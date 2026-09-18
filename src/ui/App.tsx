@@ -7,7 +7,7 @@ import StartMenuScreen from './screens/StartMenuScreen';
 import ChooseTeamScreen from './screens/ChooseTeamScreen';
 import MatchScreen from './screens/MatchScreen';
 import { SCREENS } from './screens';
-import { userGameToday, nextUserGame, opponentOf, daysUntil, payroll, userTeam } from './selectors';
+import { userGameToday, nextUserGame, opponentOf, daysUntil, userTeam } from './selectors';
 import { formatDate, formatMoney } from './format';
 import styles from './App.module.css';
 
@@ -66,7 +66,7 @@ function Shell() {
         <Screen />
       </div>
       <div className={styles.infoRow}>
-        <InfoStrip nextGame={nextLabel} cash={formatMoney(payroll(s, s.userTeamId, '2026-27'))} date={formatDate(s.date)} />
+        <InfoStrip nextGame={nextLabel} cash={formatMoney(s.finance.cash)} date={formatDate(s.date)} />
       </div>
       <TabBar active={tab} onSelect={setTab} badges={{ messages: unread }} />
     </div>

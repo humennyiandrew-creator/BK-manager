@@ -1,0 +1,284 @@
+.wrap {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0 1.4rem 1rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 1.6rem;
+  flex-shrink: 0;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  padding: 0.6rem 1rem;
+}
+
+.headerBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.headerLabel {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-dim);
+  font-weight: 700;
+}
+
+.headerValue {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.devBtn {
+  margin-left: auto;
+  background: var(--panel-alt);
+  border: 1px dashed var(--text-dim);
+  color: var(--text-muted);
+  border-radius: var(--radius);
+  padding: 0.35rem 0.7rem;
+  font-size: 0.68rem;
+}
+
+.grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1.3fr 0.95fr 0.95fr;
+  gap: var(--gap);
+}
+
+.boardPanel,
+.detailPanel {
+  min-height: 0;
+}
+
+.empty {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  margin: auto;
+}
+
+.faceThumb {
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ---------- prospect detail ---------- */
+
+.detail {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.detailHead {
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+}
+
+.detailFace {
+  width: 3.4rem;
+  height: 3.4rem;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--panel-alt);
+  flex-shrink: 0;
+}
+
+.detailName {
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.detailMeta {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+}
+
+.attrGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.attrGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.sectionTitle {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+}
+
+.attrRow {
+  display: grid;
+  grid-template-columns: 5.4rem 1fr 2.6rem;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.25rem;
+}
+
+.attrLabel {
+  font-size: 0.66rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.attrBar {
+  height: 0.35rem;
+}
+
+.attrValue {
+  font-size: 0.68rem;
+  text-align: right;
+  font-weight: 700;
+}
+
+/* ---------- right column ---------- */
+
+.rightCol {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  min-height: 0;
+}
+
+.orderPanel {
+  flex: 1;
+  min-height: 0;
+}
+
+.orderList {
+  display: flex;
+  flex-direction: column;
+  padding: 0.3rem 0;
+}
+
+.orderRound {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-dim);
+  font-weight: 700;
+  padding: 0.35rem 0.7rem 0.15rem;
+}
+
+.orderRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.7rem;
+  font-size: 0.75rem;
+}
+
+.orderRowDone {
+  opacity: 0.55;
+}
+
+.orderSlot {
+  width: 1.4rem;
+  color: var(--text-dim);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.orderTeam {
+  min-width: 0;
+}
+
+.orderMade {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.livePanel {
+  flex-shrink: 0;
+  max-height: 48%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  overflow: hidden;
+}
+
+.liveStatus {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+}
+
+.liveTeam {
+  min-width: 0;
+}
+
+.liveBtns {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.simBtn,
+.draftBtn,
+.autoBtn {
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.5rem 0.8rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  flex: 1;
+}
+
+.simBtn {
+  background: var(--cyan);
+  color: var(--bg);
+}
+
+.draftBtn {
+  background: var(--red);
+  color: var(--text);
+}
+
+.draftBtn:disabled {
+  background: var(--panel-alt);
+  color: var(--text-dim);
+}
+
+.autoBtn {
+  background: var(--panel-alt);
+  border: 1px solid var(--panel-border);
+  color: var(--text-muted);
+}
+
+.feed {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  overflow-y: auto;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.feedRow {
+  padding: 0.2rem 0;
+  border-bottom: 1px solid var(--panel-border);
+}

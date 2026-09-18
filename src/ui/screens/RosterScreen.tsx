@@ -3,13 +3,21 @@ import Panel from '../components/Panel';
 import DataTable, { type DataTableColumn } from '../components/DataTable';
 import BkImage from '../components/BkImage';
 import ProgressBar from '../components/ProgressBar';
-import { useGameState } from '../store/useGame';
+import ConfirmDialog from '../components/ConfirmDialog';
+import { useGame, useGameState } from '../store/useGame';
 import { teamRoster } from '../selectors';
 import { ageOf } from '../../engine/ratings';
 import type { Player } from '../../engine/model';
+import { releasePlayer } from '../../engine/freeagency';
+import { isTwoWay } from '../../engine/cba';
 import { ATTR_GROUPS, ATTR_LABEL, attrVariant } from '../attrGroups';
 import { formatMoney, heightFtIn, perGame } from '../format';
 import styles from './RosterScreen.module.css';
+
+function deadCapAmount(p: Player, season: string): number {
+  if (!p.contract || isTwoWay(p)) return 0;
+  return p.contract.salaries.filter((x) => x.season >= season).reduce((sum, x) => sum + x.amount, 0);
+}
 
 type SortKey = 'jersey' | 'name' | 'pos' | 'age' | 'height' | 'ovr' | 'pot' | 'ppg' | 'rpg' | 'apg' | 'salary';
 
@@ -35,9 +43,11 @@ function moraleLabel(m: number): { text: string; variant: 'positive' | 'muted' |
 
 export default function RosterScreen() {
   const s = useGameState();
+  const mutate = useGame((g) => g.mutate);
   const [sortKey, setSortKey] = useState<SortKey>('ovr');
   const [sortDir, setSortDir] = useState<1 | -1>(-1);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [releaseId, setReleaseId] = useState<string | null>(null);
 
   const roster = useMemo(() => (s ? teamRoster(s, s.userTeamId) : []), [s]);
   const sorted = useMemo(() => {
@@ -91,19 +101,31 @@ export default function RosterScreen() {
     }
   ];
 
+  const releaseTarget = releaseId ? s.players[releaseId] : null;
+
   return (
     <div className={styles.wrap}>
       <Panel title="Roster" className={styles.tablePanel} flush>
         <DataTable columns={columns} rows={sorted} rowKey={(p) => p.id} highlightedRowKey={selected?.id} onRowClick={(p) => setSelectedId(p.id)} compact />
       </Panel>
       <Panel title="Player Detail" className={styles.detailPanel}>
-        {selected && <PlayerDetail player={selected} />}
+        {selected && <PlayerDetail player={selected} onRelease={() => setReleaseId(selected.id)} />}
       </Panel>
+      {releaseTarget && (
+        <ConfirmDialog
+          title={`Release ${releaseTarget.firstName} ${releaseTarget.lastName}?`}
+          message={`Remaining salary stays on the books as dead cap: ${formatMoney(deadCapAmount(releaseTarget, s.season))}.`}
+          confirmLabel="Release"
+          danger
+          onCancel={() => setReleaseId(null)}
+          onConfirm={() => { mutate((st) => releasePlayer(st, releaseTarget.id)); setReleaseId(null); }}
+        />
+      )}
     </div>
   );
 }
 
-function PlayerDetail({ player: p }: { player: Player }) {
+function PlayerDetail({ player: p, onRelease }: { player: Player; onRelease: () => void }) {
   const age = Math.floor(ageOf(p.birthDate));
   return (
     <div className={styles.detail}>
@@ -118,6 +140,7 @@ function PlayerDetail({ player: p }: { player: Player }) {
             {p.draft ? `Draft ${p.draft.year} R${p.draft.round} P${p.draft.pick}` : 'Undrafted'} · OVR {p.ratings.ovr} · POT {p.ratings.pot}
           </div>
         </div>
+        <button type="button" className={styles.releaseBtn} onClick={onRelease}>Release</button>
       </div>
 
       <div className={styles.section}>

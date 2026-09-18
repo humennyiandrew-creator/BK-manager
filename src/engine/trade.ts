@@ -2,7 +2,7 @@
 import type { DraftPick, GameState, Player, TradeOffer, TradeSide } from './model';
 import { ageOf } from './ratings';
 import { hashString, mulberry32, type Rng } from './rng';
-import { capNumbers, isTwoWay, marketValue, payroll, rosterOf, salaryIn, tradeSalaryCheck, yearsLeft } from './cba';
+import { capNumbers, isTwoWay, leagueStrength, marketValue, payroll, rosterOf, salaryIn, tradeSalaryCheck, yearsLeft } from './cba';
 import { releasePlayer } from './freeagency';
 import { refreshRotation } from './rotation';
 import { addDays } from './schedule';
@@ -10,13 +10,11 @@ import { addDays } from './schedule';
 // ---------- team context ----------
 
 export function teamStrength(s: GameState, teamId: string): number {
-  const top = rosterOf(s, teamId).filter((p) => !p.injury || p.injury.daysLeft < 30).map((p) => p.ratings.ovr).sort((a, b) => b - a).slice(0, 8);
-  return top.reduce((x, v) => x + v, 0) / Math.max(1, top.length);
+  return leagueStrength(s).get(teamId)?.avg ?? 60;
 }
 
 export function strengthRanks(s: GameState): Map<string, number> {
-  const list = Object.keys(s.teams).map((id) => [id, teamStrength(s, id)] as const).sort((a, b) => b[1] - a[1]);
-  return new Map(list.map(([id], i) => [id, i + 1]));
+  return new Map([...leagueStrength(s)].map(([id, v]) => [id, v.rank]));
 }
 
 type Mode = 'contender' | 'middle' | 'rebuild';

@@ -14,7 +14,7 @@ export default function InfoStrip({ nextGame, cash, date }: Props) {
         <span>{nextGame}</span>
       </div>
       <div className={styles.cell}>
-        <span className={styles.cellLabel}>Payroll</span>
+        <span className={styles.cellLabel}>Cash</span>
         <span>{cash}</span>
       </div>
       <div className={styles.cell}>

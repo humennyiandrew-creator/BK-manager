@@ -11,6 +11,7 @@ export default function StartMenuScreen() {
   const setView = useUI((s) => s.setView);
   const setPendingSlot = useUI((s) => s.setPendingSlot);
   const load = useGame((s) => s.load);
+  const loadError = useGame((s) => s.loadError);
   const [mode, setMode] = useState<Mode>('menu');
   const [saves, setSaves] = useState<SaveMeta[]>([]);
   const [confirmSlot, setConfirmSlot] = useState<number | null>(null);
@@ -103,6 +104,7 @@ export default function StartMenuScreen() {
 
         {mode === 'load' && (
           <div className={styles.menu}>
+            {loadError && <div className={styles.empty}>{loadError}</div>}
             {saves.length === 0 && <div className={styles.empty}>No saved games</div>}
             {saves.map((s) => (
               <div key={s.slot} className={styles.saveRow}>

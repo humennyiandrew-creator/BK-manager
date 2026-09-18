@@ -1,10 +1,14 @@
+import { useState } from 'react';
 import Panel from '../components/Panel';
 import DataTable, { type DataTableColumn } from '../components/DataTable';
-import { useGameState } from '../store/useGame';
+import ConfirmDialog from '../components/ConfirmDialog';
+import { useGame, useGameState } from '../store/useGame';
 import { teamRoster } from '../selectors';
 import { ageOf } from '../../engine/ratings';
 import type { Player } from '../../engine/model';
-import { formatMoneyShort } from '../format';
+import { releasePlayer } from '../../engine/freeagency';
+import { isTwoWay } from '../../engine/cba';
+import { formatMoney, formatMoneyShort } from '../format';
 import { CAP_LINES, SALARY_SEASONS } from '../cba';
 import styles from './SquadHubScreen.module.css';
 
@@ -12,10 +16,18 @@ function salaryFor(p: Player, season: string) {
   return p.contract?.salaries.find((s) => s.season === season);
 }
 
+function deadCapAmount(p: Player, season: string): number {
+  if (!p.contract || isTwoWay(p)) return 0;
+  return p.contract.salaries.filter((x) => x.season >= season).reduce((sum, x) => sum + x.amount, 0);
+}
+
 export default function SquadHubScreen() {
   const s = useGameState();
+  const mutate = useGame((g) => g.mutate);
+  const [releaseId, setReleaseId] = useState<string | null>(null);
   if (!s) return null;
   const roster = teamRoster(s, s.userTeamId).slice().sort((a, b) => b.ratings.ovr - a.ratings.ovr);
+  const releaseTarget = releaseId ? s.players[releaseId] : null;
 
   const columns: DataTableColumn<Player>[] = [
     { key: 'name', header: 'Player', render: (p) => `${p.firstName} ${p.lastName}` },
@@ -34,7 +46,12 @@ export default function SquadHubScreen() {
         const cls = isOption ? (optKind === 'player' ? styles.optionPlayer : styles.optionTeam) : undefined;
         return <span className={cls}>{formatMoneyShort(line.amount)}</span>;
       }
-    }))
+    })),
+    {
+      key: 'release', header: '', align: 'right', render: (p) => (
+        <button type="button" className={styles.releaseBtn} onClick={() => setReleaseId(p.id)}>Release</button>
+      )
+    }
   ];
 
   const totals = SALARY_SEASONS.map((season) => roster.reduce((sum, p) => sum + (salaryFor(p, season)?.amount ?? 0), 0));
@@ -68,6 +85,16 @@ export default function SquadHubScreen() {
           <span className={styles.optionTeam}>■</span> Team option
         </div>
       </Panel>
+      {releaseTarget && (
+        <ConfirmDialog
+          title={`Release ${releaseTarget.firstName} ${releaseTarget.lastName}?`}
+          message={`Remaining salary stays on the books as dead cap: ${formatMoney(deadCapAmount(releaseTarget, s.season))}.`}
+          confirmLabel="Release"
+          danger
+          onCancel={() => setReleaseId(null)}
+          onConfirm={() => { mutate((st) => releasePlayer(st, releaseTarget.id)); setReleaseId(null); }}
+        />
+      )}
     </div>
   );
 }

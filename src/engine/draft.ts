@@ -29,7 +29,7 @@ export function generateDraftClass(s: GameState, year: number) {
     const pot = Math.round(Math.min(97, Math.max(58, 91 - i * 0.38 + gauss(rng) * 4 - (age - 19) * 1.5)));
     const ovr = Math.round(Math.min(pot, Math.max(50, 67 - i * 0.14 + gauss(rng) * 3 + (age - 19) * 1.2)));
     const id = `gen-${year}-${i}`;
-    s.players[id] = genPlayer({ id, ovr, pot, age, asOf: `${year}-06-24`, rng });
+    s.players[id] = genPlayer({ id, ovr, pot, age, asOf: `${year - 1}-10-01`, rng });
     ids.push(id);
   }
   s.draftClass = ids;

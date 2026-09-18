@@ -1,0 +1,146 @@
+.wrap {
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--gap);
+  padding: 0 1.4rem 1rem;
+  overflow: hidden;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  min-height: 0;
+  overflow: auto;
+}
+
+.panel {
+  flex-shrink: 0;
+}
+
+.ticketRow {
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--panel-border);
+}
+
+.ticketHead {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  margin-bottom: 0.3rem;
+}
+
+.ticketValue {
+  color: var(--cyan);
+  font-weight: 800;
+}
+
+.slider {
+  width: 100%;
+  accent-color: var(--cyan);
+}
+
+.ticketProjection {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.barRow {
+  display: grid;
+  grid-template-columns: 7rem 1fr 4.5rem;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.3rem 0;
+  font-size: 0.75rem;
+}
+
+.barLabel {
+  color: var(--text-muted);
+}
+
+.barTrack {
+  height: 0.5rem;
+  background: var(--panel-alt);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+}
+
+.barValue {
+  text-align: right;
+  font-weight: 700;
+}
+
+.capBarTrack {
+  position: relative;
+  height: 1.4rem;
+  background: var(--panel-alt);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  margin: 0.6rem 0 1.8rem;
+}
+
+.capBarFill {
+  height: 100%;
+  background: var(--cyan);
+  border-radius: var(--radius);
+}
+
+.capBarLine {
+  position: absolute;
+  top: 0;
+  bottom: -1.3rem;
+  width: 1px;
+  background: var(--text-dim);
+}
+
+.capBarLine span {
+  position: absolute;
+  top: 1.5rem;
+  left: 0.2rem;
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.capLegend {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.chart {
+  width: 100%;
+  height: 6rem;
+}
+
+.chartEmpty {
+  color: var(--text-dim);
+  font-size: 0.75rem;
+  text-align: center;
+  padding: 1rem;
+}
+
+.attendanceRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.25rem;
+  height: 5rem;
+}
+
+.attendanceBar {
+  flex: 1;
+  background: var(--cyan);
+  border-radius: 2px 2px 0 0;
+  min-height: 2px;
+}

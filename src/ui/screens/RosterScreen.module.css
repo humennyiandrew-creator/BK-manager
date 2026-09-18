@@ -73,6 +73,25 @@
   align-items: center;
 }
 
+.releaseBtn {
+  margin-left: auto;
+  align-self: flex-start;
+  background: var(--panel-alt);
+  border: 1px solid var(--negative);
+  color: var(--negative);
+  border-radius: var(--radius);
+  padding: 0.4rem 0.8rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.releaseBtn:hover {
+  background: var(--negative);
+  color: var(--text);
+}
+
 .detailFace {
   width: 3.6rem;
   height: 3.6rem;

@@ -33,6 +33,24 @@ export function yearsLeft(p: Player, season: string): number {
 export const rosterOf = (s: GameState, teamId: string) => Object.values(s.players).filter((p) => p.teamId === teamId && !p.retired);
 export const isTwoWay = (p: Player) => p.contract?.type === 'two-way';
 
+/** All rosters in one pass over players (use instead of rosterOf in loops over teams). */
+export function rostersByTeam(s: GameState): Map<string, Player[]> {
+  const m = new Map<string, Player[]>(Object.keys(s.teams).map((id) => [id, []]));
+  for (const p of Object.values(s.players)) if (p.teamId && !p.retired) m.get(p.teamId)?.push(p);
+  return m;
+}
+
+/** Team strength (avg OVR of top 8 players not out long-term) and rank, one pass. */
+export function leagueStrength(s: GameState): Map<string, { avg: number; rank: number }> {
+  const out = new Map<string, { avg: number; rank: number }>();
+  for (const [id, list] of rostersByTeam(s)) {
+    const top = list.filter((p) => !p.injury || p.injury.daysLeft < 30).map((p) => p.ratings.ovr).sort((a, b) => b - a).slice(0, 8);
+    out.set(id, { avg: top.reduce((x, v) => x + v, 0) / Math.max(1, top.length), rank: 0 });
+  }
+  [...out.entries()].sort((a, b) => b[1].avg - a[1].avg).forEach(([, v], i) => (v.rank = i + 1));
+  return out;
+}
+
 /** Cap payroll (two-way contracts don't count). */
 export function payroll(s: GameState, teamId: string, season = s.season): number {
   const dead = (s.teams[teamId].deadCap ?? []).filter((d) => d.season === season).reduce((x, d) => x + d.amount, 0);

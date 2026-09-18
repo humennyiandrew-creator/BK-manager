@@ -1,6 +1,6 @@
 // Free agents: asks, signing, releasing, AI in-season depth signings, offseason market.
 import type { GameState, Player } from './model';
-import { capNumbers, contractRows, desiredYears, isTwoWay, marketValue, minSalary, payroll, rosterOf, salaryIn, seasonLabel, signingCheck } from './cba';
+import { capNumbers, contractRows, rostersByTeam, desiredYears, isTwoWay, marketValue, minSalary, payroll, rosterOf, salaryIn, seasonLabel, signingCheck } from './cba';
 import { ageOf } from './ratings';
 import { hashString, mulberry32 } from './rng';
 import { refreshRotation } from './rotation';
@@ -63,9 +63,10 @@ export function freeAgencyDaily(s: GameState) {
   const rng = mulberry32(hashString(`${s.seed}|fa|${s.date}`));
   if (rng() > 0.35) return;
   const pool = freeAgents(s).sort((a, b) => b.ratings.ovr - a.ratings.ovr);
+  const rosters = rostersByTeam(s);
   for (const t of Object.keys(s.teams)) {
     if (t === s.userTeamId || !pool.length) continue;
-    const roster = rosterOf(s, t).filter((p) => !isTwoWay(p));
+    const roster = rosters.get(t)!.filter((p) => !isTwoWay(p));
     const healthy = roster.filter((p) => !p.injury || p.injury.daysLeft < 10).length;
     if (roster.length >= 15 || (roster.length >= 14 && healthy >= 12)) continue;
     const p = pool.shift()!;

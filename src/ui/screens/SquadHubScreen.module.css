@@ -19,6 +19,22 @@
   color: var(--text-dim);
 }
 
+.releaseBtn {
+  background: var(--panel-alt);
+  border: 1px solid var(--negative);
+  color: var(--negative);
+  border-radius: var(--radius);
+  padding: 0.25rem 0.6rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.releaseBtn:hover {
+  background: var(--negative);
+  color: var(--text);
+}
+
 .optionPlayer {
   color: #f5a623;
   background: rgba(245, 166, 35, 0.12);

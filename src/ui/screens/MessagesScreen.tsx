@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import Panel from '../components/Panel';
 import { useGame, useGameState } from '../store/useGame';
+import { useUI } from '../store/useUI';
+import { useTransfersNav } from '../store/useTransfersNav';
+import { respondToOffer } from '../../engine/trade';
 import type { Message } from '../../engine/model';
 import { formatDate } from '../format';
 import { IconStandings, IconStaff, IconBoard, IconCalendar, IconMessages } from '../components/tabIcons';
@@ -11,13 +14,19 @@ const KIND_ICON: Record<Message['kind'], typeof IconMessages> = {
   injury: IconStaff,
   board: IconBoard,
   league: IconCalendar,
+  trade: IconMessages,
+  finance: IconBoard,
+  staff: IconStaff,
+  draft: IconCalendar,
   other: IconMessages
 };
 
 export default function MessagesScreen() {
   const s = useGameState();
   const mutate = useGame((g) => g.mutate);
+  const setTab = useUI((u) => u.setTab);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [offerResult, setOfferResult] = useState<string | null>(null);
 
   if (!s) return null;
   const messages = s.messages;
@@ -25,7 +34,19 @@ export default function MessagesScreen() {
 
   const open = (m: Message) => {
     setSelectedId(m.id);
+    setOfferResult(null);
     if (!m.read) mutate((st) => { const target = st.messages.find((x) => x.id === m.id); if (target) target.read = true; });
+  };
+
+  const viewOffer = () => {
+    useTransfersNav.getState().requestOffers();
+    setTab('transfers');
+  };
+
+  const respond = (offerId: number, accept: boolean) => {
+    let result: string | undefined;
+    mutate((st) => { result = respondToOffer(st, offerId, accept); });
+    if (result) setOfferResult(result);
   };
 
   return (
@@ -60,6 +81,19 @@ export default function MessagesScreen() {
             <div className={styles.readingSubject}>{selected.subject}</div>
             <div className={styles.readingMeta}>From {selected.from} · {formatDate(selected.date)}</div>
             <div className={styles.readingBody}>{selected.body}</div>
+            {selected.action?.type === 'trade-offer' && (
+              <div className={styles.offerActions}>
+                {offerResult ? (
+                  <div className={styles.offerResult}>{offerResult}</div>
+                ) : (
+                  <>
+                    <button type="button" className={styles.acceptBtn} onClick={() => respond(selected.action!.offerId, true)}>Accept</button>
+                    <button type="button" className={styles.declineBtn} onClick={() => respond(selected.action!.offerId, false)}>Decline</button>
+                  </>
+                )}
+                <button type="button" className={styles.viewOfferBtn} onClick={viewOffer}>View offer</button>
+              </div>
+            )}
           </div>
         )}
       </Panel>

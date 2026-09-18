@@ -1,5 +1,6 @@
 // Shared market-size + team-strength helpers for mgmt systems.
 import type { GameState } from '../model';
+import { leagueStrength } from '../cba';
 import { hashString } from '../rng';
 
 const BIG = new Set(['NYK', 'LAL', 'GSW', 'LAC', 'CHI', 'BOS', 'BKN', 'PHI', 'TOR', 'MIA', 'DAL', 'HOU']);
@@ -27,10 +28,7 @@ export function teamStrength(s: GameState, teamId: string): number {
 
 /** 1 = strongest team in the league by teamStrength. */
 export function teamStrengthRank(s: GameState, teamId: string): number {
-  const ranked = Object.keys(s.teams)
-    .map((id) => ({ id, avg: teamStrength(s, id) }))
-    .sort((a, b) => b.avg - a.avg);
-  return ranked.findIndex((r) => r.id === teamId) + 1;
+  return leagueStrength(s).get(teamId)?.rank ?? 15;
 }
 
 /** Sum of OVR of a team's top-3 players — "star power". */

@@ -1,0 +1,115 @@
+.wrap {
+  height: 100%;
+  min-height: 0;
+  padding: 0 1.4rem 1rem;
+}
+
+.panel {
+  height: 100%;
+  min-height: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 0.9rem;
+  padding: 0.9rem;
+}
+
+.card {
+  background: var(--panel-alt);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  padding: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.cardHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cardTitle {
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+
+.level {
+  font-size: 0.7rem;
+  color: var(--cyan);
+  font-weight: 700;
+}
+
+.pips {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.pip,
+.pipFilled {
+  width: 1.4rem;
+  height: 0.45rem;
+  border-radius: 2px;
+  background: var(--panel-border);
+}
+
+.pipFilled {
+  background: var(--cyan);
+}
+
+.effect {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  min-height: 2.2em;
+}
+
+.progress {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.progressLabel {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+.maxed {
+  font-size: 0.72rem;
+  color: var(--positive);
+  font-weight: 700;
+}
+
+.upgradeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+}
+
+.cost {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.upgradeBtn {
+  background: var(--red);
+  border: none;
+  color: var(--text);
+  border-radius: var(--radius);
+  padding: 0.35rem 0.8rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+}
+
+.upgradeBtn:disabled {
+  background: var(--panel-border);
+  color: var(--text-dim);
+  cursor: default;
+}

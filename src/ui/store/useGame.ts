@@ -18,6 +18,7 @@ interface GameStore {
   rev: number;
   slot: number | null;
   busy: boolean;
+  loadError: string | null;
   mutate: (fn: (s: GameState) => void) => void;
   startNew: (teamId: string, slot: number) => Promise<void>;
   load: (slot: number) => Promise<boolean>;
@@ -31,6 +32,7 @@ export const useGame = create<GameStore>((set, get) => ({
   rev: 0,
   slot: null,
   busy: false,
+  loadError: null,
 
   mutate: (fn) => {
     const { s } = get();
@@ -49,13 +51,18 @@ export const useGame = create<GameStore>((set, get) => ({
   },
 
   load: async (slot) => {
-    set({ busy: true });
+    set({ busy: true, loadError: null });
     const data = await loadGame(slot);
     if (!data || !data.state) {
       set({ busy: false });
       return false;
     }
-    set({ s: data.state as GameState, slot, rev: 0, busy: false });
+    const loaded = data.state as GameState;
+    if (!loaded.staff || !loaded.finance) {
+      set({ busy: false, loadError: 'Save from older version — start a new career' });
+      return false;
+    }
+    set({ s: loaded, slot, rev: 0, busy: false });
     return true;
   },
 
