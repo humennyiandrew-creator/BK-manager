@@ -1,0 +1,103 @@
+@import '@fontsource/titillium-web/300.css';
+@import '@fontsource/titillium-web/400.css';
+@import '@fontsource/titillium-web/600.css';
+@import '@fontsource/titillium-web/700.css';
+@import '@fontsource/titillium-web/900.css';
+
+:root {
+  --bg: #0b0f1a;
+  --bg-alt: #0e1422;
+  --panel: #151b2b;
+  --panel-alt: #101627;
+  --panel-border: #232b40;
+  --radius: 4px;
+  --cyan: #19c3d6;
+  --cyan-dim: #0f7c8a;
+  --red: #c8102e;
+  --text: #ffffff;
+  --text-muted: #8a93a8;
+  --text-dim: #5b6478;
+  --positive: #3ddc97;
+  --negative: #ff4d5e;
+  --gap: 0.75rem;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+}
+
+@media (max-width: 1440px) {
+  html {
+    font-size: 13.5px;
+  }
+}
+
+@media (max-width: 1280px) {
+  html {
+    font-size: 10.7px;
+  }
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: radial-gradient(120% 120% at 20% 0%, #101a2e 0%, var(--bg) 45%, #060811 100%);
+  color: var(--text);
+  font-family: 'Titillium Web', system-ui, sans-serif;
+  font-weight: 400;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.label-caps {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.value-positive {
+  color: var(--positive);
+}
+
+.value-negative {
+  color: var(--negative);
+}
+
+.value-neutral {
+  color: var(--text);
+}
+
+::-webkit-scrollbar {
+  width: 0.5rem;
+  height: 0.5rem;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--panel-border);
+  border-radius: var(--radius);
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}

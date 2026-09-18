@@ -1,0 +1,218 @@
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr 1fr;
+  gap: var(--gap);
+  height: 100%;
+  min-height: 0;
+  padding: 0 1.4rem 1rem;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  min-height: 0;
+}
+
+.boardTeam {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.6rem;
+}
+
+.boardLogo {
+  width: 2.6rem;
+  height: 2.6rem;
+  object-fit: contain;
+}
+
+.boardTeamName {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.confidenceLabel {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+}
+
+.objective {
+  margin-top: 0.8rem;
+}
+
+.objectiveLabel {
+  display: block;
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.2rem;
+}
+
+.objectiveValue {
+  font-size: 0.85rem;
+}
+
+.playerRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--gap);
+}
+
+.tabsRight {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.confTab {
+  background: transparent;
+  border: 1px solid var(--panel-border);
+  color: var(--text-muted);
+  border-radius: var(--radius);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+}
+
+.confTabActive {
+  background: var(--red);
+  border-color: var(--red);
+  color: var(--text);
+}
+
+.standingsPanel {
+  flex: 1;
+  min-height: 0;
+}
+
+.opponentBody {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.opponentLogo {
+  width: 3.4rem;
+  height: 3.4rem;
+  object-fit: contain;
+}
+
+.opponentInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.opponentName {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.opponentMeta {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  margin-top: 0.15rem;
+}
+
+.countdown {
+  text-align: center;
+  background: var(--panel-alt);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  padding: 0.4rem 0.7rem;
+}
+
+.countdownNum {
+  display: block;
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: var(--cyan);
+}
+
+.countdownLabel {
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.eventsPanel {
+  flex: 1;
+  min-height: 0;
+}
+
+.eventGroup {
+  margin-bottom: 1rem;
+}
+
+.eventGroupLabel {
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+}
+
+.event {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.event:last-child {
+  border-bottom: none;
+}
+
+.eventIcon {
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  border-radius: var(--radius);
+  background: var(--panel-alt);
+  border: 1px solid var(--panel-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cyan);
+}
+
+.eventIcon svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.eventText {
+  flex: 1;
+  min-width: 0;
+}
+
+.eventTitle {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.eventSubtitle {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.eventOpen {
+  background: transparent;
+  border: 1px solid var(--panel-border);
+  color: var(--cyan);
+  border-radius: var(--radius);
+  width: 1.6rem;
+  height: 1.6rem;
+  flex-shrink: 0;
+  font-size: 0.9rem;
+}

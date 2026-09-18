@@ -1,0 +1,21 @@
+.badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.logo {
+  width: 1.8rem;
+  height: 1.8rem;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

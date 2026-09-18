@@ -1,0 +1,60 @@
+.wrap {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 1.4rem;
+  gap: 1rem;
+}
+
+.title {
+  font-size: 1.6rem;
+  font-weight: 900;
+}
+
+.grid {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.7rem;
+}
+
+.team {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  padding: 0.8rem;
+  color: var(--text);
+}
+
+.team:hover {
+  border-color: var(--cyan);
+}
+
+.logo {
+  width: 2.4rem;
+  height: 2.4rem;
+  object-fit: contain;
+}
+
+.name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: left;
+}
+
+.back {
+  align-self: flex-start;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.back:hover {
+  color: var(--cyan);
+}

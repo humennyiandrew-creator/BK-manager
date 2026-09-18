@@ -1,0 +1,422 @@
+[
+ {
+  "id": "1610612758",
+  "abbr": "SAC",
+  "city": "Sacramento",
+  "name": "Kings",
+  "conference": "West",
+  "division": "Pacific",
+  "colors": {
+   "primary": "#5A2D81",
+   "secondary": "#63727A"
+  },
+  "logo": "logos/SAC.svg",
+  "arenaCapacity": 17608
+ },
+ {
+  "id": "1610612745",
+  "abbr": "HOU",
+  "city": "Houston",
+  "name": "Rockets",
+  "conference": "West",
+  "division": "Southwest",
+  "colors": {
+   "primary": "#CE1141",
+   "secondary": "#000000"
+  },
+  "logo": "logos/HOU.svg",
+  "arenaCapacity": 18055
+ },
+ {
+  "id": "1610612748",
+  "abbr": "MIA",
+  "city": "Miami",
+  "name": "Heat",
+  "conference": "East",
+  "division": "Southeast",
+  "colors": {
+   "primary": "#98002E",
+   "secondary": "#F9A01B"
+  },
+  "logo": "logos/MIA.svg",
+  "arenaCapacity": 19600
+ },
+ {
+  "id": "1610612752",
+  "abbr": "NYK",
+  "city": "New York",
+  "name": "Knicks",
+  "conference": "East",
+  "division": "Atlantic",
+  "colors": {
+   "primary": "#006BB6",
+   "secondary": "#F58426"
+  },
+  "logo": "logos/NYK.svg",
+  "arenaCapacity": 19812
+ },
+ {
+  "id": "1610612766",
+  "abbr": "CHA",
+  "city": "Charlotte",
+  "name": "Hornets",
+  "conference": "East",
+  "division": "Southeast",
+  "colors": {
+   "primary": "#1D1160",
+   "secondary": "#00788C"
+  },
+  "logo": "logos/CHA.svg",
+  "arenaCapacity": 19077
+ },
+ {
+  "id": "1610612742",
+  "abbr": "DAL",
+  "city": "Dallas",
+  "name": "Mavericks",
+  "conference": "West",
+  "division": "Southwest",
+  "colors": {
+   "primary": "#00538C",
+   "secondary": "#B8C4CA"
+  },
+  "logo": "logos/DAL.svg",
+  "arenaCapacity": 19200
+ },
+ {
+  "id": "1610612762",
+  "abbr": "UTA",
+  "city": "Utah",
+  "name": "Jazz",
+  "conference": "West",
+  "division": "Northwest",
+  "colors": {
+   "primary": "#002B5C",
+   "secondary": "#F9A01B"
+  },
+  "logo": "logos/UTA.svg",
+  "arenaCapacity": 18306
+ },
+ {
+  "id": "1610612737",
+  "abbr": "ATL",
+  "city": "Atlanta",
+  "name": "Hawks",
+  "conference": "East",
+  "division": "Southeast",
+  "colors": {
+   "primary": "#E03A3E",
+   "secondary": "#C1D32F"
+  },
+  "logo": "logos/ATL.svg",
+  "arenaCapacity": 17044
+ },
+ {
+  "id": "1610612739",
+  "abbr": "CLE",
+  "city": "Cleveland",
+  "name": "Cavaliers",
+  "conference": "East",
+  "division": "Central",
+  "colors": {
+   "primary": "#860038",
+   "secondary": "#FDBB30"
+  },
+  "logo": "logos/CLE.svg",
+  "arenaCapacity": 19432
+ },
+ {
+  "id": "1610612749",
+  "abbr": "MIL",
+  "city": "Milwaukee",
+  "name": "Bucks",
+  "conference": "East",
+  "division": "Central",
+  "colors": {
+   "primary": "#00471B",
+   "secondary": "#EEE1C6"
+  },
+  "logo": "logos/MIL.svg",
+  "arenaCapacity": 17341
+ },
+ {
+  "id": "1610612761",
+  "abbr": "TOR",
+  "city": "Toronto",
+  "name": "Raptors",
+  "conference": "East",
+  "division": "Atlantic",
+  "colors": {
+   "primary": "#CE1141",
+   "secondary": "#000000"
+  },
+  "logo": "logos/TOR.svg",
+  "arenaCapacity": 19800
+ },
+ {
+  "id": "1610612757",
+  "abbr": "POR",
+  "city": "Portland",
+  "name": "Trail Blazers",
+  "conference": "West",
+  "division": "Northwest",
+  "colors": {
+   "primary": "#E03A3E",
+   "secondary": "#000000"
+  },
+  "logo": "logos/POR.svg",
+  "arenaCapacity": 19393
+ },
+ {
+  "id": "1610612741",
+  "abbr": "CHI",
+  "city": "Chicago",
+  "name": "Bulls",
+  "conference": "East",
+  "division": "Central",
+  "colors": {
+   "primary": "#CE1141",
+   "secondary": "#000000"
+  },
+  "logo": "logos/CHI.svg",
+  "arenaCapacity": 20917
+ },
+ {
+  "id": "1610612764",
+  "abbr": "WAS",
+  "city": "Washington",
+  "name": "Wizards",
+  "conference": "East",
+  "division": "Southeast",
+  "colors": {
+   "primary": "#002B5C",
+   "secondary": "#E31837"
+  },
+  "logo": "logos/WAS.svg",
+  "arenaCapacity": 20356
+ },
+ {
+  "id": "1610612743",
+  "abbr": "DEN",
+  "city": "Denver",
+  "name": "Nuggets",
+  "conference": "West",
+  "division": "Northwest",
+  "colors": {
+   "primary": "#0E2240",
+   "secondary": "#FEC524"
+  },
+  "logo": "logos/DEN.svg",
+  "arenaCapacity": 19520
+ },
+ {
+  "id": "1610612750",
+  "abbr": "MIN",
+  "city": "Minnesota",
+  "name": "Timberwolves",
+  "conference": "West",
+  "division": "Northwest",
+  "colors": {
+   "primary": "#0C2340",
+   "secondary": "#78BE20"
+  },
+  "logo": "logos/MIN.svg",
+  "arenaCapacity": 18978
+ },
+ {
+  "id": "1610612753",
+  "abbr": "ORL",
+  "city": "Orlando",
+  "name": "Magic",
+  "conference": "East",
+  "division": "Southeast",
+  "colors": {
+   "primary": "#0077C0",
+   "secondary": "#C4CED4"
+  },
+  "logo": "logos/ORL.svg",
+  "arenaCapacity": 18846
+ },
+ {
+  "id": "1610612755",
+  "abbr": "PHI",
+  "city": "Philadelphia",
+  "name": "76ers",
+  "conference": "East",
+  "division": "Atlantic",
+  "colors": {
+   "primary": "#006BB6",
+   "secondary": "#ED174C"
+  },
+  "logo": "logos/PHI.svg",
+  "arenaCapacity": 20478
+ },
+ {
+  "id": "1610612759",
+  "abbr": "SAS",
+  "city": "San Antonio",
+  "name": "Spurs",
+  "conference": "West",
+  "division": "Southwest",
+  "colors": {
+   "primary": "#C4CED4",
+   "secondary": "#000000"
+  },
+  "logo": "logos/SAS.svg",
+  "arenaCapacity": 18418
+ },
+ {
+  "id": "1610612760",
+  "abbr": "OKC",
+  "city": "Oklahoma City",
+  "name": "Thunder",
+  "conference": "West",
+  "division": "Northwest",
+  "colors": {
+   "primary": "#007AC1",
+   "secondary": "#EF3B24"
+  },
+  "logo": "logos/OKC.svg",
+  "arenaCapacity": 18203
+ },
+ {
+  "id": "1610612744",
+  "abbr": "GSW",
+  "city": "Golden State",
+  "name": "Warriors",
+  "conference": "West",
+  "division": "Pacific",
+  "colors": {
+   "primary": "#1D428A",
+   "secondary": "#FFC72C"
+  },
+  "logo": "logos/GSW.svg",
+  "arenaCapacity": 18064
+ },
+ {
+  "id": "1610612746",
+  "abbr": "LAC",
+  "city": "LA",
+  "name": "Clippers",
+  "conference": "West",
+  "division": "Pacific",
+  "colors": {
+   "primary": "#C8102E",
+   "secondary": "#1D428A"
+  },
+  "logo": "logos/LAC.svg",
+  "arenaCapacity": 18000
+ },
+ {
+  "id": "1610612740",
+  "abbr": "NOP",
+  "city": "New Orleans",
+  "name": "Pelicans",
+  "conference": "West",
+  "division": "Southwest",
+  "colors": {
+   "primary": "#0C2340",
+   "secondary": "#C8102E"
+  },
+  "logo": "logos/NOP.svg",
+  "arenaCapacity": 16867
+ },
+ {
+  "id": "1610612751",
+  "abbr": "BKN",
+  "city": "Brooklyn",
+  "name": "Nets",
+  "conference": "East",
+  "division": "Atlantic",
+  "colors": {
+   "primary": "#000000",
+   "secondary": "#FFFFFF"
+  },
+  "logo": "logos/BKN.svg",
+  "arenaCapacity": 17732
+ },
+ {
+  "id": "1610612756",
+  "abbr": "PHX",
+  "city": "Phoenix",
+  "name": "Suns",
+  "conference": "West",
+  "division": "Pacific",
+  "colors": {
+   "primary": "#1D1160",
+   "secondary": "#E56020"
+  },
+  "logo": "logos/PHX.svg",
+  "arenaCapacity": 17071
+ },
+ {
+  "id": "1610612763",
+  "abbr": "MEM",
+  "city": "Memphis",
+  "name": "Grizzlies",
+  "conference": "West",
+  "division": "Southwest",
+  "colors": {
+   "primary": "#5D76A9",
+   "secondary": "#12173F"
+  },
+  "logo": "logos/MEM.svg",
+  "arenaCapacity": 17794
+ },
+ {
+  "id": "1610612754",
+  "abbr": "IND",
+  "city": "Indiana",
+  "name": "Pacers",
+  "conference": "East",
+  "division": "Central",
+  "colors": {
+   "primary": "#002D62",
+   "secondary": "#FDBB30"
+  },
+  "logo": "logos/IND.svg",
+  "arenaCapacity": 17274
+ },
+ {
+  "id": "1610612747",
+  "abbr": "LAL",
+  "city": "Los Angeles",
+  "name": "Lakers",
+  "conference": "West",
+  "division": "Pacific",
+  "colors": {
+   "primary": "#552583",
+   "secondary": "#FDB927"
+  },
+  "logo": "logos/LAL.svg",
+  "arenaCapacity": 18997
+ },
+ {
+  "id": "1610612738",
+  "abbr": "BOS",
+  "city": "Boston",
+  "name": "Celtics",
+  "conference": "East",
+  "division": "Atlantic",
+  "colors": {
+   "primary": "#007A33",
+   "secondary": "#BA9653"
+  },
+  "logo": "logos/BOS.svg",
+  "arenaCapacity": 19156
+ },
+ {
+  "id": "1610612765",
+  "abbr": "DET",
+  "city": "Detroit",
+  "name": "Pistons",
+  "conference": "East",
+  "division": "Central",
+  "colors": {
+   "primary": "#C8102E",
+   "secondary": "#1D42BA"
+  },
+  "logo": "logos/DET.svg",
+  "arenaCapacity": 20332
+ }
+]

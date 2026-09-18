@@ -87,7 +87,7 @@ const PRIOR_PER_MIN = { pts: 0.46, orb: 0.035, drb: 0.12, ast: 0.09, stl: 0.028,
 function metrics(p: RawPlayer, a: Agg, age: number): Metrics {
   const per36 = (count: number, prior: number) => (36 * (count + prior * SHRINK_MIN)) / (a.min + SHRINK_MIN);
   const twoA = a.fga - a.tpa, twoM = a.fgm - a.tpm;
-  const shrinkImpact = a.min / (a.min + 800);
+  const shrinkImpact = a.min / (a.min + 2000);
   const tsa = a.fga + 0.44 * a.fta;
   return {
     pts36: per36(a.pts, PRIOR_PER_MIN.pts),
@@ -225,12 +225,13 @@ export function buildRatings(players: RawPlayer[]): Map<string, PlayerRatings> {
 
   for (const { p, age, a, m, rng, attrZ, rawOvr } of pre) {
     const attrs = {} as Attributes;
-    for (const attr of ATTRS) attrs[attr] = Math.round(clamp(62 + attrZ[attr] * 13 + gauss(rng) * 1.5, 25, 99));
+    for (const attr of ATTRS) attrs[attr] = Math.round(clamp(62 + attrZ[attr] * 14 + gauss(rng) * 1.5, 25, 99));
     // Age decline on physicals.
     if (age > 30) for (const k of ['speed', 'acceleration', 'vertical'] as const) attrs[k] = Math.max(25, attrs[k] - Math.round((age - 30) * 2));
 
     const ovrZ = (rawOvr - ovrDist.mean) / ovrDist.sd;
-    const ovr = Math.round(clamp(74 + ovrZ * 7, 40, 99));
+    const lin = 74 + ovrZ * 7;
+    const ovr = Math.round(clamp(lin > 86 ? 86 + (lin - 86) * 0.6 : lin, 40, 99)); // soft cap: few 95+
     const growth = Math.max(0, 25 - age) * 2.6 + gauss(rng) * 3;
     const pot = Math.round(clamp(Math.max(ovr, ovr + growth), ovr, 99));
 
