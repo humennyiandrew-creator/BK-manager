@@ -232,7 +232,7 @@ export function buildRatings(players: RawPlayer[]): Map<string, PlayerRatings> {
     const ovrZ = (rawOvr - ovrDist.mean) / ovrDist.sd;
     const lin = 74 + ovrZ * 7;
     const ovr = Math.round(clamp(lin > 86 ? 86 + (lin - 86) * 0.6 : lin, 40, 99)); // soft cap: few 95+
-    const growth = Math.max(0, 25 - age) * 2.6 + gauss(rng) * 3;
+    const growth = Math.max(0, 25 - age) * 2.0 + gauss(rng) * 3;
     const pot = Math.round(clamp(Math.max(ovr, ovr + growth), ovr, 99));
 
     const fga = Math.max(a.fga, 1);

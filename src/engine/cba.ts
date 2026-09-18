@@ -13,6 +13,10 @@ export function capNumbers(seasonYear: number): CapNumbers {
 
 export const seasonLabel = (y: number) => `${y}-${String((y + 1) % 100).padStart(2, '0')}`;
 
+/** Season whose cap sheet matters right now: next season once the offseason starts. */
+export const capYear = (s: GameState) => (s.phase === 'offseason' ? s.seasonYear + 1 : s.seasonYear);
+export const capSeason = (s: GameState) => seasonLabel(capYear(s));
+
 export function minSalary(seasonYear: number, yearsPro: number): number {
   return Math.round(capNumbers(seasonYear).minRookie * (1 + Math.min(10, yearsPro) * 0.17));
 }
@@ -80,9 +84,9 @@ export function capLevel(pay: number, seasonYear: number): CapLevel {
 
 /** Salary matching for one side of a trade. Returns null if legal, else reason. */
 export function tradeSalaryCheck(s: GameState, teamId: string, outgoing: number, incoming: number): string | null {
-  const before = payroll(s, teamId);
+  const before = payroll(s, teamId, capSeason(s));
   const after = before - outgoing + incoming;
-  const c = capNumbers(s.seasonYear);
+  const c = capNumbers(capYear(s));
   if (after <= c.cap) return null;
   if (after >= c.apron1 && incoming > outgoing) return 'Over the first apron: cannot take back more salary than sent out';
   if (incoming > outgoing * 1.25 + 250_000) return 'Salaries do not match (max 125% + $250K incoming)';
@@ -127,9 +131,9 @@ export function signingCheck(s: GameState, teamId: string, p: Player, amount: nu
     return { reason: roster.filter(isTwoWay).length >= 3 ? 'Two-way slots full (3)' : null, usesMle: false };
   }
   if (roster.filter((x) => !isTwoWay(x)).length >= 15) return { reason: 'Roster full (15 standard contracts)', usesMle: false };
-  const c = capNumbers(s.seasonYear);
-  const pay = payroll(s, teamId);
-  if (amount <= minSalary(s.seasonYear, p.yearsPro) * 1.001) return { reason: null, usesMle: false };
+  const c = capNumbers(capYear(s));
+  const pay = payroll(s, teamId, capSeason(s));
+  if (amount <= minSalary(capYear(s), p.yearsPro) * 1.001) return { reason: null, usesMle: false };
   if (pay + amount <= c.cap) return { reason: null, usesMle: false };
   const team = s.teams[teamId];
   const mle = pay + amount >= c.apron1 ? c.taxMle : c.mle;

@@ -80,17 +80,17 @@ export function freeAgencyDaily(s: GameState) {
 /** End of season: expired deals → free agency (user gets message to re-sign via Bird rights before FA opens). */
 export function expireContracts(s: GameState) {
   const next = seasonLabel(s.seasonYear + 1);
-  for (const p of Object.values(s.players)) {
-    if (!p.teamId || p.retired || !p.contract) continue;
-    if (!p.contract.salaries.some((x) => x.season >= next)) {
-      if (p.teamId === s.userTeamId) continue; // user decides in re-sign window
-      // AI re-signs good-value players with Bird rights, lets others walk.
-      const ask = askingPrice(s, p);
-      const age = ageOf(p.birthDate, new Date(s.date));
-      const keep = p.ratings.ovr >= 72 && age <= 33 && ask.amount <= marketValue(p, s.seasonYear) * 1.05;
-      if (keep) p.contract = { ...p.contract, salaries: contractRows(s.seasonYear + 1, ask.amount, ask.years), type: 'standard' };
-      else p.teamId = null;
-    }
+  const apron2 = capNumbers(s.seasonYear + 1).apron2;
+  const exp = Object.values(s.players)
+    .filter((p) => p.teamId && p.teamId !== s.userTeamId && !p.retired && p.contract && !p.contract.salaries.some((x) => x.season >= next))
+    .sort((a, b) => b.ratings.ovr - a.ratings.ovr); // best players get first claim on the budget
+  for (const p of exp) {
+    // AI re-signs good players with Bird rights while staying under the second apron; others walk.
+    const ask = askingPrice(s, p);
+    const age = ageOf(p.birthDate, new Date(s.date));
+    const keep = p.ratings.ovr >= 72 && age <= 33 && payroll(s, p.teamId!, next) + ask.amount <= apron2;
+    if (keep) p.contract = { ...p.contract!, salaries: contractRows(s.seasonYear + 1, ask.amount, ask.years), type: 'standard' };
+    else { p.teamId = null; p.contract = null; }
   }
 }
 

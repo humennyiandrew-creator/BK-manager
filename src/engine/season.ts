@@ -1,5 +1,5 @@
 // Day loop: sim games, stats, injuries, standings, play-in, playoffs.
-import type { BoxLine, Game, GameResult, GameState, Player, Series, StatLine } from './model';
+import type { BoxLine, Game, GameResult, GameState, Phase, Player, Series, StatLine } from './model';
 import { addDays } from './schedule';
 import { hashString, mulberry32 } from './rng';
 import { refreshRotation } from './rotation';
@@ -7,6 +7,7 @@ import { simGame } from './sim/fast';
 import { dailyUpdate } from './daily';
 import { boardOnPhase } from './mgmt/board';
 import { trainingEffects } from './progression';
+import { offseasonStep } from './offseason';
 
 // ---------- standings ----------
 
@@ -250,8 +251,9 @@ export function advanceDay(s: GameState, skipUserGame = false) {
 
 /** "Continue" button: play through to the next day the user has a game (stops at start of that day). */
 export function continueGame(s: GameState, maxDays = 60) {
+  if (s.phase === 'offseason') { offseasonStep(s); return; }
   if (userGameToday(s)) { advanceDay(s); return; }
-  for (let i = 0; i < maxDays && s.phase !== 'offseason'; i++) {
+  for (let i = 0; i < maxDays && (s.phase as Phase) !== 'offseason'; i++) {
     advanceDay(s);
     if (userGameToday(s)) return;
   }

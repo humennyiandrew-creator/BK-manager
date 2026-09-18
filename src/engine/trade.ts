@@ -2,7 +2,7 @@
 import type { DraftPick, GameState, Player, TradeOffer, TradeSide } from './model';
 import { ageOf } from './ratings';
 import { hashString, mulberry32, type Rng } from './rng';
-import { capNumbers, isTwoWay, leagueStrength, marketValue, payroll, rosterOf, salaryIn, tradeSalaryCheck, yearsLeft } from './cba';
+import { capNumbers, capSeason, isTwoWay, leagueStrength, marketValue, payroll, rosterOf, salaryIn, tradeSalaryCheck, yearsLeft } from './cba';
 import { releasePlayer } from './freeagency';
 import { refreshRotation } from './rotation';
 import { addDays } from './schedule';
@@ -48,7 +48,7 @@ export function sideValue(s: GameState, side: TradeSide, mode: Mode, ranks: Map<
     + side.picks.reduce((x, id) => x + pickValue(s, s.picks.find((p) => p.id === id)!, mode, ranks), 0);
 }
 
-const sideSalary = (s: GameState, side: TradeSide) => side.players.reduce((x, id) => x + (isTwoWay(s.players[id]) ? 0 : salaryIn(s.players[id], s.season)), 0);
+const sideSalary = (s: GameState, side: TradeSide) => side.players.reduce((x, id) => x + (isTwoWay(s.players[id]) ? 0 : salaryIn(s.players[id], capSeason(s))), 0);
 
 // ---------- legality + acceptance ----------
 

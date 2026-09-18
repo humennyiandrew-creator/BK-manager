@@ -53,6 +53,7 @@ export function newGame(teams: Team[], raw: RawPlayer[], userTeamId: string, see
     staff: [], facilities: {}, finance: undefined as unknown as GameState['finance'], board: undefined as unknown as GameState['board'],
     training: Object.fromEntries(teams.map((t) => [t.id, defaultTraining()])),
     picks: [], tradeOffers: [], transactions: [], draftClass: [], draftOrder: [],
+    startYear: seasonYear, maxSeasons: 5, history: [],
     keyDates: { tradeDeadline: `${seasonYear + 1}-02-05`, regularEnd, draft: `${seasonYear + 1}-06-24`, freeAgency: `${seasonYear + 1}-06-30` },
   };
   initStaff(s);

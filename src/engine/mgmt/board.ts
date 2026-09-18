@@ -12,7 +12,7 @@ const RESULT_LABEL = [
   'Runner-up in the NBA Finals',
   'Won the Championship',
 ];
-const LONG_TERM: Record<ObjectiveKind, string> = {
+export const LONG_TERM: Record<ObjectiveKind, string> = {
   title: 'Build a roster capable of winning it all, year after year.',
   finals: 'Push this core to the NBA Finals within the next two seasons.',
   confFinals: 'Establish the franchise as a perennial conference contender.',
@@ -32,7 +32,7 @@ export function objectiveLabel(k: ObjectiveKind): string {
   }
 }
 
-function objectiveByRank(rank: number): ObjectiveKind {
+export function objectiveByRank(rank: number): ObjectiveKind {
   if (rank <= 3) return 'title';
   if (rank <= 6) return 'finals';
   if (rank <= 10) return 'confFinals';

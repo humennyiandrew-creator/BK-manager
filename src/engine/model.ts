@@ -128,6 +128,25 @@ export interface GameState {
   draftClass: string[];                    // player ids of upcoming draft prospects (teamId null, prospect true)
   draftOrder: string[];                    // pick ids in selection order once the lottery has run
   keyDates: KeyDates;
+  // ---- M7 career ----
+  startYear: number;                       // first season of the career
+  maxSeasons: number;                      // career length cap (5)
+  offseason?: { stage: OffseasonStage; faDay: number; waitingPick?: string };
+  history: SeasonRecord[];                 // one per completed season
+  careerOver?: boolean;
+}
+
+export type OffseasonStage = 'draft' | 'resign' | 'fa' | 'camp';
+
+export interface Awards { mvp: string; dpoy: string; roy: string | null; sixth: string | null; mip: string | null; allNba: string[] }
+export interface SeasonRecord {
+  season: string;
+  w: number; l: number; confRank: number;
+  result: string;                          // e.g. "Lost Conf Finals 2-4", "Champions"
+  champion: string;                        // teamId
+  awards: Awards;
+  objective: string; objectiveMet: boolean;
+  topScorer: { id: string; ppg: number };
 }
 
 // ---------- M6 types ----------

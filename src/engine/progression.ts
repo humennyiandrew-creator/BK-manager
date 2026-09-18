@@ -36,8 +36,8 @@ export function trainingEffects(s: GameState, teamId: string): { growthMul: numb
 /** Expected OVR change over a full year at this age. */
 export function annualExpected(age: number, ovr: number, pot: number): number {
   const gap = Math.max(0, pot - ovr);
-  if (age <= 22) return 0.35 * gap + 1;
-  if (age <= 24) return 0.25 * gap + 0.5;
+  if (age <= 22) return 0.26 * gap + 0.6;
+  if (age <= 24) return 0.18 * gap + 0.3;
   if (age <= 27) return 0.15 * gap;
   if (age <= 29) return -0.3;
   if (age <= 31) return -1.2;
@@ -63,7 +63,9 @@ function applyDelta(p: Player, raw: number, focus: TrainingFocus, rng: Rng) {
   const whole = Math.trunc(p.prog);
   if (!whole) return;
   p.prog -= whole;
-  p.ratings.ovr = Math.max(35, Math.min(99, p.ratings.ovr + whole));
+  // Elite ceiling: above 90, only every other point of positive progress sticks.
+  const gain = whole > 0 && p.ratings.ovr >= 90 ? Math.floor(whole / 2) : whole;
+  p.ratings.ovr = Math.max(35, Math.min(99, p.ratings.ovr + gain));
   if (p.ratings.ovr > p.ratings.pot) p.ratings.pot = p.ratings.ovr;
   p.lastChange = whole;
   shiftAttrs(p, whole, focus, rng);
