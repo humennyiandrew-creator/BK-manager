@@ -54,7 +54,11 @@ export default function ChooseTeamScreen() {
   if (!previews) {
     return (
       <div className={styles.wrap}>
-        <div className={styles.loading}>Loading league data&hellip;</div>
+        <div className={styles.loadingLayout}>
+          <div className={`${styles.loadingPanel} shimmer`} />
+          <div className={`${styles.loadingPanel} shimmer`} />
+          <div className={`${styles.loadingPanel} shimmer`} />
+        </div>
       </div>
     );
   }

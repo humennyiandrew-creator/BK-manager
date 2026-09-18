@@ -21,6 +21,15 @@
   box-shadow: 0 0 0 1px rgba(227, 163, 46, 0.25), 0 20px 60px rgba(0, 0, 0, 0.6);
 }
 
+@keyframes modalPop {
+  0% { opacity: 0; transform: scale(0.93); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.modalPop {
+  animation: modalPop var(--dur) var(--ease-out) both;
+}
+
 .header {
   display: flex;
   align-items: center;

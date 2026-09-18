@@ -5,6 +5,7 @@ import DataTable, { type DataTableColumn } from '../components/DataTable';
 import TeamBadge from '../components/TeamBadge';
 import BkImage from '../components/BkImage';
 import ProgressBar from '../components/ProgressBar';
+import CountUp from '../components/CountUp';
 import { IconCalendar, IconTraining, IconStaff } from '../components/tabIcons';
 import { useGameState } from '../store/useGame';
 import { useUI } from '../store/useUI';
@@ -100,7 +101,7 @@ function LastSeasonPanel({ s }: { s: GameState }) {
   return (
     <Panel title={`${rec.season} Recap`} className={styles.lastSeasonPanel}>
       <div className={styles.lastSeasonHead}>
-        <span className={styles.lastSeasonRecord}>{rec.w}-{rec.l}</span>
+        <span className={styles.lastSeasonRecord}><CountUp value={rec.w} />-<CountUp value={rec.l} /></span>
         <span className={styles.lastSeasonResult}>{rec.result}</span>
       </div>
       <div className={styles.lastSeasonObjective}>
@@ -145,7 +146,7 @@ export default function HomeScreen() {
 
   return (
     <div className={styles.grid}>
-      <div className={styles.col}>
+      <div className={`${styles.col} stagger`}>
         <Panel title="Board">
           <div className={styles.boardTeam}>
             <BkImage path={team.logo} alt={team.name} className={styles.boardLogo} />
@@ -153,7 +154,7 @@ export default function HomeScreen() {
           </div>
           <div className={styles.confidenceLabel}>
             <span>Conference Rank</span>
-            <span>#{rank || '-'}</span>
+            <span>#{rank ? <CountUp value={rank} /> : '-'}</span>
           </div>
           <ProgressBar value={Math.max(0, 16 - rank)} max={15} variant="cyan" />
           <div className={styles.objective}>
@@ -162,7 +163,7 @@ export default function HomeScreen() {
           </div>
           <div className={styles.objective}>
             <span className={styles.objectiveLabel}>League Strength Rank</span>
-            <span className={styles.objectiveValue}>#{strengthRank} of 30</span>
+            <span className={styles.objectiveValue}>#<CountUp value={strengthRank} /> of 30</span>
           </div>
         </Panel>
 
@@ -175,12 +176,13 @@ export default function HomeScreen() {
               firstName={p.firstName}
               lastName={p.lastName}
               subtitle={`${p.positions[0]} · ${p.ratings.ovr} OVR`}
+              className="glow-hover"
             />
           ))}
         </div>
       </div>
 
-      <div className={styles.col}>
+      <div className={`${styles.col} stagger`}>
         <Panel
           title="Standings"
           className={styles.standingsPanel}
@@ -232,7 +234,7 @@ export default function HomeScreen() {
         </Panel>}
       </div>
 
-      <div className={styles.col}>
+      <div className={`${styles.col} stagger`}>
         {s.phase === 'offseason' ? <LastSeasonPanel s={s} /> : <Panel title="Starting Five">
           <div className={styles.startersList}>
             {five.map((p: Player) => (
@@ -256,7 +258,7 @@ export default function HomeScreen() {
 
         <Panel title="Upcoming Events" className={styles.eventsPanel}>
           {pendingEvents.length > 0 && (
-            <div className={styles.eventGroup}>
+            <div className={`${styles.eventGroup} stagger`}>
               <div className={styles.eventGroupLabel}>Decision Needed</div>
               {pendingEvents.map((ev) => (
                 <button key={ev.id} type="button" className={styles.pendingEventRow} onClick={() => openEvent(ev.id)}>
@@ -269,7 +271,7 @@ export default function HomeScreen() {
             </div>
           )}
           {events.map((group) => (
-            <div key={group.group} className={styles.eventGroup}>
+            <div key={group.group} className={`${styles.eventGroup} stagger`}>
               <div className={styles.eventGroupLabel}>{group.group}</div>
               {group.events.map((ev) => {
                 const Icon = eventIcon[ev.icon];

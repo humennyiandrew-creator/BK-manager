@@ -1,10 +1,21 @@
 .bar {
+  position: relative;
   display: flex;
   align-items: stretch;
   background: var(--panel);
   border-top: 1px solid var(--panel-border);
   flex-shrink: 0;
   height: 3.4rem;
+}
+
+.indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 2px;
+  background: var(--accent);
+  transition: transform var(--dur) var(--ease-out);
+  pointer-events: none;
 }
 
 .tab {

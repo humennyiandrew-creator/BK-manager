@@ -12,6 +12,7 @@ import { askingPrice, freeAgents } from '../../engine/freeagency';
 import { capNumbers, isTwoWay, marketValue, payroll as cbaPayroll, rosterOf, salaryIn, yearsLeft } from '../../engine/cba';
 import { formatDate, formatMoneyShort } from '../format';
 import NegotiationModal from '../components/NegotiationModal';
+import { toast } from '../components/Toasts';
 import styles from './TransfersScreen.module.css';
 
 type SubTab = 'trade' | 'offers' | 'fa' | 'tx';
@@ -96,7 +97,7 @@ function TradeCenter({ s, mutate }: { s: GameState; mutate: Mutate }) {
   const [aiTeamId, setAiTeamId] = useState(aiTeams[0]?.id ?? '');
   const [youSend, setYouSend] = useState<TradeSide>({ players: [], picks: [] });
   const [theySend, setTheySend] = useState<TradeSide>({ players: [], picks: [] });
-  const [toast, setToast] = useState<string | null>(null);
+  const [dealMsg, setDealMsg] = useState<string | null>(null);
 
   useEffect(() => { setYouSend({ players: [], picks: [] }); setTheySend({ players: [], picks: [] }); }, [aiTeamId]);
 
@@ -113,9 +114,12 @@ function TradeCenter({ s, mutate }: { s: GameState; mutate: Mutate }) {
     let result: { ok: boolean; text: string } | undefined;
     mutate((st) => { result = proposeTrade(st, aiTeamId, youSend, theySend); });
     if (result) {
-      setToast(result.text);
-      if (result.ok) { setYouSend({ players: [], picks: [] }); setTheySend({ players: [], picks: [] }); }
-      setTimeout(() => setToast(null), 3500);
+      setDealMsg(result.text);
+      if (result.ok) {
+        setYouSend({ players: [], picks: [] }); setTheySend({ players: [], picks: [] });
+        toast(result.text, 'success');
+      }
+      setTimeout(() => setDealMsg(null), 3500);
     }
   };
 
@@ -143,7 +147,7 @@ function TradeCenter({ s, mutate }: { s: GameState; mutate: Mutate }) {
             <div className={styles.meterReason}>{hasAssets ? ev.reason : 'Select players or picks on both sides.'}</div>
           </div>
           <button type="button" className={styles.proposeBtn} disabled={!canPropose} onClick={propose}>Propose Trade</button>
-          {toast && <div className={styles.toast}>{toast}</div>}
+          {dealMsg && <div className={styles.toast}>{dealMsg}</div>}
         </Panel>
         <Panel title="You Receive" className={styles.tradeCol} flush>
           <AssetTable s={s} teamId={aiTeamId} selected={theySend} onToggle={(a) => setTheySend((side) => toggleAsset(side, a))} />
@@ -154,15 +158,19 @@ function TradeCenter({ s, mutate }: { s: GameState; mutate: Mutate }) {
 }
 
 function OffersTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
-  const [toast, setToast] = useState<string | null>(null);
+  const [msg, setMsg] = useState<string | null>(null);
   const respond = (id: number, accept: boolean) => {
     let result: string | undefined;
     mutate((st) => { result = respondToOffer(st, id, accept); });
-    if (result) { setToast(result); setTimeout(() => setToast(null), 3000); }
+    if (result) {
+      setMsg(result);
+      if (accept) toast(result, 'success');
+      setTimeout(() => setMsg(null), 3000);
+    }
   };
   return (
     <Panel title="Incoming Offers" className={styles.offersPanel} flush>
-      {toast && <div className={styles.toast}>{toast}</div>}
+      {msg && <div className={styles.toast}>{msg}</div>}
       {s.tradeOffers.length === 0 && <div className={styles.empty}>No pending offers</div>}
       <div className={styles.offerList}>
         {s.tradeOffers.map((o) => (

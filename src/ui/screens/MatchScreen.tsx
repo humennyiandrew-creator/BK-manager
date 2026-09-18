@@ -11,8 +11,70 @@ import type { PbpLine, Snapshot } from '../../engine/sim/live';
 import { lineupProfile, offenseFit, defenseFit } from '../../engine/playbook/fit';
 import BkImage from '../components/BkImage';
 import BipolarBar from '../components/BipolarBar';
-import { COURT_W, COURT_H, colorDist, drawBall, drawCourt, drawPlayer, drawScreen, fitCourt } from '../court';
+import CountUp from '../components/CountUp';
+import { COURT_W, COURT_H, colorDist, drawBall, drawBallTrail, drawCourt, drawPlayer, drawScreen, fitCourt } from '../court';
+import { play, startCrowd, stopCrowd, crowdIntensity } from '../sound';
 import styles from './MatchScreen.module.css';
+
+/** Finds the scoring player's id by matching the pbp line's leading name against both rosters. */
+function scorerIdFromText(text: string, home: Side, away: Side): string | null {
+  for (const sp of [...home.roster, ...away.roster]) {
+    if (text.startsWith(`${sp.p.firstName} ${sp.p.lastName} makes`)) return sp.p.id;
+  }
+  return null;
+}
+
+/** Plays the right SFX for one new play-by-play line, throttled by sim speed to avoid noise spam. */
+function handlePbpSound(
+  line: PbpLine,
+  speed: number,
+  swishRef: { current: number },
+  prevRef: { current: PbpLine | null },
+  closeQ4: boolean
+) {
+  const periodEnd = line.kind === 'info' && (line.text.startsWith('End of') || line.text.startsWith('Final:'));
+  const timeout = line.kind === 'info' && line.text.startsWith('Timeout');
+
+  if (speed >= 10) {
+    if (periodEnd) play('buzzer');
+    prevRef.current = line;
+    return;
+  }
+  if (speed >= 5) {
+    if (periodEnd) play('buzzer');
+    else if (timeout || line.kind === 'foul') play('whistle');
+    else if (line.kind === 'score' && line.text.includes('makes') && !line.text.includes('free throw')) {
+      swishRef.current++;
+      if (swishRef.current % 3 === 0) play('swish');
+    }
+    prevRef.current = line;
+    return;
+  }
+  if (periodEnd) { play('buzzer'); prevRef.current = line; return; }
+  if (timeout || line.kind === 'foul') { play('whistle'); prevRef.current = line; return; }
+  if (line.kind === 'to') { crowdIntensity(closeQ4 ? 0.95 : 0.6); prevRef.current = line; return; }
+  if (line.kind === 'score') {
+    const isFt = line.text.includes('free throw');
+    if (isFt) {
+      const prev = prevRef.current;
+      const andOne = !!prev && prev.kind === 'score' && !prev.text.includes('free throw') && line.text.includes('1 of 1');
+      play('swish');
+      if (andOne) play('crowdCheer');
+    } else {
+      play('swish');
+      const big = line.text.includes('three') || line.text.includes('dunk');
+      if (big) { play('crowdCheer'); if (closeQ4) crowdIntensity(1); }
+    }
+    prevRef.current = line;
+    return;
+  }
+  if (line.kind === 'miss') {
+    play(line.text.includes('blocked by') ? 'dribble' : 'rim');
+    prevRef.current = line;
+    return;
+  }
+  prevRef.current = line;
+}
 
 const hexAlpha = (hex: string, a: number) => {
   const h = hex.replace('#', '');
@@ -48,6 +110,13 @@ export default function MatchScreen() {
   const [subOut, setSubOut] = useState<string | null>(null);
   const [calledPlay, setCalledPlay] = useState('');
 
+  const pbpLenRef = useRef(0);
+  const swishCountRef = useRef(0);
+  const prevLineRef = useRef<PbpLine | null>(null);
+  const ballTrailRef = useRef<{ x: number; y: number }[]>([]);
+  const scorerGlowRef = useRef<Map<string, number>>(new Map());
+  const lastCrowdUpdateRef = useRef(0);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || !match || !s || !game) return;
@@ -55,6 +124,13 @@ export default function MatchScreen() {
     const homeColor = home.colors.primary;
     const awayColor = colorDist(home.colors.primary, away.colors.primary) < 60 ? away.colors.secondary : away.colors.primary;
     const fillOf = (side: 0 | 1) => (side === 0 ? homeColor : awayColor);
+    const matchH = match.H, matchA = match.A;
+
+    pbpLenRef.current = 0;
+    swishCountRef.current = 0;
+    prevLineRef.current = null;
+    ballTrailRef.current = [];
+    scorerGlowRef.current = new Map();
 
     let fit = fitCourt(canvas, COURT_W, COURT_H);
     const ro = new ResizeObserver(() => { fit = fitCourt(canvas, COURT_W, COURT_H); });
@@ -80,6 +156,31 @@ export default function MatchScreen() {
       }
 
       const snap = match!.snapshot();
+
+      // New play-by-play lines since last frame drive SFX + crowd murmur.
+      if (snap.pbp.length > pbpLenRef.current) {
+        const newLines = snap.pbp.slice(pbpLenRef.current);
+        pbpLenRef.current = snap.pbp.length;
+        const closeQ4 = snap.period >= 4 && Math.abs(snap.score[0] - snap.score[1]) <= 8;
+        for (const line of newLines) {
+          handlePbpSound(line, st.speed, swishCountRef, prevLineRef, closeQ4);
+          if (line.kind === 'score' && !line.text.includes('free throw')) {
+            const id = scorerIdFromText(line.text, matchH, matchA);
+            if (id) scorerGlowRef.current.set(id, now);
+          }
+        }
+      }
+
+      // Ambience intensity from score margin + period + clock (tight Q4 = loud); throttled.
+      if (snap.state === 'live' && now - lastCrowdUpdateRef.current > 600) {
+        lastCrowdUpdateRef.current = now;
+        const margin = Math.abs(snap.score[0] - snap.score[1]);
+        const tightness = margin <= 5 ? 1 : margin <= 10 ? 0.6 : 0.3;
+        const periodFactor = snap.period >= 4 ? 1 : 0.55;
+        const clockFactor = snap.period >= 4 && snap.clock < 120 ? 1 : 0.7;
+        crowdIntensity(tightness * 0.5 + periodFactor * 0.3 + clockFactor * 0.2);
+      }
+
       const ctx = fit.ctx;
       ctx.clearRect(0, 0, COURT_W, COURT_H);
       // Home attacks the right basket in periods 1-2, the left basket from period 3 on (post-halftime end swap).
@@ -93,9 +194,18 @@ export default function MatchScreen() {
         if (a && b) drawScreen(ctx, a.x, a.y, b.x, b.y);
       }
       for (const p of snap.players) {
-        drawPlayer(ctx, { x: p.x, y: p.y, label: p.jersey, sub: p.name, energy: p.energy, fouls: p.fouls, fill: fillOf(p.side), hasBall: p.ball });
+        const glowTs = scorerGlowRef.current.get(p.id);
+        const glow = glowTs ? Math.max(0, 1 - (now - glowTs) / 650) : 0;
+        if (glowTs && glow <= 0) scorerGlowRef.current.delete(p.id);
+        drawPlayer(ctx, { x: p.x, y: p.y, label: p.jersey, sub: p.name, energy: p.energy, fouls: p.fouls, fill: fillOf(p.side), hasBall: p.ball, glow });
       }
-      if (snap.state !== 'pregame') drawBall(ctx, snap.ball.x, snap.ball.y, snap.ball.z);
+      if (snap.state !== 'pregame') {
+        const trail = ballTrailRef.current;
+        trail.push({ x: snap.ball.x, y: snap.ball.y });
+        if (trail.length > 6) trail.shift();
+        drawBallTrail(ctx, trail);
+        drawBall(ctx, snap.ball.x, snap.ball.y, snap.ball.z);
+      }
 
       if (now - lastUi > 120) { lastUi = now; setTick((t) => t + 1); }
       raf = requestAnimationFrame(frame);
@@ -104,6 +214,9 @@ export default function MatchScreen() {
     return () => { cancelAnimationFrame(raf); ro.disconnect(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [match]);
+
+  // Stop ambience if the player navigates away from the screen entirely.
+  useEffect(() => () => stopCrowd(), []);
 
   if (!s || !game || !match) return null;
 
@@ -114,14 +227,16 @@ export default function MatchScreen() {
   const snap: Snapshot = match.snapshot();
   const maxTo = snap.period >= 3 ? 4 : 7;
 
-  function handleTipOff() { match!.start(); }
+  function handleTipOff() { startCrowd(); match!.start(); }
   function handleQuickSim() {
+    stopCrowd();
     mutate((st) => continueGame(st));
     void save();
     clearMatch();
     setView('shell');
   }
   function handleContinueFinal() {
+    stopCrowd();
     const g = game!, m = match!;
     mutate((st) => { applyResult(st, g, m.result()); advanceDay(st); });
     void save();
@@ -168,7 +283,9 @@ export default function MatchScreen() {
           )}
           {snap.state === 'final' && (
             <Overlay wide>
-              <div className={styles.overlayTitle}>FINAL — {home.abbr} {snap.score[0]} · {snap.score[1]} {away.abbr}</div>
+              <div className={styles.overlayTitle}>
+                FINAL — {home.abbr} <CountUp value={snap.score[0]} /> · <CountUp value={snap.score[1]} /> {away.abbr}
+              </div>
               <LineScore snap={snap} home={home} away={away} />
               <div className={styles.topPerfRow}>
                 <TopPerformers side={match.H} />
@@ -249,13 +366,15 @@ export default function MatchScreen() {
 // ---------- scoreboard ----------
 
 function Scoreboard({ s, game, snap, home, away, maxTo }: any) {
+  const clockCls = snap.clock < 24 ? `${styles.sbClock} ${styles.clockRed}` : snap.clock < 60 ? `${styles.sbClock} ${styles.clockAmber}` : styles.sbClock;
+  const shotUrgent = snap.state === 'live' && snap.shotClock <= 5;
   return (
     <div className={styles.scoreboard}>
       <TeamScore team={home} score={snap.score[0]} bonus={snap.bonus[0]} timeouts={snap.timeouts[0]} maxTo={maxTo} possession={snap.possession === 0} align="left" />
       <div className={styles.sbCenter}>
         <div className={styles.sbPeriod}>{periodLabel(snap.period)}</div>
-        <div className={styles.sbClock}>{fmtClock(snap.clock)}</div>
-        <div className={styles.sbShotClock}>{snap.state === 'live' ? Math.ceil(snap.shotClock) : '--'}</div>
+        <div className={clockCls}>{fmtClock(snap.clock)}</div>
+        <div className={shotUrgent ? `${styles.sbShotClock} ${styles.shotUrgent}` : styles.sbShotClock}>{snap.state === 'live' ? Math.ceil(snap.shotClock) : '--'}</div>
         {snap.play && <div className={styles.sbPlay}>Running: {snap.play}</div>}
       </div>
       <TeamScore team={away} score={snap.score[1]} bonus={snap.bonus[1]} timeouts={snap.timeouts[1]} maxTo={maxTo} possession={snap.possession === 1} align="right" />
@@ -280,7 +399,7 @@ function TeamScore({ team, score, bonus, timeouts, maxTo, possession, align }: a
           {bonus && <span className={styles.bonusTag}>BONUS</span>}
         </div>
       </div>
-      <span className={styles.sbScore}>{score}</span>
+      <span key={score} className={`${styles.sbScore} ${styles.sbScorePop}`} style={{ '--flash-color': team.colors.primary } as any}>{score}</span>
       {align === 'right' && <BkImage path={team.logo} alt={team.abbr} className={styles.sbLogo} />}
     </div>
   );
@@ -322,7 +441,7 @@ function LineScore({ snap, home, away }: { snap: Snapshot; home: any; away: any 
 function TopPerformers({ side }: { side: Side }) {
   const top = [...side.roster].sort((a, b) => b.line.pts - a.line.pts).slice(0, 3);
   return (
-    <div className={styles.topPerfCol}>
+    <div className={`${styles.topPerfCol} stagger`}>
       <div className={styles.topPerfTeam}>{side.team.abbr}</div>
       {top.map((sp) => (
         <div key={sp.p.id} className={styles.topPerfRow2}>
@@ -336,8 +455,8 @@ function TopPerformers({ side }: { side: Side }) {
 
 function Overlay({ children, wide }: { children: React.ReactNode; wide?: boolean }) {
   return (
-    <div className={styles.overlayBackdrop}>
-      <div className={wide ? `${styles.overlayPanel} ${styles.overlayPanelWide}` : styles.overlayPanel}>{children}</div>
+    <div className={`${styles.overlayBackdrop} fade-in`}>
+      <div className={`${wide ? `${styles.overlayPanel} ${styles.overlayPanelWide}` : styles.overlayPanel} slide-up`}>{children}</div>
     </div>
   );
 }

@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { GameState } from '../../engine/model';
 import { resolveEvent } from '../../engine/events';
 import { useGame } from '../store/useGame';
 import BkImage from './BkImage';
+import { play } from '../sound';
 import { IconTransfers, IconStaff, IconBoard, IconFinances, IconTraining, IconMessages } from './tabIcons';
 import styles from './EventModal.module.css';
 
@@ -45,6 +46,7 @@ const TYPE_LABEL: Record<string, string> = {
 export default function EventModal({ s, eventId, onClose }: { s: GameState; eventId: string; onClose: () => void }) {
   const mutate = useGame((g) => g.mutate);
   const [picking, setPicking] = useState(false);
+  useEffect(() => { play('notify'); }, []);
   const ev = s.events.find((e) => e.id === eventId);
   if (!ev) return null;
   const Icon = TYPE_ICON[ev.type] ?? IconMessages;
@@ -56,8 +58,8 @@ export default function EventModal({ s, eventId, onClose }: { s: GameState; even
   };
 
   return (
-    <div className={styles.backdrop}>
-      <div className={styles.modal}>
+    <div className={`${styles.backdrop} fade-in`}>
+      <div className={`${styles.modal} ${styles.modalPop}`}>
         <div className={styles.header}>
           <span className={styles.headerIcon}><Icon /></span>
           <div className={styles.headerText}>

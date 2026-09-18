@@ -38,6 +38,47 @@
   flex-shrink: 0;
 }
 
+.pickReveal {
+  position: fixed;
+  top: 4.5rem;
+  right: 1.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  background: var(--panel);
+  border: 1px solid var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), 0 16px 40px rgba(0, 0, 0, 0.55);
+  border-radius: var(--radius);
+  padding: 0.7rem 1.1rem;
+  z-index: 50;
+}
+
+.pickRevealFace {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.pickRevealLabel {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+}
+
+.pickRevealName {
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.pickRevealMeta {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
 .clockDraftBtn:disabled {
   background: var(--panel-alt);
   color: var(--text-dim);

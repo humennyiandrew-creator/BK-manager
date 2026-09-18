@@ -33,8 +33,12 @@
   text-align: right;
 }
 
+.row {
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
 .row:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
 }
 
 .highlighted {

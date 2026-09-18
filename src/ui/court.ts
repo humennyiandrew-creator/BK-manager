@@ -86,11 +86,18 @@ export function drawCourt(ctx: CanvasRenderingContext2D, mode: 'full' | 'half', 
 }
 
 export interface PlayerDrawOpts {
-  x: number; y: number; label: string; sub: string; energy: number; fouls: number; fill: string; hasBall: boolean;
+  x: number; y: number; label: string; sub: string; energy: number; fouls: number; fill: string; hasBall: boolean; glow?: number;
 }
 
 export function drawPlayer(ctx: CanvasRenderingContext2D, o: PlayerDrawOpts) {
   const r = 1.4;
+  if (o.glow && o.glow > 0) {
+    ctx.beginPath();
+    ctx.strokeStyle = `rgba(255,210,61,${o.glow * 0.8})`;
+    ctx.lineWidth = 0.25 + o.glow * 0.45;
+    ctx.arc(o.x, o.y, r + 1.05 + (1 - o.glow) * 0.7, 0, Math.PI * 2);
+    ctx.stroke();
+  }
   ctx.beginPath();
   ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 0.22;
   ctx.arc(o.x, o.y, r + 0.45, 0, Math.PI * 2); ctx.stroke();
@@ -129,6 +136,19 @@ export function drawPlayer(ctx: CanvasRenderingContext2D, o: PlayerDrawOpts) {
   ctx.fillStyle = 'rgba(255,255,255,0.88)';
   ctx.font = '0.95px "Titillium Web", sans-serif';
   ctx.fillText(o.sub, o.x, o.y + r + (o.fouls > 0 ? 1.55 : 1.1));
+}
+
+/** Fading trail of recent ball positions, drawn before the ball itself. */
+export function drawBallTrail(ctx: CanvasRenderingContext2D, trail: { x: number; y: number }[]) {
+  const n = trail.length;
+  for (let i = 0; i < n - 1; i++) {
+    const t = trail[i];
+    const alpha = ((i + 1) / n) * 0.22;
+    ctx.beginPath();
+    ctx.fillStyle = `rgba(232,114,12,${alpha})`;
+    ctx.arc(t.x, t.y, 0.38, 0, Math.PI * 2);
+    ctx.fill();
+  }
 }
 
 export function drawBall(ctx: CanvasRenderingContext2D, x: number, y: number, z: number) {

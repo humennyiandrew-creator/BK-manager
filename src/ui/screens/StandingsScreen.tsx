@@ -81,6 +81,7 @@ function StandingsTable({ rows, teams, userTeamId }: { rows: StandingRow[]; team
       highlightedRowKey={userTeamId}
       rowClass={(r) => (r.rank === 6 ? styles.playoffLine : r.rank === 10 ? styles.playinLine : undefined)}
       compact
+      animateRows
     />
   );
 }

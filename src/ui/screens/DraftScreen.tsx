@@ -12,6 +12,7 @@ import { standings } from '../../engine/season';
 import { hashString, mulberry32 } from '../../engine/rng';
 import { ATTR_GROUPS, ATTR_LABEL, attrVariant } from '../attrGroups';
 import { formatDate, heightFtIn } from '../format';
+import { play } from '../sound';
 import styles from './DraftScreen.module.css';
 
 interface Scouted { p: Player; ovr: number; pot: number; range: number }
@@ -116,6 +117,7 @@ export default function DraftScreen() {
   const s = useGameState();
   const mutate = useGame((g) => g.mutate);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [pickReveal, setPickReveal] = useState<Scouted | null>(null);
 
   const scoutedList = useMemo<Scouted[]>(() => {
     if (!s) return [];
@@ -149,6 +151,9 @@ export default function DraftScreen() {
   const draftSelected = () => {
     if (!selected) return;
     mutate((st) => { const p = nextPick(st); if (p) makePick(st, p.id, selected.p.id); });
+    play('confirm');
+    setPickReveal(selected);
+    setTimeout(() => setPickReveal(null), 2000);
     setSelectedId(null);
   };
   const autoPick = () => mutate((st) => { const p = nextPick(st); if (p) aiPick(st, p.id); });
@@ -224,6 +229,16 @@ export default function DraftScreen() {
           )}
         </div>
       </div>
+      {pickReveal && (
+        <div className={`${styles.pickReveal} slide-in-right`}>
+          <BkImage path={pickReveal.p.face} alt={pickReveal.p.lastName} className={styles.pickRevealFace} />
+          <div>
+            <div className={styles.pickRevealLabel}>Pick is in</div>
+            <div className={styles.pickRevealName}>{pickReveal.p.firstName} {pickReveal.p.lastName}</div>
+            <div className={styles.pickRevealMeta}>{pickReveal.p.positions.join('/')} · {pickReveal.p.college ?? 'International'}</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

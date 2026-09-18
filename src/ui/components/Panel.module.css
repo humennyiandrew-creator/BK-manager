@@ -9,12 +9,23 @@
 }
 
 .head {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0.6rem 0.9rem;
   border-bottom: 1px solid var(--panel-border);
   flex-shrink: 0;
+}
+
+.head::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 2.4rem;
+  height: 2px;
+  background: var(--accent);
 }
 
 .title {

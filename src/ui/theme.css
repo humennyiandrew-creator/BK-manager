@@ -71,6 +71,11 @@ button {
   cursor: pointer;
 }
 
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
 .label-caps {
   text-transform: uppercase;
   letter-spacing: 0.08em;

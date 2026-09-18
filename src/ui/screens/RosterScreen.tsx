@@ -143,7 +143,7 @@ export default function RosterScreen() {
   return (
     <div className={styles.wrap}>
       <Panel title="Roster" className={styles.tablePanel} flush>
-        <DataTable columns={columns} rows={sorted} rowKey={(p) => p.id} highlightedRowKey={selected?.id} onRowClick={(p) => setSelectedId(p.id)} compact />
+        <DataTable columns={columns} rows={sorted} rowKey={(p) => p.id} highlightedRowKey={selected?.id} onRowClick={(p) => setSelectedId(p.id)} compact animateRows />
       </Panel>
       <Panel title="Player Detail" className={styles.detailPanel}>
         {selected && <PlayerDetail player={selected} onRelease={() => setReleaseId(selected.id)} />}

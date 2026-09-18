@@ -50,8 +50,13 @@ interface Props {
 }
 
 export default function TabBar({ active, onSelect, badges }: Props) {
+  const activeIndex = TABS.findIndex((t) => t.id === active);
   return (
     <nav className={styles.bar}>
+      <span
+        className={styles.indicator}
+        style={{ width: `${100 / TABS.length}%`, transform: `translateX(${activeIndex * 100}%)` }}
+      />
       {TABS.map(({ id, label, Icon }) => {
         const badge = badges?.[id];
         return (

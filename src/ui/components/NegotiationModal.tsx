@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import BkImage from './BkImage';
 import { useGame } from '../store/useGame';
 import type { ContractOffer, GameState } from '../../engine/model';
@@ -6,6 +6,8 @@ import { type NegKind, startNegotiation, makeOffer } from '../../engine/negotiat
 import { ageOf } from '../../engine/ratings';
 import { capYear, isTwoWay, marketValue, maxSalary, minSalary, salaryIn, signingCheck, yearsLeft } from '../../engine/cba';
 import { formatMoney, formatMoneyShort } from '../format';
+import { play } from '../sound';
+import { toast } from './Toasts';
 import styles from './NegotiationModal.module.css';
 
 type Mutate = (fn: (s: GameState) => void) => void;
@@ -40,6 +42,24 @@ export default function NegotiationModal({ s, mutate, playerId, kind, onClose }:
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [neg?.id]);
 
+  const prevLogLen = useRef(0);
+  useEffect(() => {
+    if (!neg) return;
+    if (neg.log.length > prevLogLen.current) {
+      const added = neg.log.slice(prevLogLen.current);
+      if (added.some((e) => e.by === 'agent')) play('notify');
+    }
+    prevLogLen.current = neg.log.length;
+  }, [neg?.log.length]);
+
+  const prevStatus = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    if (!neg) return;
+    if (prevStatus.current === 'open' && neg.status === 'signed') toast('Deal signed.', 'success');
+    else if (prevStatus.current === 'open' && neg.status === 'walked') toast('Agent walked away from the table.', 'error');
+    prevStatus.current = neg.status;
+  }, [neg?.status]);
+
   if (!p || !neg) return null;
 
   const mv = marketValue(p, s.seasonYear);
@@ -58,8 +78,8 @@ export default function NegotiationModal({ s, mutate, playerId, kind, onClose }:
   const capBad = kind === 'fa' && !!capCheck!.reason;
 
   return (
-    <div className={styles.backdrop} onClick={onClose}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+    <div className={`${styles.backdrop} fade-in`} onClick={onClose}>
+      <div className={`${styles.modal} ${styles.modalPop}`} onClick={(e) => e.stopPropagation()}>
         <div className={styles.header}>
           <span className={styles.kicker}>{KIND_LABEL[kind]} Negotiation</span>
           <button type="button" className={styles.closeBtn} onClick={onClose}>×</button>
@@ -87,7 +107,7 @@ export default function NegotiationModal({ s, mutate, playerId, kind, onClose }:
           <div className={styles.right}>
             <div className={styles.log}>
               {neg.log.map((entry, i) => (
-                <div key={i} className={entry.by === 'team' ? styles.bubbleTeam : styles.bubbleAgent}>{entry.text}</div>
+                <div key={i} className={entry.by === 'team' ? `${styles.bubbleTeam} slide-in-right` : `${styles.bubbleAgent} slide-in-right`}>{entry.text}</div>
               ))}
             </div>
             {open ? (
