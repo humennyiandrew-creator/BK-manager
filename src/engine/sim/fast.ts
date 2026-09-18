@@ -19,7 +19,7 @@ export const K = {
   toBase: 0.127,
   stealShare: 0.56,
   nsFoul: 0.085,
-  threeMul: 0.92,
+  threeMul: 0.86,
   base: { rim: 0.67, mid: 0.435, three: 0.316 },
   skill: { rim: 0.0065, mid: 0.006, three: 0.0036 },
   def: { rim: 0.004, mid: 0.003, three: 0.002 },

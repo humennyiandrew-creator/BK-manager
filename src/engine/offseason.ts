@@ -72,6 +72,15 @@ function recordSeason(s: GameState) {
     topScorer: top ? { id: top.id, ppg: +(top.season.pts / top.season.gp).toFixed(1) } : { id: '', ppg: 0 },
   };
   s.history.push(rec);
+  // Recognition feeds ratings: award winners carry confidence into next season.
+  const bump = (id: string | null, ovr: number, pot: number) => {
+    if (!id) return;
+    const r = s.players[id].ratings;
+    r.ovr = Math.min(99, r.ovr + ovr);
+    r.pot = Math.min(99, Math.max(r.ovr, r.pot + pot));
+  };
+  bump(awards.mvp, 1, 1); bump(awards.roy, 1, 2); bump(awards.mip, 1, 2); bump(awards.dpoy, 0, 1);
+  awards.allNba.slice(0, 5).forEach((id) => bump(id, 0, 1));
   const n = (id: string | null) => (id ? `${fullName(s.players[id])} (${s.teams[s.players[id].teamId!]?.abbr ?? 'FA'})` : '—');
   msg(s, 'League Office', `${s.season} awards`, `MVP: ${n(awards.mvp)}. DPOY: ${n(awards.dpoy)}. ROY: ${n(awards.roy)}. 6MOY: ${n(awards.sixth)}. MIP: ${n(awards.mip)}.`);
 }

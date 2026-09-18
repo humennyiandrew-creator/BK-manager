@@ -39,6 +39,8 @@ export interface Player {
   ovrHistory?: { season: string; ovr: number; pot: number }[];
   lastChange?: number;            // OVR change from last progression tick (UI arrows)
   prog?: number;                  // fractional OVR progress accumulator
+  form?: number;                  // performance vs rating expectation, −3..+3 (weekly)
+  potSeason?: number;             // POT change this season from performance (UI)
 }
 
 export interface Tactics {

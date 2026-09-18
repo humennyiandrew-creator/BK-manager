@@ -74,11 +74,47 @@ function applyDelta(p: Player, raw: number, focus: TrainingFocus, rng: Rng) {
 const IN_SEASON_SHARE = 0.35;
 const WEEKS = 26;
 
+// ---------- dynamic potential: performance vs expectation ----------
+
+/** Hollinger game score per 36 minutes. */
+function gmsc36(p: Player): number {
+  const l = p.season;
+  const g = l.pts + 0.4 * l.fgm - 0.7 * l.fga - 0.4 * (l.fta - l.ftm) + 0.7 * l.orb + 0.3 * l.drb + l.stl + 0.7 * l.ast + 0.7 * l.blk - 0.4 * l.pf - l.tov;
+  return (g / Math.max(1, l.min)) * 36;
+}
+
+/**
+ * Form = how far a player's production sits above/below what his OVR predicts (league regression, in SDs).
+ * Sample-size shrink: needs ~400 minutes before form counts fully.
+ */
+export function updateForm(s: GameState) {
+  const all = Object.values(s.players).filter((p) => p.teamId && p.season.min >= 150);
+  // Separate regressions for bigs and perimeter players: box-score value differs by role.
+  const isBig = (p: Player) => p.positions[0] === 'C' || p.positions[0] === 'PF';
+  for (const pool of [all.filter(isBig), all.filter((p) => !isBig(p))]) {
+    if (pool.length < 25) continue;
+    const xs = pool.map((p) => p.ratings.ovr), ys = pool.map(gmsc36);
+    const mx = xs.reduce((a, b) => a + b, 0) / xs.length, my = ys.reduce((a, b) => a + b, 0) / ys.length;
+    let sxy = 0, sxx = 0;
+    for (let i = 0; i < xs.length; i++) { sxy += (xs[i] - mx) * (ys[i] - my); sxx += (xs[i] - mx) ** 2; }
+    // Quadratic-ish: stars' production grows faster than linearly with OVR, so allow a steeper slope above mean.
+    const slope = sxy / Math.max(1, sxx);
+    const pred = (x: number) => my + slope * (x - mx) + Math.max(0, x - 85) ** 2 * slope * 0.08;
+    const resid = pool.map((p, i) => ys[i] - pred(xs[i]));
+    const sd = Math.sqrt(resid.reduce((a, r) => a + r * r, 0) / resid.length) || 1;
+    pool.forEach((p, i) => {
+      const w = p.season.min / (p.season.min + 400);
+      p.form = Math.max(-3, Math.min(3, +((resid[i] / sd) * w).toFixed(2)));
+    });
+  }
+}
+
 /** Weekly (every 7th day from Oct 1) development tick for every rostered player. */
 export function progressionDaily(s: GameState) {
   if (s.phase === 'offseason') return;
   const d = daysBetween(`${s.seasonYear}-10-01`, s.date);
   if (d <= 0 || d % 7 !== 0) return;
+  updateForm(s);
   const rng = mulberry32(hashString(`${s.seed}|prog|${s.date}`));
   const eff = new Map<string, ReturnType<typeof trainingEffects>>();
   for (const p of Object.values(s.players)) {
@@ -92,7 +128,17 @@ export function progressionDaily(s: GameState) {
     const work = 0.85 + p.ratings.personality.workEthic / 66;
     const base = annualExpected(age, p.ratings.ovr, p.ratings.pot) * IN_SEASON_SHARE / WEEKS;
     const growth = base > 0 ? base * e.growthMul * minutesMul * work : base / Math.max(0.8, e.growthMul * 0.5 + 0.5);
-    applyDelta(p, growth + gauss(rng) * 0.12, plan.individual[p.id] ?? plan.focus, rng);
+    // Performance feeds back: overperformers grow a little faster and raise their ceiling, flops the reverse.
+    const form = p.form ?? 0;
+    applyDelta(p, growth + form * 0.035 + gauss(rng) * 0.12, plan.individual[p.id] ?? plan.focus, rng);
+    const potStep = form * (age <= 25 ? 0.12 : 0.05);
+    const room = 6 - Math.abs(p.potSeason ?? 0); // max ±6 POT per season from form
+    if (Math.abs(potStep) > 0.01 && room > 0) {
+      const ceiling = age >= 27 ? p.ratings.ovr + 2 : 99; // veterans: potential ≈ current level
+      const next = Math.max(p.ratings.ovr, Math.min(ceiling, 99, p.ratings.pot + Math.sign(potStep) * Math.min(Math.abs(potStep), room)));
+      p.potSeason = (p.potSeason ?? 0) + (next - p.ratings.pot);
+      p.ratings.pot = +next.toFixed(2);
+    }
     // Morale: playing time vs role expectation, winning, heavy training grind.
     const expectMin = 12 + Math.max(0, p.ratings.ovr - 65) * 1.3;
     const target = 60 + Math.max(-25, Math.min(20, (mpg - expectMin) * 1.5)) - (e.fatigueMul - 1) * 40;
@@ -116,5 +162,7 @@ export function annualProgression(s: GameState) {
     // Potential drifts: young players' ceilings move, vets' pot converges to ovr.
     if (age <= 24) p.ratings.pot = Math.max(p.ratings.ovr, Math.min(99, Math.round(p.ratings.pot + gauss(rng) * 2)));
     else p.ratings.pot = Math.max(p.ratings.ovr, Math.round(p.ratings.pot - (p.ratings.pot - p.ratings.ovr) * 0.5));
+    p.potSeason = 0;
+    p.form = 0;
   }
 }

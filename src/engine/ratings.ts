@@ -156,7 +156,7 @@ const OVR_W: Record<Position, Partial<Record<Attr, number>>> = {
   SG: { threePoint: 3, midRange: 2, ballHandle: 2, perimeterD: 2.5, offIQ: 2, layup: 1.5, speed: 1.5, steal: 1.5, block: 0.4, postScoring: 0.4, offRebound: 0.4 },
   SF: { threePoint: 2.5, perimeterD: 2.5, helpD: 2, layup: 1.5, midRange: 1.5, offIQ: 2, defRebound: 1.2, strength: 1.2 },
   PF: { interiorD: 2, helpD: 2, defRebound: 2, strength: 2, closeShot: 2, threePoint: 1.5, postScoring: 1.5, block: 1.5, ballHandle: 0.6, vision: 0.7 },
-  C:  { interiorD: 3, block: 2.5, defRebound: 2.5, offRebound: 2, closeShot: 2.5, strength: 2, postScoring: 1.5, dunk: 1.5, threePoint: 0.5, ballHandle: 0.3, speed: 0.5, passing: 0.6 },
+  C:  { interiorD: 2, block: 1.5, defRebound: 1.8, offRebound: 1.2, closeShot: 2.5, strength: 1.5, postScoring: 1.8, dunk: 1.2, threePoint: 0.6, ballHandle: 0.5, speed: 0.5, passing: 0.9, offIQ: 1.5 },
 };
 
 // ---------- main ----------
@@ -217,7 +217,9 @@ export function buildRatings(players: RawPlayer[]): Map<string, PlayerRatings> {
     let ws = 0, wt = 0;
     for (const attr of ATTRS) { const w = OVR_W[pos][attr] ?? 1; ws += attrZ[attr] * w; wt += w; }
     const impactZ = hasStats ? (m.bpm - dist.bpm.mean) / dist.bpm.sd * blend + rook * (1 - blend) : rook;
-    return { p, age, a, m, rng, attrZ, rawOvr: 0.55 * (ws / wt) + 0.45 * impactZ };
+    // Coaches' trust (minutes) and offensive load (usage) are strong real-world signals of quality.
+    const role = hasStats ? (((m.mpg - dist.mpg.mean) / dist.mpg.sd) * 0.6 + ((m.usg - dist.usg.mean) / dist.usg.sd) * 0.4) * blend + rook * (1 - blend) : rook;
+    return { p, age, a, m, rng, attrZ, rawOvr: 0.45 * (ws / wt) + 0.35 * impactZ + 0.2 * role };
   });
 
   const ovrDist = zStats(pre.filter((r) => r.a.min >= 1500).map((r) => r.rawOvr));
