@@ -41,6 +41,7 @@ export interface Player {
   prog?: number;                  // fractional OVR progress accumulator
   form?: number;                  // performance vs rating expectation, −3..+3 (weekly)
   potSeason?: number;             // POT change this season from performance (UI)
+  minutesPromise?: { baselineMpg: number; checkDate: string; season: string }; // dynamic event follow-up
 }
 
 export interface Tactics {
@@ -99,8 +100,17 @@ export type Phase = 'preseason' | 'regular' | 'playin' | 'playoffs' | 'offseason
 
 export interface Message {
   id: number; date: string; from: string; subject: string; body: string; read: boolean;
-  kind: 'result' | 'injury' | 'board' | 'league' | 'trade' | 'finance' | 'staff' | 'draft' | 'other';
-  action?: { type: 'trade-offer'; offerId: number };
+  kind: 'result' | 'injury' | 'board' | 'league' | 'trade' | 'finance' | 'staff' | 'draft' | 'event' | 'other';
+  action?: { type: 'trade-offer'; offerId: number } | { type: 'event'; eventId: string };
+}
+
+export interface GameEvent {
+  id: string; date: string; type: string; title: string; body: string;
+  teamId: string; playerId?: string; staffId?: string;
+  meta?: Record<string, string>;                  // extra ids (e.g. a second player in a fight)
+  choices: { id: string; label: string; hint: string }[];
+  resolved?: { choiceId: string; outcome: string };
+  expires: string;
 }
 
 export interface GameState {
@@ -136,6 +146,9 @@ export interface GameState {
   offseason?: { stage: OffseasonStage; faDay: number; waitingPick?: string };
   history: SeasonRecord[];                 // one per completed season
   careerOver?: boolean;
+  // ---- dynamic events ----
+  events: GameEvent[];                     // pending + resolved log, newest first, kept to 60
+  offseasonEventStage?: string;            // last offseason stage an event was rolled for
 }
 
 export type OffseasonStage = 'draft' | 'resign' | 'fa' | 'camp';
@@ -176,6 +189,7 @@ export interface Finances {
   expense: Record<ExpenseCat, number>;     // this season
   monthly: { month: string; revenue: number; expense: number; cash: number }[];
   attendance: number[];                    // last home games, fraction of capacity
+  sponsorBonus?: number;                   // extra $/month from a long-term sponsor deal event
 }
 
 export type ObjectiveKind = 'title' | 'finals' | 'confFinals' | 'playoffs' | 'playin' | 'develop';

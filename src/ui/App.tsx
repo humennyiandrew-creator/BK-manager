@@ -1,8 +1,10 @@
+import { useEffect, useRef } from 'react';
 import { useUI, type TabId } from './store/useUI';
 import { useGame, useGameState } from './store/useGame';
 import TopBar from './components/TopBar';
 import TabBar from './components/TabBar';
 import InfoStrip from './components/InfoStrip';
+import EventModal from './components/EventModal';
 import StartMenuScreen from './screens/StartMenuScreen';
 import ChooseTeamScreen from './screens/ChooseTeamScreen';
 import MatchScreen from './screens/MatchScreen';
@@ -13,6 +15,7 @@ import { formatDate, formatMoney } from './format';
 import type { GameState } from '../engine/model';
 import { nextPick } from '../engine/draft';
 import { offseasonStageLabel } from '../engine/offseason';
+import { pendingUserEvent } from '../engine/events';
 import { seasonLabel } from '../engine/cba';
 import styles from './App.module.css';
 
@@ -56,7 +59,20 @@ function Shell() {
   const doContinue = useGame((g) => g.continue);
   const reset = useGame((g) => g.reset);
   const setView = useUI((s) => s.setView);
+  const activeEventId = useUI((s) => s.activeEventId);
+  const openEvent = useUI((s) => s.openEvent);
+  const closeEvent = useUI((s) => s.closeEvent);
   const Screen = SCREENS[tab];
+  const pending = s ? pendingUserEvent(s) : undefined;
+  const seenPendingId = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (pending && pending.id !== seenPendingId.current) {
+      seenPendingId.current = pending.id;
+      openEvent(pending.id);
+    }
+    if (!pending) seenPendingId.current = null;
+  }, [pending, openEvent]);
 
   if (!s) return null;
 
@@ -97,6 +113,7 @@ function Shell() {
         <InfoStrip nextGame={nextLabel} cash={formatMoney(s.finance.cash)} date={formatDate(s.date)} />
       </div>
       <TabBar active={tab} onSelect={setTab} badges={{ messages: unread }} />
+      {activeEventId && <EventModal s={s} eventId={activeEventId} onClose={closeEvent} />}
     </div>
   );
 }

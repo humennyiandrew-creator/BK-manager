@@ -88,6 +88,12 @@ export function financeDaily(s: GameState, playedToday: Game[]): void {
     f.revenue.merch += msDaily * 0.45;
     f.revenue.sponsors += msDaily * 0.55;
     f.cash += msDaily;
+
+    if (f.sponsorBonus) {
+      const bonusDaily = f.sponsorBonus / 30;
+      f.revenue.sponsors += bonusDaily;
+      f.cash += bonusDaily;
+    }
   }
 
   // (c) luxury tax, once, at regular season end

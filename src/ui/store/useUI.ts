@@ -26,16 +26,22 @@ interface UIState {
   view: AppView;
   tab: TabId;
   pendingSlot: number | null;
+  activeEventId: string | null;
   setView: (view: AppView) => void;
   setTab: (tab: TabId) => void;
   setPendingSlot: (slot: number | null) => void;
+  openEvent: (id: string) => void;
+  closeEvent: () => void;
 }
 
 export const useUI = create<UIState>((set) => ({
   view: 'startMenu',
   tab: 'home',
   pendingSlot: null,
+  activeEventId: null,
   setView: (view) => set({ view }),
   setTab: (tab) => set({ tab }),
-  setPendingSlot: (pendingSlot) => set({ pendingSlot })
+  setPendingSlot: (pendingSlot) => set({ pendingSlot }),
+  openEvent: (activeEventId) => set({ activeEventId }),
+  closeEvent: () => set({ activeEventId: null })
 }));

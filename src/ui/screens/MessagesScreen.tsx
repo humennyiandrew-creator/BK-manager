@@ -6,7 +6,7 @@ import { useTransfersNav } from '../store/useTransfersNav';
 import { respondToOffer } from '../../engine/trade';
 import type { Message } from '../../engine/model';
 import { formatDate } from '../format';
-import { IconStandings, IconStaff, IconBoard, IconCalendar, IconMessages } from '../components/tabIcons';
+import { IconStandings, IconStaff, IconBoard, IconCalendar, IconMessages, IconTransfers } from '../components/tabIcons';
 import styles from './MessagesScreen.module.css';
 
 const KIND_ICON: Record<Message['kind'], typeof IconMessages> = {
@@ -18,6 +18,7 @@ const KIND_ICON: Record<Message['kind'], typeof IconMessages> = {
   finance: IconBoard,
   staff: IconStaff,
   draft: IconCalendar,
+  event: IconTransfers,
   other: IconMessages
 };
 
@@ -81,19 +82,30 @@ export default function MessagesScreen() {
             <div className={styles.readingSubject}>{selected.subject}</div>
             <div className={styles.readingMeta}>From {selected.from} · {formatDate(selected.date)}</div>
             <div className={styles.readingBody}>{selected.body}</div>
-            {selected.action?.type === 'trade-offer' && (
-              <div className={styles.offerActions}>
-                {offerResult ? (
-                  <div className={styles.offerResult}>{offerResult}</div>
-                ) : (
-                  <>
-                    <button type="button" className={styles.acceptBtn} onClick={() => respond(selected.action!.offerId, true)}>Accept</button>
-                    <button type="button" className={styles.declineBtn} onClick={() => respond(selected.action!.offerId, false)}>Decline</button>
-                  </>
-                )}
-                <button type="button" className={styles.viewOfferBtn} onClick={viewOffer}>View offer</button>
-              </div>
-            )}
+            {selected.action?.type === 'trade-offer' && (() => {
+              const offerId = selected.action.offerId;
+              return (
+                <div className={styles.offerActions}>
+                  {offerResult ? (
+                    <div className={styles.offerResult}>{offerResult}</div>
+                  ) : (
+                    <>
+                      <button type="button" className={styles.acceptBtn} onClick={() => respond(offerId, true)}>Accept</button>
+                      <button type="button" className={styles.declineBtn} onClick={() => respond(offerId, false)}>Decline</button>
+                    </>
+                  )}
+                  <button type="button" className={styles.viewOfferBtn} onClick={viewOffer}>View offer</button>
+                </div>
+              );
+            })()}
+            {selected.action?.type === 'event' && (() => {
+              const eventId = selected.action.eventId;
+              return (
+                <div className={styles.offerActions}>
+                  <button type="button" className={styles.viewOfferBtn} onClick={() => useUI.getState().openEvent(eventId)}>Decide</button>
+                </div>
+              );
+            })()}
           </div>
         )}
       </Panel>

@@ -1,0 +1,174 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 9, 16, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  padding: 1.5rem 1.7rem;
+  width: 30rem;
+  max-width: calc(100vw - 3rem);
+  box-shadow: 0 0 0 1px rgba(227, 163, 46, 0.25), 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid var(--panel-border);
+  background: linear-gradient(180deg, rgba(227, 163, 46, 0.12), transparent);
+  margin: -1.5rem -1.7rem 0;
+  padding: 1rem 1.7rem 0.8rem;
+}
+
+.headerIcon {
+  width: 2.6rem;
+  height: 2.6rem;
+  flex-shrink: 0;
+  border-radius: var(--radius);
+  background: var(--panel-alt);
+  border: 1px solid #e3a32e;
+  color: #e3a32e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.headerIcon svg {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+.headerText {
+  min-width: 0;
+}
+
+.kicker {
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #e3a32e;
+}
+
+.title {
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.playerRow {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.playerFace {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--panel-border);
+}
+
+.playerName {
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.playerMeta {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.body {
+  font-size: 0.86rem;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.choices {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.choiceBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  text-align: left;
+  background: var(--panel-alt);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  padding: 0.6rem 0.8rem;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.choiceBtn:hover:not(:disabled) {
+  border-color: var(--cyan-dim);
+  background: rgba(25, 195, 214, 0.06);
+}
+
+.choiceBtn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.choiceLabel {
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.choiceHint {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.outcome {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  border-top: 1px solid var(--panel-border);
+  padding-top: 0.8rem;
+}
+
+.outcomeLabel {
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--cyan);
+}
+
+.outcomeText {
+  font-size: 0.84rem;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.doneBtn {
+  align-self: flex-end;
+  background: var(--cyan);
+  color: var(--bg);
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.45rem 1rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+}

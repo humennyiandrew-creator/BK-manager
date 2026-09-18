@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import type { GameState } from '../../engine/model';
 import { newGame } from '../../engine/world';
 import { continueGame, userGameToday } from '../../engine/season';
+import { pendingUserEvent } from '../../engine/events';
 import type { SaveData } from '../../types/bk';
 import { loadGame, saveGame } from '../saves';
 import { loadLeagueData } from '../loadData';
@@ -62,6 +63,7 @@ export const useGame = create<GameStore>((set, get) => ({
       set({ busy: false, loadError: 'Save from older version — start a new career' });
       return false;
     }
+    if (!loaded.events) loaded.events = [];
     set({ s: loaded, slot, rev: 0, busy: false });
     return true;
   },
@@ -75,6 +77,8 @@ export const useGame = create<GameStore>((set, get) => ({
   continue: () => {
     const { s, slot, busy } = get();
     if (!s || busy) return;
+    const pending = pendingUserEvent(s);
+    if (pending) { useUI.getState().openEvent(pending.id); return; }
     const today = userGameToday(s);
     if (today) {
       useMatch.getState().start(s, today);

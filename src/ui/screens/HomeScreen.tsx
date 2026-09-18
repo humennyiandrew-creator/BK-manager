@@ -8,6 +8,7 @@ import ProgressBar from '../components/ProgressBar';
 import { IconCalendar, IconTraining, IconStaff } from '../components/tabIcons';
 import { useGameState } from '../store/useGame';
 import { useUI } from '../store/useUI';
+import { formatDate } from '../format';
 import { useTransfersNav } from '../store/useTransfersNav';
 import {
   userTeam, topPlayers, playerRankOnTeam, conferenceRank, teamStrengthRank, seasonObjective,
@@ -119,6 +120,7 @@ function LastSeasonPanel({ s }: { s: GameState }) {
 
 export default function HomeScreen() {
   const s = useGameState();
+  const openEvent = useUI((u) => u.openEvent);
   const [conference, setConference] = useState<'East' | 'West'>(s ? userTeam(s).conference : 'East');
   if (!s) return null;
 
@@ -129,6 +131,7 @@ export default function HomeScreen() {
   const next = nextUserGame(s);
   const five = starters(s, s.userTeamId);
   const events = upcomingEvents(s);
+  const pendingEvents = s.events.filter((e) => !e.resolved && e.teamId === s.userTeamId);
 
   const rows = conferenceStandings(s, conference);
   const columns: DataTableColumn<StandingRow>[] = [
@@ -252,6 +255,19 @@ export default function HomeScreen() {
         </Panel>}
 
         <Panel title="Upcoming Events" className={styles.eventsPanel}>
+          {pendingEvents.length > 0 && (
+            <div className={styles.eventGroup}>
+              <div className={styles.eventGroupLabel}>Decision Needed</div>
+              {pendingEvents.map((ev) => (
+                <button key={ev.id} type="button" className={styles.pendingEventRow} onClick={() => openEvent(ev.id)}>
+                  <div className={styles.eventText}>
+                    <div className={styles.eventTitle}>{ev.title}</div>
+                    <div className={styles.eventSubtitle}>Decide by {formatDate(ev.expires)}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
           {events.map((group) => (
             <div key={group.group} className={styles.eventGroup}>
               <div className={styles.eventGroupLabel}>{group.group}</div>

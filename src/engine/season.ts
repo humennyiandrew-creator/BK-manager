@@ -8,6 +8,7 @@ import { dailyUpdate } from './daily';
 import { boardOnPhase } from './mgmt/board';
 import { trainingEffects } from './progression';
 import { offseasonStep } from './offseason';
+import { eventsDaily } from './events';
 
 // ---------- standings ----------
 
@@ -251,7 +252,7 @@ export function advanceDay(s: GameState, skipUserGame = false) {
 
 /** "Continue" button: play through to the next day the user has a game (stops at start of that day). */
 export function continueGame(s: GameState, maxDays = 60) {
-  if (s.phase === 'offseason') { offseasonStep(s); return; }
+  if (s.phase === 'offseason') { offseasonStep(s); eventsDaily(s); return; }
   if (userGameToday(s)) { advanceDay(s); return; }
   for (let i = 0; i < maxDays && (s.phase as Phase) !== 'offseason'; i++) {
     advanceDay(s);
