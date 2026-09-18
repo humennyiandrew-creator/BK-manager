@@ -6,6 +6,12 @@ import { refreshRotation } from './rotation';
 import { buildSchedule } from './schedule';
 import { autoTactics, defaultTactics } from './playbook/systems';
 import type { RawPlayer, Team } from './types';
+import { initStaff } from './mgmt/staff';
+import { initFacilities } from './mgmt/facilities';
+import { initFinances } from './mgmt/finance';
+import { initBoard } from './mgmt/board';
+import { defaultTraining } from './progression';
+import { initPicks } from './draft';
 
 export const MAX_STANDARD = 15;
 export const MAX_TWO_WAY = 3;
@@ -34,7 +40,8 @@ export function newGame(teams: Team[], raw: RawPlayer[], userTeamId: string, see
   const season = `${seasonYear}-${String((seasonYear + 1) % 100).padStart(2, '0')}`;
   const games = buildSchedule(Object.values(teamStates), seasonYear, seed, 1);
   const user = teamStates[userTeamId];
-  return {
+  const regularEnd = games.reduce((m, g) => (g.date > m ? g.date : m), '');
+  const s: GameState = {
     version: 1, seed, season, seasonYear, date: `${seasonYear}-10-01`, phase: 'preseason', userTeamId,
     teams: teamStates, players, games, series: [],
     messages: [{
@@ -43,7 +50,17 @@ export function newGame(teams: Team[], raw: RawPlayer[], userTeamId: string, see
       body: `The board welcomes you as head coach for the ${season} season. Opening night is ${games.find((g) => g.home === userTeamId || g.away === userTeamId)?.date}.`,
     }],
     nextId: games.length + 2,
+    staff: [], facilities: {}, finance: undefined as unknown as GameState['finance'], board: undefined as unknown as GameState['board'],
+    training: Object.fromEntries(teams.map((t) => [t.id, defaultTraining()])),
+    picks: [], tradeOffers: [], transactions: [], draftClass: [], draftOrder: [],
+    keyDates: { tradeDeadline: `${seasonYear + 1}-02-05`, regularEnd, draft: `${seasonYear + 1}-06-24`, freeAgency: `${seasonYear + 1}-06-30` },
   };
+  initStaff(s);
+  initFacilities(s);
+  initFinances(s);
+  initBoard(s);
+  initPicks(s);
+  return s;
 }
 
 /** Preseason camp rosters run 16–25. Keep 15 standard + 3 two-way, cut the rest to free agency. */

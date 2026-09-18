@@ -4,6 +4,9 @@ import { addDays } from './schedule';
 import { hashString, mulberry32 } from './rng';
 import { refreshRotation } from './rotation';
 import { simGame } from './sim/fast';
+import { dailyUpdate } from './daily';
+import { boardOnPhase } from './mgmt/board';
+import { trainingEffects } from './progression';
 
 // ---------- standings ----------
 
@@ -69,8 +72,8 @@ const INJURIES: [string, number, number, number][] = [
   ['Fractured foot', 2, 45, 100], ['Torn ACL', 1, 220, 320], ['Illness', 12, 1, 4],
 ];
 
-function rollInjury(p: Player, minutes: number, rng: () => number): boolean {
-  if (minutes <= 0 || rng() >= 0.0045 * (minutes / 36) * (0.4 + p.ratings.injuryProne)) return false;
+function rollInjury(p: Player, minutes: number, rng: () => number, mul = 1): boolean {
+  if (minutes <= 0 || rng() >= 0.0045 * mul * (minutes / 36) * (0.4 + p.ratings.injuryProne)) return false;
   let r = rng() * INJURIES.reduce((s, x) => s + x[1], 0);
   const inj = INJURIES.find((x) => (r -= x[1]) <= 0) ?? INJURIES[0];
   p.injury = { name: inj[0], daysLeft: Math.round(inj[2] + rng() * (inj[3] - inj[2])) };
@@ -84,10 +87,11 @@ function msg(s: GameState, from: string, subject: string, body: string, kind: Ga
 export function applyResult(s: GameState, g: Game, res: GameResult) {
   const rng = mulberry32(hashString(`${s.seed}|inj|${g.id}`));
   const isUser = g.home === s.userTeamId || g.away === s.userTeamId;
+  const injMul = { [g.home]: trainingEffects(s, g.home).injuryMul, [g.away]: trainingEffects(s, g.away).injuryMul };
   for (const b of [...res.box!.home, ...res.box!.away]) {
     const p = s.players[b.id];
     addLine(g.type === 'regular' ? p.season : p.playoffs, b);
-    if (rollInjury(p, b.min, rng)) {
+    if (rollInjury(p, b.min, rng, injMul[p.teamId!] ?? 1)) {
       refreshRotation(s.teams[p.teamId!], s.players);
       if (p.teamId === s.userTeamId) {
         msg(s, 'Medical Staff', `${p.firstName} ${p.lastName} injured`, `${p.injury!.name}. Expected out ${p.injury!.daysLeft} days.`, 'injury');
@@ -216,10 +220,14 @@ export const userGameToday = (s: GameState) =>
 export function advanceDay(s: GameState, skipUserGame = false) {
   if (s.phase === 'offseason') return;
   if (s.phase === 'preseason' && s.games.some((g) => g.date === s.date)) s.phase = 'regular';
+  const phaseBefore = s.phase;
+  const played: Game[] = [];
   for (const g of s.games) {
-    if (g.date !== s.date || g.result) continue;
+    if (g.date !== s.date) continue;
+    if (g.result) { played.push(g); continue; } // user's live game already applied today
     if (skipUserGame && (g.home === s.userTeamId || g.away === s.userTeamId)) continue;
     playGame(s, g);
+    played.push(g);
   }
   // Heal
   const healed = new Set<string>();
@@ -235,6 +243,8 @@ export function advanceDay(s: GameState, skipUserGame = false) {
 
   if (s.phase === 'regular' && s.games.every((g) => g.type !== 'regular' || g.result)) startPlayIn(s);
   if (s.phase === 'playin' || s.phase === 'playoffs') postseasonTick(s);
+  dailyUpdate(s, played);
+  if (s.phase !== phaseBefore) boardOnPhase(s);
   s.date = addDays(s.date, 1);
 }
 

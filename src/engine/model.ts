@@ -33,6 +33,12 @@ export interface Player {
   playoffs: StatLine;
   injury: Injury | null;
   morale: number;                 // 0–100
+  prospect?: boolean;             // draft prospect (not yet in league)
+  college?: string;
+  retired?: boolean;
+  ovrHistory?: { season: string; ovr: number; pot: number }[];
+  lastChange?: number;            // OVR change from last progression tick (UI arrows)
+  prog?: number;                  // fractional OVR progress accumulator
 }
 
 export interface Tactics {
@@ -52,6 +58,8 @@ export interface TeamState extends Team {
   minutes: Record<string, number>; // target minutes, sums ~240
   tactics: Tactics;
   customRotation?: boolean;        // user-set depth chart: injuries only shuffle, never rebuild
+  mleUsed?: boolean;               // mid-level exception used this season
+  deadCap?: { season: string; amount: number }[]; // waived salary still on the cap
 }
 
 export type GameType = 'regular' | 'playin' | 'playoff';
@@ -89,7 +97,8 @@ export type Phase = 'preseason' | 'regular' | 'playin' | 'playoffs' | 'offseason
 
 export interface Message {
   id: number; date: string; from: string; subject: string; body: string; read: boolean;
-  kind: 'result' | 'injury' | 'board' | 'league' | 'other';
+  kind: 'result' | 'injury' | 'board' | 'league' | 'trade' | 'finance' | 'staff' | 'draft' | 'other';
+  action?: { type: 'trade-offer'; offerId: number };
 }
 
 export interface GameState {
@@ -107,4 +116,81 @@ export interface GameState {
   champion?: string;
   messages: Message[];
   nextId: number;
+  // ---- M6 management ----
+  staff: Staff[];                          // all staff, teamId null = available to hire
+  facilities: Record<string, Record<FacilityId, Facility>>; // teamId → facilities
+  finance: Finances;                       // user team only
+  board: Board;                            // user team only
+  training: Record<string, TrainingPlan>;  // teamId → plan (AI teams use defaults)
+  picks: DraftPick[];
+  tradeOffers: TradeOffer[];               // pending offers to the user
+  transactions: Transaction[];             // league-wide log
+  draftClass: string[];                    // player ids of upcoming draft prospects (teamId null, prospect true)
+  draftOrder: string[];                    // pick ids in selection order once the lottery has run
+  keyDates: KeyDates;
+}
+
+// ---------- M6 types ----------
+
+export type StaffRole = 'assistantOff' | 'assistantDef' | 'development' | 'medical' | 'scout' | 'analytics';
+export interface Staff {
+  id: string; name: string; role: StaffRole;
+  rating: number;        // 1–100
+  age: number; salary: number; years: number;
+  teamId: string | null;
+}
+
+export type FacilityId = 'training' | 'medical' | 'arena' | 'scouting' | 'analytics';
+export interface Facility {
+  level: number;         // 1–5
+  upgrade?: { to: number; done: string; cost: number };
+}
+
+export type RevenueCat = 'tickets' | 'tv' | 'merch' | 'sponsors' | 'playoffs';
+export type ExpenseCat = 'salaries' | 'staff' | 'facilities' | 'tax' | 'operations';
+export interface Finances {
+  cash: number;
+  ticketPrice: number;                     // avg ticket, USD
+  revenue: Record<RevenueCat, number>;     // this season
+  expense: Record<ExpenseCat, number>;     // this season
+  monthly: { month: string; revenue: number; expense: number; cash: number }[];
+  attendance: number[];                    // last home games, fraction of capacity
+}
+
+export type ObjectiveKind = 'title' | 'finals' | 'confFinals' | 'playoffs' | 'playin' | 'develop';
+export interface Board {
+  confidence: number;                      // 0–100
+  objective: ObjectiveKind;
+  longTerm: string;
+  budgetMul: number;                       // 0.8–1.2 multiplier on staff/facility budgets, driven by confidence
+  history: { season: string; objective: ObjectiveKind; result: string; met: boolean }[];
+}
+
+export type TrainingFocus = 'balanced' | 'shooting' | 'finishing' | 'playmaking' | 'defense' | 'rebounding' | 'conditioning';
+export interface TrainingPlan {
+  intensity: number;                       // 1–5: growth vs fatigue/injury risk
+  focus: TrainingFocus;
+  individual: Record<string, TrainingFocus>; // playerId → personal focus
+}
+
+export interface DraftPick {
+  id: string;             // "2027-1-LAL"
+  year: number; round: 1 | 2;
+  original: string;       // teamId
+  owner: string;          // teamId
+}
+
+export interface TradeSide { players: string[]; picks: string[] }
+export interface TradeOffer {
+  id: number; date: string;
+  from: string; to: string;               // teamIds (to = user)
+  give: TradeSide;                        // what `from` sends
+  get: TradeSide;                         // what `from` receives
+  expires: string;
+}
+
+export interface Transaction { date: string; kind: 'trade' | 'sign' | 'release' | 'draft' | 'extend' | 'retire'; text: string; teams: string[] }
+
+export interface KeyDates {
+  tradeDeadline: string; regularEnd: string; draft: string; freeAgency: string;
 }
