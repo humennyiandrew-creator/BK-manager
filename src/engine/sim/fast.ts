@@ -7,6 +7,7 @@ import { available } from '../rotation';
 import { PLAY_BY_ID } from '../playbook/plays';
 import { SCHEMES, SYSTEMS } from '../playbook/systems';
 import type { Play, Role, ShotType } from '../playbook/types';
+import { defenseFit, lineupProfile, offenseFit, type DefFit, type OffFit, type Profile } from '../playbook/fit';
 
 export type { ShotType };
 export interface Rules { periods: number; periodSec: number; otSec: number; foulOut: number; bonusAt: number }
@@ -14,12 +15,12 @@ export const NBA_RULES: Rules = { periods: 4, periodSec: 720, otSec: 300, foulOu
 
 /** Tuning knobs — calibrated by src/engine/__tests__/calibration.test.ts. */
 export const K = {
-  possSec: 13.7,
-  toBase: 0.133,
+  possSec: 14.0,
+  toBase: 0.127,
   stealShare: 0.56,
   nsFoul: 0.085,
-  threeMul: 1.16,
-  base: { rim: 0.665, mid: 0.43, three: 0.322 },
+  threeMul: 0.92,
+  base: { rim: 0.67, mid: 0.435, three: 0.316 },
   skill: { rim: 0.0065, mid: 0.006, three: 0.0036 },
   def: { rim: 0.004, mid: 0.003, three: 0.002 },
   block: { rim: 0.095, mid: 0.025, three: 0.008 },
@@ -120,7 +121,39 @@ export function doSubs(s: Side, elapsed: number, total: number, ctx: SubCtx, rul
   sortCourt(s.court);
 }
 
+// ---------- tactic fit (cached per lineup + tactics) ----------
+
+interface OffC { ids: string[]; tac: string; prof: Profile; fit: OffFit }
+interface DefC { ids: string[]; opp: string[]; scheme: string; fit: DefFit }
+const offCache = new WeakMap<Side, OffC>();
+const defCache = new WeakMap<Side, DefC>();
+const sameCourt = (ids: string[], s: Side) => ids.length === s.court.length && s.court.every((x, i) => x.p.id === ids[i]);
+
+export function sideFit(s: Side): { prof: Profile; fit: OffFit } {
+  const t = s.team.tactics;
+  const tac = `${t.offense}|${t.threeFocus}|${t.crashGlass}|${t.pace}`;
+  let c = offCache.get(s);
+  const same = !!c && sameCourt(c.ids, s);
+  if (!c || !same || c.tac !== tac) {
+    const prof = same ? c!.prof : lineupProfile(s.court.map((x) => x.p));
+    c = { ids: s.court.map((x) => x.p.id), tac, prof, fit: offenseFit(prof, t) };
+    offCache.set(s, c);
+  }
+  return c;
+}
+
+export function schemeFit(def: Side, off: Side): DefFit {
+  let c = defCache.get(def);
+  if (!c || c.scheme !== def.team.tactics.defense || !sameCourt(c.ids, def) || !sameCourt(c.opp, off)) {
+    c = { ids: def.court.map((x) => x.p.id), opp: off.court.map((x) => x.p.id), scheme: def.team.tactics.defense,
+      fit: defenseFit(sideFit(def).prof, def.team.tactics.defense, sideFit(off).prof) };
+    defCache.set(def, c);
+  }
+  return c.fit;
+}
+
 export function tickEnergy(s: Side, sec: number, drainMul = 1) {
+  drainMul *= sideFit(s).fit.drainMul;
   for (const sp of s.roster) {
     if (s.court.includes(sp)) {
       sp.sec += sec;
@@ -166,7 +199,8 @@ function freeThrowEvents(sp: SP, n: number, rng: Rng): Ev[] {
 
 function reboundEvent(off: Side, def: Side, rng: Rng): Ev & { k: 'reb' } {
   const t = off.team.tactics;
-  const pOrb = K.orb + SCHEMES[def.team.tactics.defense].orbAllowed + (t.crashGlass - 50) * 0.0012
+  void t;
+  const pOrb = K.orb + SCHEMES[def.team.tactics.defense].orbAllowed + sideFit(off).fit.orbAdd
     + (avg(off.court, (x) => a(x).offRebound) - avg(def.court, (x) => a(x).defRebound)) * 0.004;
   if (rng() < pOrb) return { k: 'reb', by: pick(off.court, (x) => a(x).offRebound ** 2 * (posRank(x) + 2), rng), off: true };
   return { k: 'reb', by: rng() > 0.11 ? pick(def.court, (x) => a(x).defRebound ** 2 * (posRank(x) + 2), rng) : null, off: false };
@@ -197,7 +231,8 @@ export function decide(off: Side, def: Side, rng: Rng, rules: Rules, ctx: Decide
   const out = (events: Ev[], keep: boolean, transition: boolean, event: string): Outcome => ({ play, handler, events, keep, transition, event });
 
   // Turnover
-  const pTo = K.toBase * sys.toMul * sch.toMul
+  const of = sideFit(off).fit, df = schemeFit(def, off);
+  const pTo = K.toBase * sys.toMul * (1 + (sch.toMul - 1) * df.mul) * of.toMul
     * (1 + (62 - (a(handler).ballHandle + a(handler).passing) / 2) * 0.01)
     * (1 + (avg(def.court, (x) => a(x).steal) - 62) * 0.008);
   if (rng() < pTo) {
@@ -233,9 +268,11 @@ export function decide(off: Side, def: Side, rng: Rng, rules: Rules, ctx: Decide
     if (sp) optW.set(sp, (optW.get(sp) ?? 0) + o.weight / optTotal);
   }
   const boxed = def.team.tactics.defense === 'box1' ? focus : null;
+  const out3 = (t.threeFocus - 50) / 50;
+  const lean = (x: SP) => 1 + (out3 > 0 ? out3 * (a(x).threePoint - 62) : -out3 * ((a(x).layup + a(x).dunk + a(x).postScoring) / 3 - 62)) / 40;
   const shooter = fastBreak
     ? pick(off.court, (x) => usage(x) * (a(x).speed + 20), rng)
-    : pick(off.court, (x) => usage(x) * (1 + (optW.get(x) ?? 0) * 5 * K.playFocus) * (x === focus ? 1.25 : 1) * (x === boxed ? 0.65 : 1), rng);
+    : pick(off.court, (x) => usage(x) * (1 + (optW.get(x) ?? 0) * 5 * K.playFocus) * (x === focus ? 1.25 : 1) * (x === boxed ? 0.65 : 1) * lean(x), rng);
 
   let type: ShotType;
   const myOpts = play.options.filter((o) => optSp(o.role) === shooter);
@@ -250,10 +287,11 @@ export function decide(off: Side, def: Side, rng: Rng, rules: Rules, ctx: Decide
   const defender = def.court[off.court.indexOf(shooter)] ?? def.court[0];
   const protector = def.court.reduce((b, x) => (a(x).block + a(x).interiorD > a(b).block + a(b).interiorD ? x : b));
   const pts = type === 'three' ? 3 : 2;
-  const schemeD = type === 'rim' ? sch.rimD : type === 'mid' ? sch.midD : sch.threeD;
+  const schemeD = (type === 'rim' ? sch.rimD : type === 'mid' ? sch.midD : sch.threeD) * df.mul - df.leak;
   const playEdge = play.strongVs.includes(sch.id) ? K.playEdge : play.weakVs.includes(sch.id) ? -K.playEdge : 0;
   const edge = (off.home ? K.homeEdge : 0) + contextEdge(handler, def.court) + K.offIQ * (a(shooter).offIQ - 62)
-    - schemeD + (fastBreak ? (type === 'rim' ? K.breakBonus : 0.02) : playEdge) - (shooter === boxed ? 0.03 : 0);
+    - schemeD + (fastBreak ? (type === 'rim' ? K.breakBonus : 0.02) : playEdge) - (shooter === boxed ? 0.03 : 0)
+    + of.edge + (type === 'rim' ? of.rimEdge : type === 'three' ? of.threeEdge : 0);
   const pMake = shotProb(shooter, defender, protector, type, edge);
   const passers = off.court.filter((x) => x !== shooter);
   const assistBy = (): SP | null => (rng() < K.assist[type] * sys.assistMul
@@ -290,7 +328,7 @@ export function decide(off: Side, def: Side, rng: Rng, rules: Rules, ctx: Decide
   }
   const reb = reboundEvent(off, def, rng);
   return out([{ k: 'shot', by: shooter, type, made: false, defender, block: null, assist: null, fastBreak }, reb],
-    reb.off, !reb.off && rng() < 0.18, reb.off ? 'orb' : 'drb');
+    reb.off, !reb.off && rng() < 0.18 + of.oppTransition, reb.off ? 'orb' : 'drb');
 }
 
 // ---------- commit ----------

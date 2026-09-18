@@ -1,6 +1,7 @@
 // Offensive systems, defensive schemes, AI tactic picks.
 import type { Player, Tactics } from '../model';
 import type { DefScheme, OffSystem, SchemeDef, SystemDef } from './types';
+import { suggestTactics, teamProfile } from './fit';
 
 export const SYSTEMS: Record<OffSystem, SystemDef> = {
   motion: { id: 'motion', name: 'Motion', desc: 'Read-and-react ball movement. Rewards passing and IQ across the roster.',
@@ -49,26 +50,12 @@ export const defaultTactics = (): Tactics => ({
   offense: 'motion', defense: 'man', playWeights: {}, focusPlayer: null, clutchPlay: null,
 });
 
-/** AI coach picks a system that fits the roster. */
+/** AI coach picks the tactics that best fit the roster (same fit model the user sees). */
 export function autoTactics(t: Tactics, roster: Player[]) {
-  const top = [...roster].filter((p) => !p.injury).sort((a, b) => b.ratings.ovr - a.ratings.ovr).slice(0, 8);
-  if (!top.length) return;
-  const star = top[0];
-  const at = (p: Player) => p.ratings.attrs;
-  const avg = (f: (p: Player) => number, n = 8) => top.slice(0, n).reduce((s, p) => s + f(p), 0) / Math.min(n, top.length);
-  const big = star.positions[0] === 'C' || star.positions[0] === 'PF';
-
-  if (big && at(star).postScoring >= 78) t.offense = 'post';
-  else if (star.ratings.ovr >= 90 && star.ratings.tend.usage >= 0.3) t.offense = 'iso';
-  else if (avg((p) => at(p).threePoint) >= 70 && avg((p) => at(p).speed) >= 64) t.offense = 'seven';
-  else if (at(star).ballHandle >= 78 && at(star).passing >= 72) t.offense = 'pnr';
-  else t.offense = 'motion';
-
-  const rimProt = Math.max(...top.map((p) => at(p).block + at(p).interiorD));
-  if (rimProt >= 175) t.defense = 'drop';
-  else if (avg((p) => at(p).perimeterD, 5) >= 70) t.defense = 'switch';
-  else t.defense = 'man';
-
-  t.focusPlayer = star.id;
-  t.pace = 50 + SYSTEMS[t.offense].pace;
+  const healthy = roster.filter((p) => !p.injury);
+  if (healthy.length < 5) return;
+  const top = [...healthy].sort((a, b) => b.ratings.ovr - a.ratings.ovr);
+  const minutes = Object.fromEntries(top.map((p, i) => [p.id, Math.max(0, 36 - i * 3)]));
+  Object.assign(t, suggestTactics(teamProfile(healthy, minutes), t));
+  t.focusPlayer = top[0].id;
 }
