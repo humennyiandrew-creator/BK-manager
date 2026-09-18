@@ -25,13 +25,17 @@ export type AppView = 'startMenu' | 'chooseTeam' | 'shell';
 interface UIState {
   view: AppView;
   tab: TabId;
+  pendingSlot: number | null;
   setView: (view: AppView) => void;
   setTab: (tab: TabId) => void;
+  setPendingSlot: (slot: number | null) => void;
 }
 
 export const useUI = create<UIState>((set) => ({
   view: 'startMenu',
   tab: 'home',
+  pendingSlot: null,
   setView: (view) => set({ view }),
-  setTab: (tab) => set({ tab })
+  setTab: (tab) => set({ tab }),
+  setPendingSlot: (pendingSlot) => set({ pendingSlot })
 }));

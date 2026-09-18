@@ -34,6 +34,17 @@ export function autoMinutes(rotation: string[], players: Record<string, Player>)
 
 export function refreshRotation(team: TeamState, players: Record<string, Player>) {
   const roster = Object.values(players).filter((p) => p.teamId === team.id);
+  if (team.customRotation) {
+    // Keep the user's order; drop departed players, append new ones, injured to the back.
+    const ids = team.rotation.filter((id) => players[id]?.teamId === team.id);
+    for (const p of roster) if (!ids.includes(p.id)) ids.push(p.id);
+    team.rotation = [...ids.filter((id) => available(players[id])), ...ids.filter((id) => !available(players[id]))];
+    const mins = team.rotation.map((id) => (available(players[id]) ? team.minutes[id] ?? 0 : 0));
+    const sum = mins.reduce((x, m) => x + m, 0);
+    team.minutes = Object.fromEntries(team.rotation.map((id, i) => [id, sum > 0 ? Math.round((mins[i] * 240) / sum) : 0]));
+    if (sum === 0) team.minutes = autoMinutes(team.rotation, players);
+    return;
+  }
   team.rotation = autoRotation(roster);
   team.minutes = autoMinutes(team.rotation, players);
 }

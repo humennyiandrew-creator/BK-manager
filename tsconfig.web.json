@@ -11,7 +11,11 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@data/*": ["data/*"]
+    }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx"]
 }

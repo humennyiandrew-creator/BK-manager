@@ -51,6 +51,7 @@ export interface TeamState extends Team {
   rotation: string[];              // depth chart, [0..4] starters
   minutes: Record<string, number>; // target minutes, sums ~240
   tactics: Tactics;
+  customRotation?: boolean;        // user-set depth chart: injuries only shuffle, never rebuild
 }
 
 export type GameType = 'regular' | 'playin' | 'playoff';

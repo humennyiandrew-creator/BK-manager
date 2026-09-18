@@ -2,6 +2,7 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import { join } from 'node:path';
 import { registerBkDataSchemePrivileged, registerBkDataProtocol } from './protocol';
 import { saveGame, loadGame, listSaves, deleteSave, type SaveData } from './saves';
+import { runDevShots } from './devshot';
 
 registerBkDataSchemePrivileged();
 
@@ -14,12 +15,14 @@ function createWindow(): void {
     backgroundColor: '#0b0f1a',
     autoHideMenuBar: true,
     webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
+      preload: join(__dirname, '../preload/index.mjs'),
+      sandbox: false,
       contextIsolation: true,
       nodeIntegration: false
     }
   });
 
+  runDevShots(win);
   const devServerUrl = process.env.ELECTRON_RENDERER_URL;
   if (devServerUrl) {
     win.loadURL(devServerUrl);

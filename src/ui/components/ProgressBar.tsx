@@ -1,6 +1,6 @@
 import styles from './ProgressBar.module.css';
 
-type Variant = 'cyan' | 'positive' | 'negative';
+type Variant = 'cyan' | 'positive' | 'negative' | 'muted';
 
 interface Props {
   value: number;
@@ -12,7 +12,8 @@ interface Props {
 const variantColor: Record<Variant, string> = {
   cyan: 'var(--cyan)',
   positive: 'var(--positive)',
-  negative: 'var(--negative)'
+  negative: 'var(--negative)',
+  muted: 'var(--text-muted)'
 };
 
 export default function ProgressBar({ value, max = 100, variant = 'cyan', className }: Props) {

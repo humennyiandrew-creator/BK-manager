@@ -1,0 +1,108 @@
+.wrap {
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr 20rem;
+  gap: var(--gap);
+  padding: 0 1.4rem 1rem;
+}
+
+.tablePanel {
+  min-height: 0;
+}
+
+.barPanel {
+  min-height: 0;
+}
+
+.noSalary {
+  color: var(--text-dim);
+}
+
+.optionPlayer {
+  color: #f5a623;
+  background: rgba(245, 166, 35, 0.12);
+  border-radius: var(--radius);
+  padding: 0.05rem 0.3rem;
+}
+
+.optionTeam {
+  color: var(--cyan);
+  background: rgba(25, 195, 214, 0.12);
+  border-radius: var(--radius);
+  padding: 0.05rem 0.3rem;
+}
+
+.totalsRow {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1.4rem;
+  padding: 0.6rem 0.9rem;
+  border-top: 1px solid var(--panel-border);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.totalsLabel {
+  margin-right: auto;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  font-size: 0.65rem;
+  letter-spacing: 0.05em;
+}
+
+.totalsValue {
+  min-width: 4.5rem;
+  text-align: right;
+  color: var(--cyan);
+}
+
+.barTrack {
+  position: relative;
+  height: 1.4rem;
+  background: var(--panel-alt);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  margin: 0.6rem 0 2rem;
+}
+
+.barFill {
+  height: 100%;
+  background: var(--cyan);
+  border-radius: var(--radius);
+}
+
+.barLine {
+  position: absolute;
+  top: 0;
+  bottom: -1.4rem;
+  width: 1px;
+  background: var(--text-dim);
+}
+
+.barLineLabel {
+  position: absolute;
+  top: 1.6rem;
+  left: 0.2rem;
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+  transform: rotate(0deg);
+}
+
+.barLegend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.legendKeys {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.8rem;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}

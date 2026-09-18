@@ -79,7 +79,27 @@
   background: #29d4e6;
 }
 
+.continue:disabled {
+  opacity: 0.75;
+  cursor: default;
+}
+
 .chevron {
   font-size: 1rem;
   line-height: 1;
+}
+
+.spinner {
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 50%;
+  border: 2px solid rgba(5, 34, 38, 0.35);
+  border-top-color: #052226;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }

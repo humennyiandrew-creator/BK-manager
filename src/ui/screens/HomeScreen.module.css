@@ -216,3 +216,63 @@
   flex-shrink: 0;
   font-size: 0.9rem;
 }
+
+.startersList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.starterRow {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.starterFace {
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--panel-alt);
+}
+
+.starterInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.starterName {
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.starterMeta {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+.staminaWrap {
+  width: 4rem;
+  flex-shrink: 0;
+}
+
+.injuryChip {
+  flex-shrink: 0;
+  font-size: 0.62rem;
+  color: var(--negative);
+  background: rgba(255, 77, 94, 0.12);
+  border: 1px solid var(--negative);
+  border-radius: var(--radius);
+  padding: 0.15rem 0.4rem;
+  max-width: 6rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

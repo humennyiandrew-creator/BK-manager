@@ -23,6 +23,16 @@ export default defineConfig({
   },
   renderer: {
     root: 'src',
+    resolve: {
+      alias: {
+        '@data': resolve(__dirname, 'data')
+      }
+    },
+    server: {
+      fs: {
+        allow: [resolve(__dirname)]
+      }
+    },
     build: {
       outDir: 'out/renderer',
       rollupOptions: {

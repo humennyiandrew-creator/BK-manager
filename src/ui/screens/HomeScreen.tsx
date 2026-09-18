@@ -5,78 +5,78 @@ import DataTable, { type DataTableColumn } from '../components/DataTable';
 import TeamBadge from '../components/TeamBadge';
 import BkImage from '../components/BkImage';
 import ProgressBar from '../components/ProgressBar';
-import { IconCalendar, IconTraining, IconStaff, IconFinances, IconDraft } from '../components/tabIcons';
+import { IconCalendar, IconTraining, IconStaff } from '../components/tabIcons';
+import { useGameState } from '../store/useGame';
 import {
-  userTeam,
-  nextOpponent,
-  boardConfidence,
-  seasonObjective,
-  longTermObjective,
-  starPlayers,
-  standingsWest,
-  standingsEast,
-  daysUntilNextGame,
-  upcomingEvents,
-  type FakeStandingRow,
-  type FakeEvent
-} from '../data/fakeData';
+  userTeam, topPlayers, playerRankOnTeam, conferenceRank, teamStrengthRank, seasonObjective,
+  conferenceStandings, nextUserGame, opponentOf, daysUntil, lastMeeting, teamRecord, starters,
+  upcomingEvents, type UpcomingEvent
+} from '../selectors';
+import type { Player } from '../../engine/model';
+import type { StandingRow } from '../../engine/season';
 import styles from './HomeScreen.module.css';
 
-const eventIcon: Record<FakeEvent['icon'], typeof IconCalendar> = {
+const eventIcon: Record<UpcomingEvent['icon'], typeof IconCalendar> = {
   game: IconCalendar,
-  training: IconTraining,
-  meeting: IconStaff,
-  contract: IconFinances,
-  scouting: IconDraft
+  injury: IconStaff,
+  league: IconTraining
 };
 
-const standingsColumns: DataTableColumn<FakeStandingRow>[] = [
-  { key: 'rank', header: '#', render: (r) => r.rank },
-  { key: 'team', header: 'Team', render: (r) => <TeamBadge logoPath={r.team.logo} name={r.team.abbr} /> },
-  { key: 'w', header: 'W', align: 'right', render: (r) => r.wins },
-  { key: 'l', header: 'L', align: 'right', render: (r) => r.losses },
-  { key: 'gb', header: 'GB', align: 'right', render: (r) => r.gb },
-  { key: 'streak', header: 'Streak', align: 'right', render: (r) => r.streak }
-];
-
 export default function HomeScreen() {
-  const [conference, setConference] = useState<'East' | 'West'>('West');
-  const standings = conference === 'West' ? standingsWest : standingsEast;
-  const userRow = standings.find((r) => r.isUser);
+  const s = useGameState();
+  const [conference, setConference] = useState<'East' | 'West'>('East');
+  if (!s) return null;
+
+  const team = userTeam(s);
+  const rank = conferenceRank(s);
+  const strengthRank = teamStrengthRank(s, s.userTeamId);
+  const top2 = topPlayers(s, s.userTeamId, 2);
+  const next = nextUserGame(s);
+  const five = starters(s, s.userTeamId);
+  const events = upcomingEvents(s);
+
+  const rows = conferenceStandings(s, conference);
+  const columns: DataTableColumn<StandingRow>[] = [
+    { key: 'rank', header: '#', render: (r) => rows.findIndex((x) => x.teamId === r.teamId) + 1 },
+    { key: 'team', header: 'Team', render: (r) => <TeamBadge logoPath={s.teams[r.teamId].logo} name={s.teams[r.teamId].abbr} /> },
+    { key: 'w', header: 'W', align: 'right', render: (r) => r.w },
+    { key: 'l', header: 'L', align: 'right', render: (r) => r.l },
+    { key: 'gb', header: 'GB', align: 'right', render: (r) => (r.gb ? r.gb.toFixed(1) : '-') },
+    { key: 'streak', header: 'Streak', align: 'right', render: (r) => (r.streak === 0 ? '-' : `${r.streak > 0 ? 'W' : 'L'}${Math.abs(r.streak)}`) }
+  ];
 
   return (
     <div className={styles.grid}>
       <div className={styles.col}>
         <Panel title="Board">
           <div className={styles.boardTeam}>
-            <BkImage path={userTeam.logo} alt={userTeam.name} className={styles.boardLogo} />
-            <span className={styles.boardTeamName}>{userTeam.name}</span>
+            <BkImage path={team.logo} alt={team.name} className={styles.boardLogo} />
+            <span className={styles.boardTeamName}>{team.city} {team.name}</span>
           </div>
           <div className={styles.confidenceLabel}>
-            <span>Board Confidence</span>
-            <span>{boardConfidence}%</span>
+            <span>Conference Rank</span>
+            <span>#{rank || '-'}</span>
           </div>
-          <ProgressBar value={boardConfidence} variant="cyan" />
+          <ProgressBar value={Math.max(0, 16 - rank)} max={15} variant="cyan" />
           <div className={styles.objective}>
             <span className={styles.objectiveLabel}>Season Objective</span>
-            <span className={styles.objectiveValue}>{seasonObjective}</span>
+            <span className={styles.objectiveValue}>{seasonObjective(strengthRank)}</span>
           </div>
           <div className={styles.objective}>
-            <span className={styles.objectiveLabel}>Long-Term Objective</span>
-            <span className={styles.objectiveValue}>{longTermObjective}</span>
+            <span className={styles.objectiveLabel}>League Strength Rank</span>
+            <span className={styles.objectiveValue}>#{strengthRank} of 30</span>
           </div>
         </Panel>
 
         <div className={styles.playerRow}>
-          {starPlayers.map((p) => (
+          {top2.map((p) => (
             <PlayerCard
               key={p.id}
-              rank={p.rank}
-              rankTrend={p.rankTrend}
+              rank={playerRankOnTeam(s, p)}
               facePath={p.face}
               firstName={p.firstName}
               lastName={p.lastName}
-              subtitle={`${p.position} · ${p.overall} OVR`}
+              subtitle={`${p.positions[0]} · ${p.ratings.ovr} OVR`}
             />
           ))}
         </div>
@@ -102,29 +102,62 @@ export default function HomeScreen() {
             </div>
           }
         >
-          <DataTable columns={standingsColumns} rows={standings} rowKey={(r) => r.team.id} highlightedRowKey={userRow?.team.id} compact />
+          <DataTable columns={columns} rows={rows} rowKey={(r) => r.teamId} highlightedRowKey={s.userTeamId} compact />
         </Panel>
 
         <Panel title="Next Opponent">
-          <div className={styles.opponentBody}>
-            <BkImage path={nextOpponent.logo} alt={nextOpponent.name} className={styles.opponentLogo} />
-            <div className={styles.opponentInfo}>
-              <div className={styles.opponentName}>{nextOpponent.name}</div>
-              <div className={styles.opponentMeta}>
-                {nextOpponent.wins}-{nextOpponent.losses} record this season
+          {!next && <div className={styles.objectiveValue}>Season complete</div>}
+          {next && (() => {
+            const opp = opponentOf(s, next);
+            const [w, l] = teamRecord(s, opp.id);
+            const d = daysUntil(s, next.date);
+            const last = lastMeeting(s, opp.id);
+            return (
+              <div className={styles.opponentBody}>
+                <BkImage path={opp.logo} alt={opp.name} className={styles.opponentLogo} />
+                <div className={styles.opponentInfo}>
+                  <div className={styles.opponentName}>{opp.city} {opp.name}</div>
+                  <div className={styles.opponentMeta}>{w}-{l} record this season</div>
+                  {last && (
+                    <div className={styles.opponentMeta}>
+                      Last meeting: {last.result!.home}-{last.result!.away} ({last.home === s.userTeamId ? 'W' : 'A'})
+                    </div>
+                  )}
+                </div>
+                <div className={styles.countdown}>
+                  <span className={styles.countdownNum}>{d <= 0 ? 'Today' : d}</span>
+                  {d > 0 && <span className={styles.countdownLabel}>Days</span>}
+                </div>
               </div>
-            </div>
-            <div className={styles.countdown}>
-              <span className={styles.countdownNum}>{daysUntilNextGame}</span>
-              <span className={styles.countdownLabel}>Days</span>
-            </div>
-          </div>
+            );
+          })()}
         </Panel>
       </div>
 
       <div className={styles.col}>
+        <Panel title="Starting Five">
+          <div className={styles.startersList}>
+            {five.map((p: Player) => (
+              <div key={p.id} className={styles.starterRow}>
+                <BkImage path={p.face} alt={p.lastName} className={styles.starterFace} />
+                <div className={styles.starterInfo}>
+                  <span className={styles.starterName}>{p.firstName[0]}. {p.lastName}</span>
+                  <span className={styles.starterMeta}>{p.positions[0]} · {p.ratings.ovr} OVR</span>
+                </div>
+                {p.injury ? (
+                  <span className={styles.injuryChip}>{p.injury.name}</span>
+                ) : (
+                  <div className={styles.staminaWrap}>
+                    <ProgressBar value={p.ratings.attrs.stamina} variant="cyan" />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </Panel>
+
         <Panel title="Upcoming Events" className={styles.eventsPanel}>
-          {upcomingEvents.map((group) => (
+          {events.map((group) => (
             <div key={group.group} className={styles.eventGroup}>
               <div className={styles.eventGroupLabel}>{group.group}</div>
               {group.events.map((ev) => {
@@ -138,9 +171,6 @@ export default function HomeScreen() {
                       <div className={styles.eventTitle}>{ev.title}</div>
                       <div className={styles.eventSubtitle}>{ev.subtitle}</div>
                     </div>
-                    <button type="button" className={styles.eventOpen} aria-label="Open">
-                      &#8250;
-                    </button>
                   </div>
                 );
               })}
