@@ -1,0 +1,9 @@
+.wrap {
+  height: 100%;
+  min-height: 0;
+}
+
+.inner {
+  height: 100%;
+  min-height: 0;
+}

@@ -41,4 +41,5 @@
   top: 0;
   bottom: 0;
   border-radius: 1px;
+  transition: left var(--dur) var(--ease-out), width var(--dur) var(--ease-out), background var(--dur) var(--ease-out);
 }

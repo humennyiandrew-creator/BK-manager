@@ -60,6 +60,7 @@ export default function TabBar({ active, onSelect, badges }: Props) {
             type="button"
             className={id === active ? `${styles.tab} ${styles.active}` : styles.tab}
             onClick={() => onSelect(id)}
+            data-sound-hover
           >
             {badge != null && badge > 0 && <span className={styles.badge}>{badge}</span>}
             <Icon />

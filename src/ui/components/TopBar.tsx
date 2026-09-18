@@ -21,7 +21,13 @@ export default function TopBar({ title, subtitle, onContinue, continueLabel = 'C
         {subtitle && <span className={styles.subtitle}>{subtitle}</span>}
       </div>
       {onContinue && (
-        <button type="button" className={styles.continue} onClick={onContinue} disabled={busy}>
+        <button
+          type="button"
+          className={busy ? `${styles.continue} ${styles.busy}` : styles.continue}
+          onClick={onContinue}
+          disabled={busy}
+          data-sound="confirm"
+        >
           {busy && <span className={styles.spinner} />}
           <span>{busy ? 'Simulating…' : continueLabel}</span>
           {!busy && <span className={styles.chevron}>&#10148;</span>}

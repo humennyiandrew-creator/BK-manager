@@ -1,23 +1,55 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef, type CSSProperties } from 'react';
 import { useUI, type TabId } from './store/useUI';
 import { useGame, useGameState } from './store/useGame';
 import TopBar from './components/TopBar';
 import TabBar from './components/TabBar';
 import InfoStrip from './components/InfoStrip';
 import EventModal from './components/EventModal';
+import ScreenTransition from './components/ScreenTransition';
+import Toasts from './components/Toasts';
 import StartMenuScreen from './screens/StartMenuScreen';
 import ChooseTeamScreen from './screens/ChooseTeamScreen';
 import MatchScreen from './screens/MatchScreen';
 import CareerSummary from './screens/CareerSummary';
 import { SCREENS } from './screens';
 import { userGameToday, nextUserGame, opponentOf, daysUntil, userTeam } from './selectors';
-import { formatDate, formatMoney } from './format';
+import { formatDate } from './format';
 import type { GameState } from '../engine/model';
 import { nextPick } from '../engine/draft';
 import { offseasonStageLabel } from '../engine/offseason';
 import { pendingUserEvent } from '../engine/events';
 import { seasonLabel } from '../engine/cba';
+import { computeAccent } from './accent';
+import { play } from './sound';
 import styles from './App.module.css';
+
+/** Delegated button-sound listener, mounted once at the app root. */
+function useButtonSounds() {
+  useEffect(() => {
+    let lastHover = 0;
+    const onPointerDown = (e: PointerEvent) => {
+      const target = (e.target as HTMLElement)?.closest?.('button, [role="button"]') as HTMLElement | null;
+      if (!target) return;
+      const mode = target.dataset.sound;
+      if (mode === 'none') return;
+      play(mode === 'confirm' ? 'confirm' : 'click');
+    };
+    const onPointerOver = (e: PointerEvent) => {
+      const target = (e.target as HTMLElement)?.closest?.('[data-sound-hover]') as HTMLElement | null;
+      if (!target) return;
+      const now = performance.now();
+      if (now - lastHover < 120) return;
+      lastHover = now;
+      play('hover');
+    };
+    window.addEventListener('pointerdown', onPointerDown);
+    window.addEventListener('pointerover', onPointerOver);
+    return () => {
+      window.removeEventListener('pointerdown', onPointerDown);
+      window.removeEventListener('pointerover', onPointerOver);
+    };
+  }, []);
+}
 
 /** Continue button label while s.phase === 'offseason'. */
 function offseasonContinueLabel(s: GameState): string {
@@ -74,6 +106,12 @@ function Shell() {
     if (!pending) seenPendingId.current = null;
   }, [pending, openEvent]);
 
+  const team = s ? userTeam(s) : null;
+  const accent = useMemo(
+    () => computeAccent(team?.colors.primary, team?.colors.secondary),
+    [team?.colors.primary, team?.colors.secondary]
+  );
+
   if (!s) return null;
 
   if (s.careerOver) {
@@ -97,8 +135,14 @@ function Shell() {
   const continueLabel = today ? 'Play Match' : s.phase === 'offseason' ? offseasonContinueLabel(s) : 'Continue';
   const unread = s.messages.filter((m) => !m.read).length;
 
+  const accentStyle = {
+    '--accent': accent.accent,
+    '--accent-2': accent.accent2,
+    '--accent-contrast': accent.accentContrast
+  } as CSSProperties;
+
   return (
-    <div className={styles.shell}>
+    <div className={styles.shell} style={accentStyle}>
       <TopBar
         title={homeTitle}
         subtitle={subtitle}
@@ -107,10 +151,12 @@ function Shell() {
         busy={busy}
       />
       <div className={styles.content}>
-        <Screen />
+        <ScreenTransition tabKey={tab}>
+          <Screen />
+        </ScreenTransition>
       </div>
       <div className={styles.infoRow}>
-        <InfoStrip nextGame={nextLabel} cash={formatMoney(s.finance.cash)} date={formatDate(s.date)} />
+        <InfoStrip nextGame={nextLabel} cash={s.finance.cash} date={formatDate(s.date)} />
       </div>
       <TabBar active={tab} onSelect={setTab} badges={{ messages: unread }} />
       {activeEventId && <EventModal s={s} eventId={activeEventId} onClose={closeEvent} />}
@@ -120,9 +166,15 @@ function Shell() {
 
 export default function App() {
   const view = useUI((s) => s.view);
+  useButtonSounds();
 
-  if (view === 'startMenu') return <StartMenuScreen />;
-  if (view === 'chooseTeam') return <ChooseTeamScreen />;
-  if (view === 'match') return <MatchScreen />;
-  return <Shell />;
+  return (
+    <>
+      {view === 'startMenu' && <StartMenuScreen />}
+      {view === 'chooseTeam' && <ChooseTeamScreen />}
+      {view === 'match' && <MatchScreen />}
+      {view === 'shell' && <Shell />}
+      <Toasts />
+    </>
+  );
 }

@@ -14,6 +14,9 @@
   --cyan: #19c3d6;
   --cyan-dim: #0f7c8a;
   --red: #c8102e;
+  --accent: var(--cyan);
+  --accent-2: var(--cyan-dim);
+  --accent-contrast: #052226;
   --text: #ffffff;
   --text-muted: #8a93a8;
   --text-dim: #5b6478;

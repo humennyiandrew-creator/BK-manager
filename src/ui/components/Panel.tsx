@@ -5,13 +5,14 @@ interface Props {
   title: string;
   headerRight?: ReactNode;
   flush?: boolean;
+  reveal?: boolean;
   className?: string;
   children: ReactNode;
 }
 
-export default function Panel({ title, headerRight, flush, className, children }: Props) {
+export default function Panel({ title, headerRight, flush, reveal, className, children }: Props) {
   return (
-    <section className={`${styles.panel} ${className ?? ''}`}>
+    <section className={`${styles.panel} ${reveal ? 'fade-in slide-up' : ''} ${className ?? ''}`}>
       <div className={styles.head}>
         <span className={styles.title}>{title}</span>
         {headerRight}

@@ -1,6 +1,10 @@
 .wrap {
   height: 100%;
   padding: 0 1.4rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow-y: auto;
 }
 
 .panel {
@@ -31,7 +35,7 @@
 
 .phase {
   text-transform: capitalize;
-  color: var(--cyan);
+  color: var(--accent);
 }
 
 .actions {
@@ -53,8 +57,8 @@
 }
 
 .btn:hover {
-  border-color: var(--cyan);
-  color: var(--cyan);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .btnDanger:hover {
@@ -66,4 +70,49 @@
   margin-top: 0.8rem;
   color: var(--positive);
   font-size: 0.78rem;
+}
+
+.sliderRow,
+.toggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-bottom: 0.7rem;
+}
+
+.sliderRow input[type='range'] {
+  flex: 1;
+  max-width: 12rem;
+  accent-color: var(--accent);
+}
+
+.toggleRow input[type='checkbox'] {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--accent);
+}
+
+.testRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+
+.testBtn {
+  background: var(--panel-alt);
+  border: 1px solid var(--panel-border);
+  color: var(--text-muted);
+  border-radius: var(--radius);
+  padding: 0.35rem 0.6rem;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  transition: border-color var(--dur) var(--ease-out), color var(--dur) var(--ease-out);
+}
+
+.testBtn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }

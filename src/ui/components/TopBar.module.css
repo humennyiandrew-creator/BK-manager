@@ -38,7 +38,7 @@
 }
 
 .helpKey {
-  color: var(--cyan);
+  color: var(--accent);
 }
 
 .subtitle {
@@ -51,8 +51,8 @@
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  background: var(--cyan);
-  color: #052226;
+  background: var(--accent);
+  color: var(--accent-contrast);
   border: none;
   border-radius: var(--radius);
   padding: 0.7rem 1.4rem;
@@ -61,6 +61,7 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
   overflow: hidden;
+  transition: transform var(--dur-fast) var(--ease-out), filter var(--dur) var(--ease-out);
 }
 
 .continue::before {
@@ -75,13 +76,33 @@
   pointer-events: none;
 }
 
-.continue:hover {
-  background: #29d4e6;
+.continue:hover:not(:disabled) {
+  filter: brightness(1.12);
+}
+
+.continue:active:not(:disabled) {
+  transform: scale(0.97);
 }
 
 .continue:disabled {
   opacity: 0.75;
   cursor: default;
+}
+
+.busy::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, 0.4) 50%, transparent 80%);
+  transform: translateX(-120%);
+  animation: continueSweep 1.1s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes continueSweep {
+  to {
+    transform: translateX(120%);
+  }
 }
 
 .chevron {
@@ -94,7 +115,7 @@
   height: 0.9rem;
   border-radius: 50%;
   border: 2px solid rgba(5, 34, 38, 0.35);
-  border-top-color: #052226;
+  border-top-color: var(--accent-contrast);
   animation: spin 0.7s linear infinite;
 }
 

@@ -2,8 +2,12 @@ import { useState } from 'react';
 import Panel from '../components/Panel';
 import { useGame, useGameState } from '../store/useGame';
 import { useUI } from '../store/useUI';
+import { useAudioSettings, play, type SoundName } from '../sound';
+import { useDisplaySettings } from '../store/useDisplaySettings';
 import { formatDate } from '../format';
 import styles from './SettingsScreen.module.css';
+
+const TEST_SOUNDS: SoundName[] = ['click', 'confirm', 'error', 'swish', 'whistle', 'buzzer'];
 
 export default function SettingsScreen() {
   const s = useGameState();
@@ -12,6 +16,8 @@ export default function SettingsScreen() {
   const reset = useGame((g) => g.reset);
   const setView = useUI((v) => v.setView);
   const [status, setStatus] = useState<string | null>(null);
+  const audio = useAudioSettings();
+  const display = useDisplaySettings();
 
   if (!s) return null;
   const team = s.teams[s.userTeamId];
@@ -43,6 +49,65 @@ export default function SettingsScreen() {
           <button type="button" className={`${styles.btn} ${styles.btnDanger}`} onClick={saveAndQuit}>Save &amp; Quit to Menu</button>
         </div>
         {status && <div className={styles.status}>{status}</div>}
+      </Panel>
+
+      <Panel title="Audio" className={styles.panel}>
+        <label className={styles.sliderRow}>
+          <span className={styles.label}>Master</span>
+          <input
+            type="range" min={0} max={1} step={0.01}
+            value={audio.master}
+            onChange={(e) => audio.setMaster(Number(e.target.value))}
+          />
+        </label>
+        <label className={styles.sliderRow}>
+          <span className={styles.label}>SFX</span>
+          <input
+            type="range" min={0} max={1} step={0.01}
+            value={audio.sfx}
+            onChange={(e) => audio.setSfx(Number(e.target.value))}
+          />
+        </label>
+        <label className={styles.sliderRow}>
+          <span className={styles.label}>Ambience</span>
+          <input
+            type="range" min={0} max={1} step={0.01}
+            value={audio.ambience}
+            onChange={(e) => audio.setAmbience(Number(e.target.value))}
+          />
+        </label>
+        <label className={styles.toggleRow}>
+          <span className={styles.label}>Mute</span>
+          <input
+            type="checkbox"
+            checked={audio.muted}
+            onChange={(e) => audio.setMuted(e.target.checked)}
+          />
+        </label>
+        <div className={styles.testRow}>
+          {TEST_SOUNDS.map((name) => (
+            <button
+              key={name}
+              type="button"
+              className={styles.testBtn}
+              data-sound="none"
+              onClick={() => play(name)}
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+      </Panel>
+
+      <Panel title="Display" className={styles.panel}>
+        <label className={styles.toggleRow}>
+          <span className={styles.label}>Reduce animations</span>
+          <input
+            type="checkbox"
+            checked={display.reduceMotion}
+            onChange={(e) => display.setReduceMotion(e.target.checked)}
+          />
+        </label>
       </Panel>
     </div>
   );

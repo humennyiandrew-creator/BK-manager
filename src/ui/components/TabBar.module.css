@@ -34,25 +34,29 @@
   height: 1.15rem;
 }
 
+.tab {
+  transition: color var(--dur) var(--ease-out), background var(--dur) var(--ease-out);
+}
+
 .tab:hover {
   color: var(--text);
   background: rgba(255, 255, 255, 0.03);
 }
 
 .active {
-  background: var(--red);
-  color: var(--text);
+  background: var(--accent);
+  color: var(--accent-contrast);
 }
 
 .active:hover {
-  background: var(--red);
+  background: var(--accent);
 }
 
 .badge {
   position: absolute;
   top: 0.35rem;
   right: 22%;
-  background: var(--cyan);
+  background: var(--accent-2);
   color: var(--bg);
   font-size: 0.6rem;
   font-weight: 700;
