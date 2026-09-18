@@ -39,6 +39,24 @@
   min-height: 0;
 }
 
+.mainRow {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: var(--gap);
+}
+
+.mainCol {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  min-height: 0;
+}
+
+.mainCol > * {
+  flex: 1;
+}
+
 /* ---------- offense ---------- */
 
 .offenseGrid {
@@ -314,6 +332,18 @@
   flex-direction: column;
   gap: 0.9rem;
   max-width: 26rem;
+}
+
+.styleSliderWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.styleHint {
+  font-size: 0.62rem;
+  color: var(--text-dim);
+  padding-left: 7.6rem;
 }
 
 .styleSlider {

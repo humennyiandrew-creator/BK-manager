@@ -61,6 +61,48 @@
   color: var(--negative);
 }
 
+.deltaPositive {
+  color: var(--positive);
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.deltaNegative {
+  color: var(--negative);
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.formRow {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.72rem;
+}
+
+.formText {
+  color: var(--text-muted);
+}
+
+.sparkWrap {
+  display: flex;
+  gap: 1.2rem;
+  margin-top: 0.6rem;
+}
+
+.sparkCol {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.sparkLabel {
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
 .detail {
   display: flex;
   flex-direction: column;

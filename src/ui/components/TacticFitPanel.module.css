@@ -1,0 +1,177 @@
+.panel {
+  min-height: 0;
+  overflow-y: auto;
+  width: 19rem;
+  flex-shrink: 0;
+}
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.bars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.notes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.note {
+  font-size: 0.65rem;
+  line-height: 1.3;
+  padding: 0.3rem 0.5rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--panel-border);
+}
+
+.noteGood {
+  color: var(--positive);
+  border-color: rgba(66, 200, 140, 0.35);
+}
+
+.noteWarn {
+  color: var(--negative);
+  border-color: rgba(220, 90, 90, 0.35);
+}
+
+.sectionLabel {
+  font-size: 0.62rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.dirtyTag {
+  color: var(--cyan);
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 700;
+}
+
+.profileList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.profileRow {
+  display: grid;
+  grid-template-columns: 6.2rem 3.2rem 1fr;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.66rem;
+}
+
+.profileLabel {
+  color: var(--text-muted);
+}
+
+.profileVal {
+  color: var(--text);
+  font-weight: 600;
+  text-align: right;
+}
+
+.profilePct {
+  text-align: right;
+  font-weight: 700;
+}
+
+.draftFields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.draftField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.draftField label {
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.draftField select {
+  background: var(--panel-alt);
+  border: 1px solid var(--panel-border);
+  color: var(--text);
+  border-radius: var(--radius);
+  padding: 0.35rem 0.45rem;
+  font-size: 0.72rem;
+}
+
+.draftSlider {
+  display: grid;
+  grid-template-columns: 5.2rem 1fr 1.8rem;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+.draftSlider input {
+  accent-color: var(--cyan);
+}
+
+.draftSlider span {
+  text-align: right;
+  color: var(--text);
+}
+
+.btnRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+}
+
+.btn {
+  background: var(--panel-alt);
+  border: 1px solid var(--panel-border);
+  color: var(--text);
+  border-radius: var(--radius);
+  padding: 0.4rem 0.5rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.btn:disabled {
+  opacity: 0.4;
+}
+
+.btnPrimary {
+  background: var(--cyan);
+  border: none;
+  color: var(--bg);
+  border-radius: var(--radius);
+  padding: 0.4rem 0.5rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.btnPrimary:disabled {
+  opacity: 0.4;
+}
+
+.labResult {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-align: center;
+  padding: 0.4rem;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+}

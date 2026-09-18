@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Panel from '../components/Panel';
 import ProgressBar from '../components/ProgressBar';
 import PlayDiagram from '../components/PlayDiagram';
+import TacticFitPanel from '../components/TacticFitPanel';
 import { useGame, useGameState } from '../store/useGame';
 import { SYSTEMS, SCHEMES } from '../../engine/playbook/systems';
 import { PLAYS } from '../../engine/playbook/plays';
@@ -12,6 +13,13 @@ import styles from './PlaybookScreen.module.css';
 type SubTab = 'offense' | 'defense' | 'style' | 'rotation';
 
 const CATEGORIES: (PlayCategory | 'all')[] = ['all', 'pnr', 'horns', 'off-ball', 'post', 'iso', 'motion', 'transition', 'zone-buster'];
+
+const STYLE_SLIDERS: { key: 'pace' | 'threeFocus' | 'crashGlass' | 'transition'; label: string; hint: string }[] = [
+  { key: 'threeFocus', label: 'Shot Profile', hint: 'Paint ↔ Perimeter — leaning away from your shot-makers costs efficiency' },
+  { key: 'crashGlass', label: 'Crash Glass', hint: 'Get back ↔ Crash — extra offensive boards cost you in opponent transition' },
+  { key: 'pace', label: 'Pace', hint: 'Slow ↔ Fast — faster pace needs handling and speed or it bleeds turnovers' },
+  { key: 'transition', label: 'Transition', hint: 'Set ↔ Push — pushing every miss/make tires legs but creates easy points' }
+];
 
 const EFFECTS: { key: string; label: string; get: (s: SchemeDef) => number; invert?: boolean }[] = [
   { key: 'rim', label: 'Rim Protection', get: (s) => s.rimD },
@@ -95,6 +103,8 @@ export default function PlaybookScreen() {
         ))}
       </div>
 
+      <div className={styles.mainRow}>
+      <div className={styles.mainCol}>
       {subTab === 'offense' && (
         <div className={styles.offenseGrid}>
           <Panel title="Offensive Systems" className={styles.col}>
@@ -200,11 +210,14 @@ export default function PlaybookScreen() {
       {subTab === 'style' && (
         <Panel title="Team Style" className={styles.fullPanel}>
           <div className={styles.styleWrap}>
-            {(['pace', 'threeFocus', 'crashGlass', 'transition'] as const).map((k) => (
-              <div key={k} className={styles.styleSlider}>
-                <label>{k === 'threeFocus' ? '3PT Focus' : k === 'crashGlass' ? 'Crash Glass' : k[0].toUpperCase() + k.slice(1)}</label>
-                <input type="range" min={0} max={100} value={tactics[k]} onChange={(e) => setSlider(k, Number(e.target.value))} />
-                <span>{tactics[k]}</span>
+            {STYLE_SLIDERS.map(({ key: k, label, hint }) => (
+              <div key={k} className={styles.styleSliderWrap}>
+                <div className={styles.styleSlider}>
+                  <label>{label}</label>
+                  <input type="range" min={0} max={100} value={tactics[k]} onChange={(e) => setSlider(k, Number(e.target.value))} />
+                  <span>{tactics[k]}</span>
+                </div>
+                <div className={styles.styleHint}>{hint}</div>
               </div>
             ))}
             <div className={styles.styleField}>
@@ -257,6 +270,9 @@ export default function PlaybookScreen() {
           </div>
         </Panel>
       )}
+      </div>
+      <TacticFitPanel />
+      </div>
     </div>
   );
 }

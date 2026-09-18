@@ -4,6 +4,7 @@ import DataTable, { type DataTableColumn } from '../components/DataTable';
 import BkImage from '../components/BkImage';
 import ProgressBar from '../components/ProgressBar';
 import ConfirmDialog from '../components/ConfirmDialog';
+import Sparkline from '../components/Sparkline';
 import { useGame, useGameState } from '../store/useGame';
 import { teamRoster } from '../selectors';
 import { ageOf } from '../../engine/ratings';
@@ -19,7 +20,7 @@ function deadCapAmount(p: Player, season: string): number {
   return p.contract.salaries.filter((x) => x.season >= season).reduce((sum, x) => sum + x.amount, 0);
 }
 
-type SortKey = 'jersey' | 'name' | 'pos' | 'age' | 'height' | 'ovr' | 'pot' | 'ppg' | 'rpg' | 'apg' | 'salary';
+type SortKey = 'jersey' | 'name' | 'pos' | 'age' | 'height' | 'ovr' | 'pot' | 'form' | 'ppg' | 'rpg' | 'apg' | 'salary';
 
 const SORTERS: Record<SortKey, (p: Player) => number | string> = {
   jersey: (p) => Number(p.jersey) || 0,
@@ -29,6 +30,7 @@ const SORTERS: Record<SortKey, (p: Player) => number | string> = {
   height: (p) => p.heightCm,
   ovr: (p) => p.ratings.ovr,
   pot: (p) => p.ratings.pot,
+  form: (p) => p.form ?? 0,
   ppg: (p) => (p.season.gp ? p.season.pts / p.season.gp : 0),
   rpg: (p) => (p.season.gp ? (p.season.orb + p.season.drb) / p.season.gp : 0),
   apg: (p) => (p.season.gp ? p.season.ast / p.season.gp : 0),
@@ -39,6 +41,24 @@ function moraleLabel(m: number): { text: string; variant: 'positive' | 'muted' |
   if (m >= 70) return { text: 'Happy', variant: 'positive' };
   if (m >= 40) return { text: 'Neutral', variant: 'muted' };
   return { text: 'Unhappy', variant: 'negative' };
+}
+
+function formChip(f: number | undefined): { icon: string; variant: 'positive' | 'muted' | 'negative' } {
+  const v = f ?? 0;
+  if (v >= 1.5) return { icon: '🔥', variant: 'positive' };
+  if (v >= 0.5) return { icon: '▲', variant: 'positive' };
+  if (v <= -1.5) return { icon: '❄', variant: 'negative' };
+  if (v <= -0.5) return { icon: '▼', variant: 'negative' };
+  return { icon: '—', variant: 'muted' };
+}
+
+function formExplanation(f: number | undefined): string {
+  const v = f ?? 0;
+  if (v >= 1.5) return 'Producing well above his rating — potential rising';
+  if (v >= 0.5) return 'Playing above his rating recently';
+  if (v <= -1.5) return 'Producing well below his rating — potential fading';
+  if (v <= -0.5) return 'Playing below his rating recently';
+  return 'Performing in line with his rating';
 }
 
 export default function RosterScreen() {
@@ -81,7 +101,24 @@ export default function RosterScreen() {
     { key: 'age', header: th('age', 'Age'), align: 'right', render: (p) => Math.floor(ageOf(p.birthDate)) },
     { key: 'height', header: th('height', 'Ht'), align: 'right', render: (p) => heightFtIn(p.heightCm) },
     { key: 'ovr', header: th('ovr', 'OVR'), align: 'right', render: (p) => p.ratings.ovr },
-    { key: 'pot', header: th('pot', 'POT'), align: 'right', render: (p) => p.ratings.pot },
+    {
+      key: 'pot', header: th('pot', 'POT'), align: 'right', render: (p) => (
+        <span>
+          {Math.round(p.ratings.pot)}
+          {!!p.potSeason && (
+            <span className={p.potSeason > 0 ? styles.deltaPositive : styles.deltaNegative}>
+              {p.potSeason > 0 ? ' +' : ' '}{p.potSeason.toFixed(0)}
+            </span>
+          )}
+        </span>
+      )
+    },
+    {
+      key: 'form', header: th('form', 'Form'), align: 'right', render: (p) => {
+        const f = formChip(p.form);
+        return <span className={styles[`chip${f.variant === 'positive' ? 'Positive' : f.variant === 'negative' ? 'Negative' : 'Muted'}`]}>{f.icon}</span>;
+      }
+    },
     { key: 'ppg', header: th('ppg', 'PPG'), align: 'right', render: (p) => perGame(p.season.pts, p.season.gp) },
     { key: 'rpg', header: th('rpg', 'RPG'), align: 'right', render: (p) => perGame(p.season.orb + p.season.drb, p.season.gp) },
     { key: 'apg', header: th('apg', 'APG'), align: 'right', render: (p) => perGame(p.season.ast, p.season.gp) },
@@ -137,7 +174,7 @@ function PlayerDetail({ player: p, onRelease }: { player: Player; onRelease: () 
             #{p.jersey} · {p.positions.join('/')} · {age}y · {heightFtIn(p.heightCm)} · {p.weightKg}kg · {p.country}
           </div>
           <div className={styles.detailMeta}>
-            {p.draft ? `Draft ${p.draft.year} R${p.draft.round} P${p.draft.pick}` : 'Undrafted'} · OVR {p.ratings.ovr} · POT {p.ratings.pot}
+            {p.draft ? `Draft ${p.draft.year} R${p.draft.round} P${p.draft.pick}` : 'Undrafted'} · OVR {p.ratings.ovr} · POT {Math.round(p.ratings.pot)}
           </div>
         </div>
         <button type="button" className={styles.releaseBtn} onClick={onRelease}>Release</button>
@@ -151,6 +188,26 @@ function PlayerDetail({ player: p, onRelease }: { player: Player; onRelease: () 
           <span>APG {perGame(p.season.ast, p.season.gp)}</span>
           <span>GP {p.season.gp}</span>
         </div>
+      </div>
+
+      <div className={styles.section}>
+        <div className={styles.sectionTitle}>Form</div>
+        <div className={styles.formRow}>
+          {(() => { const f = formChip(p.form); return <span className={styles[`chip${f.variant === 'positive' ? 'Positive' : f.variant === 'negative' ? 'Negative' : 'Muted'}`]}>{f.icon} {(p.form ?? 0).toFixed(1)}</span>; })()}
+          <span className={styles.formText}>{formExplanation(p.form)}</span>
+        </div>
+        {p.ovrHistory && p.ovrHistory.length > 1 && (
+          <div className={styles.sparkWrap}>
+            <div className={styles.sparkCol}>
+              <span className={styles.sparkLabel}>OVR</span>
+              <Sparkline values={p.ovrHistory.map((h) => h.ovr)} color="var(--cyan)" />
+            </div>
+            <div className={styles.sparkCol}>
+              <span className={styles.sparkLabel}>POT</span>
+              <Sparkline values={p.ovrHistory.map((h) => h.pot)} color="var(--positive)" />
+            </div>
+          </div>
+        )}
       </div>
 
       <div className={styles.attrGrid}>

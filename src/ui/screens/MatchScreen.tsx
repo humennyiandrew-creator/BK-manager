@@ -8,7 +8,9 @@ import { PLAYS } from '../../engine/playbook/plays';
 import type { OffSystem, DefScheme } from '../../engine/playbook/types';
 import type { Side, SP } from '../../engine/sim/fast';
 import type { PbpLine, Snapshot } from '../../engine/sim/live';
+import { lineupProfile, offenseFit, defenseFit } from '../../engine/playbook/fit';
 import BkImage from '../components/BkImage';
+import BipolarBar from '../components/BipolarBar';
 import { COURT_W, COURT_H, colorDist, drawBall, drawCourt, drawPlayer, drawScreen, fitCourt } from '../court';
 import styles from './MatchScreen.module.css';
 
@@ -192,6 +194,7 @@ export default function MatchScreen() {
               <TacticsTab
                 tactics={userTeamState.tactics}
                 roster={userSideObj.roster}
+                court={userSideObj.court}
                 onOffense={(v: OffSystem) => handleTactic((t) => (t.offense = v))}
                 onDefense={(v: DefScheme) => handleTactic((t) => (t.defense = v))}
                 onSlider={(k: string, v: number) => handleTactic((t) => ((t as any)[k] = v))}
@@ -404,9 +407,21 @@ function BoxTable({ side, label }: { side: Side; label: string }) {
   );
 }
 
-function TacticsTab({ tactics, roster, onOffense, onDefense, onSlider, onFocus, onClutch, calledPlay, onCalledPlayChange, onCallPlay }: any) {
+function TacticsTab({ tactics, roster, court, onOffense, onDefense, onSlider, onFocus, onClutch, calledPlay, onCalledPlayChange, onCallPlay }: any) {
+  const five = (court as SP[]).map((sp) => sp.p);
+  const fit = five.length === 5
+    ? (() => { const prof = lineupProfile(five); return { off: offenseFit(prof, tactics), def: defenseFit(prof, tactics.defense) }; })()
+    : null;
+  const fitNotes = fit ? [...fit.off.notes, ...fit.def.notes].slice(0, 2) : [];
   return (
     <div className={styles.tacticsWrap}>
+      {fit && (
+        <div className={styles.fitBox}>
+          <BipolarBar label="Lineup Offense Fit" value={fit.off.score} />
+          <BipolarBar label="Lineup Defense Fit" value={fit.def.score} />
+          {fitNotes.map((n, i) => <div key={i} className={styles.fitNote}>{n}</div>)}
+        </div>
+      )}
       <div className={styles.tField}>
         <label>Offense</label>
         <select value={tactics.offense} onChange={(e) => onOffense(e.target.value as OffSystem)}>
