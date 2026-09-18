@@ -4,6 +4,7 @@ import { emptyLine } from './model';
 import { buildRatings } from './ratings';
 import { refreshRotation } from './rotation';
 import { buildSchedule } from './schedule';
+import { autoTactics, defaultTactics } from './playbook/systems';
 import type { RawPlayer, Team } from './types';
 
 export const MAX_STANDARD = 15;
@@ -24,9 +25,10 @@ export function newGame(teams: Team[], raw: RawPlayer[], userTeamId: string, see
 
   const teamStates: Record<string, TeamState> = {};
   for (const t of teams) {
-    teamStates[t.id] = { ...t, rotation: [], minutes: {}, tactics: { pace: 50, threeFocus: 50, crashGlass: 50 } };
+    teamStates[t.id] = { ...t, rotation: [], minutes: {}, tactics: defaultTactics() };
     trimRoster(t.id, players);
     refreshRotation(teamStates[t.id], players);
+    autoTactics(teamStates[t.id].tactics, Object.values(players).filter((p) => p.teamId === t.id));
   }
 
   const season = `${seasonYear}-${String((seasonYear + 1) % 100).padStart(2, '0')}`;

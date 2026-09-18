@@ -1,6 +1,7 @@
 // World state. Plain JSON — whole object is the save file.
 import type { Contract, Position, SeasonStats, Team } from './types';
 import type { PlayerRatings } from './ratings';
+import type { DefScheme, OffSystem } from './playbook/types';
 
 export interface StatLine {
   gp: number; gs: number; min: number; pts: number;
@@ -38,6 +39,12 @@ export interface Tactics {
   pace: number;        // 0–100, 50 = league avg
   threeFocus: number;  // 0–100
   crashGlass: number;  // 0–100
+  transition: number;  // 0–100, how often to push after rebounds/steals
+  offense: OffSystem;
+  defense: DefScheme;
+  playWeights: Record<string, number>; // user overrides of system play frequencies (0 = off)
+  focusPlayer: string | null;
+  clutchPlay: string | null;           // play run in last 2 min of close games
 }
 
 export interface TeamState extends Team {

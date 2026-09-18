@@ -1,20 +1,25 @@
-// Possession-level game sim (no court geometry). Also the probability core the live 2D sim will reuse.
+// Possession core. decide() rolls a possession into events (pure w.r.t. stats), commit() books them.
+// Fast sim = decide+commit in a loop. Live sim = decide, animate, commit each event on its beat.
 import type { BoxLine, GameResult, Player, TeamState } from '../model';
 import { emptyLine } from '../model';
 import { gauss, type Rng } from '../rng';
 import { available } from '../rotation';
+import { PLAY_BY_ID } from '../playbook/plays';
+import { SCHEMES, SYSTEMS } from '../playbook/systems';
+import type { Play, Role, ShotType } from '../playbook/types';
 
+export type { ShotType };
 export interface Rules { periods: number; periodSec: number; otSec: number; foulOut: number; bonusAt: number }
 export const NBA_RULES: Rules = { periods: 4, periodSec: 720, otSec: 300, foulOut: 6, bonusAt: 5 };
 
 /** Tuning knobs — calibrated by src/engine/__tests__/calibration.test.ts. */
 export const K = {
   possSec: 13.7,
-  toBase: 0.128,
+  toBase: 0.133,
   stealShare: 0.56,
   nsFoul: 0.085,
-  threeMul: 1.11,
-  base: { rim: 0.69, mid: 0.455, three: 0.335 },
+  threeMul: 1.16,
+  base: { rim: 0.665, mid: 0.43, three: 0.322 },
   skill: { rim: 0.0065, mid: 0.006, three: 0.0036 },
   def: { rim: 0.004, mid: 0.003, three: 0.002 },
   block: { rim: 0.095, mid: 0.025, three: 0.008 },
@@ -29,9 +34,11 @@ export const K = {
   usgExp: 1.6,
   drain: 0.00085,
   recover: 0.0016,
+  playFocus: 0.9,   // how strongly play options steer shooter choice
+  playShot: 0.45,   // chance the shot type comes from the play instead of player tendency
+  playEdge: 0.02,   // make-prob bonus when play beats the scheme (penalty when weak)
+  breakBonus: 0.07, // fast-break rim bonus
 };
-
-export type ShotType = 'rim' | 'mid' | 'three';
 
 export interface SP {
   p: Player;
@@ -44,7 +51,7 @@ export interface SP {
 export interface Side {
   team: TeamState;
   roster: SP[];
-  court: SP[];
+  court: SP[];          // sorted by position → index+1 = Role
   pts: number;
   fouls: number;        // team fouls this period
   home: boolean;
@@ -53,6 +60,7 @@ export interface Side {
 const a = (sp: SP) => sp.p.ratings.attrs;
 const avg = (list: SP[], f: (sp: SP) => number) => list.reduce((s, x) => s + f(x), 0) / list.length;
 const posRank = (sp: SP) => ({ PG: 0, SG: 1, SF: 2, PF: 3, C: 4 })[sp.p.positions[0] ?? 'SF'];
+export const roleOf = (s: Side, sp: SP) => (s.court.indexOf(sp) + 1) as Role;
 
 export function pick<T>(list: T[], w: (x: T) => number, rng: Rng): T {
   const ws = list.map((x) => Math.max(0.0001, w(x)));
@@ -71,22 +79,22 @@ export function makeSide(team: TeamState, players: Record<string, Player>, home:
   return { team, roster, court: sortCourt(court), pts: 0, fouls: 0, home };
 }
 
-const sortCourt = (c: SP[]) => c.sort((x, y) => posRank(x) - posRank(y));
+export const sortCourt = (c: SP[]) => c.sort((x, y) => posRank(x) - posRank(y));
 const fatigue = (sp: SP) => 0.9 + 0.1 * sp.energy;
 
 // ---------- substitutions ----------
 
-export function doSubs(s: Side, elapsed: number, total: number, ctx: { period: number; clock: number; margin: number }, rules: Rules) {
+export interface SubCtx { period: number; clock: number; margin: number }
+
+export function doSubs(s: Side, elapsed: number, total: number, ctx: SubCtx, rules: Rules) {
   const frac = Math.min(1, elapsed / total);
-  const played = (sp: SP) => sp.sec / 60;
-  const need = (sp: SP) => sp.target * frac - played(sp);
+  const need = (sp: SP) => sp.target * frac - sp.sec / 60;
   const eligible = (sp: SP) => sp.line.pf < rules.foulOut;
   const late = ctx.period >= rules.periods && ctx.clock <= 300;
   const garbage = ctx.period >= rules.periods && ctx.clock <= 420 && Math.abs(ctx.margin) >= 22;
   const bench = () => s.roster.filter((sp) => !s.court.includes(sp) && eligible(sp));
 
   if (late && !garbage && Math.abs(ctx.margin) <= 12) {
-    // Closing lineup: top-5 of rotation when fresh enough.
     const closers = s.roster.filter((sp) => eligible(sp) && sp.energy > 0.35).slice(0, 5);
     if (closers.length === 5) { s.court = sortCourt([...closers]); return; }
   }
@@ -112,46 +120,56 @@ export function doSubs(s: Side, elapsed: number, total: number, ctx: { period: n
   sortCourt(s.court);
 }
 
-export function tickEnergy(s: Side, sec: number) {
+export function tickEnergy(s: Side, sec: number, drainMul = 1) {
   for (const sp of s.roster) {
     if (s.court.includes(sp)) {
       sp.sec += sec;
-      sp.energy = Math.max(0.05, sp.energy - sec * K.drain * (1.6 - a(sp).stamina / 100));
+      sp.energy = Math.max(0.05, sp.energy - sec * K.drain * drainMul * (1.6 - a(sp).stamina / 100));
     } else sp.energy = Math.min(1, sp.energy + sec * K.recover);
   }
 }
 
-// ---------- possession ----------
+// ---------- decide ----------
 
-export interface PossOut { keep: boolean; transition: boolean; event: string }
+export type Ev =
+  | { k: 'to'; by: SP; steal: SP | null }
+  | { k: 'foul'; by: SP; on: SP; shooting: boolean }
+  | { k: 'ft'; by: SP; made: boolean; n: number; of: number }
+  | { k: 'shot'; by: SP; type: ShotType; made: boolean; defender: SP; block: SP | null; assist: SP | null; fastBreak: boolean }
+  | { k: 'reb'; by: SP | null; off: boolean };
 
-function score(off: Side, def: Side, sp: SP, pts: number) {
-  sp.line.pts += pts;
-  off.pts += pts;
-  off.court.forEach((x) => (x.line.pm += pts));
-  def.court.forEach((x) => (x.line.pm -= pts));
+export interface Outcome {
+  play: Play;
+  handler: SP;
+  events: Ev[];
+  keep: boolean;        // offense keeps ball (ORB / non-bonus foul)
+  transition: boolean;  // next possession starts in transition
+  event: string;
 }
 
-function freeThrows(off: Side, def: Side, sp: SP, n: number, rng: Rng): boolean {
+export interface DecideCtx { transition: boolean; calledPlay?: string | null; clutch?: boolean }
+
+export function choosePlay(off: Side, rng: Rng, ctx: DecideCtx): Play {
+  const t = off.team.tactics;
+  if (ctx.calledPlay && PLAY_BY_ID[ctx.calledPlay]) return PLAY_BY_ID[ctx.calledPlay];
+  if (ctx.clutch && t.clutchPlay && PLAY_BY_ID[t.clutchPlay]) return PLAY_BY_ID[t.clutchPlay];
+  const weights: Record<string, number> = { ...SYSTEMS[t.offense].plays, ...t.playWeights };
+  if (ctx.transition) { weights.drag = (weights.drag ?? 0) + 3; weights['early-three'] = (weights['early-three'] ?? 0) + 2; }
+  const ids = Object.keys(weights).filter((id) => weights[id] > 0 && PLAY_BY_ID[id]);
+  return PLAY_BY_ID[ids.length ? pick(ids, (id) => weights[id], rng) : 'motion-5out'];
+}
+
+function freeThrowEvents(sp: SP, n: number, rng: Rng): Ev[] {
   const pFt = Math.min(0.95, Math.max(0.4, 0.785 + (a(sp).freeThrow - 62) * 0.0055));
-  let lastMade = true;
-  for (let i = 0; i < n; i++) {
-    sp.line.fta++;
-    lastMade = rng() < pFt;
-    if (lastMade) { sp.line.ftm++; score(off, def, sp, 1); }
-  }
-  return lastMade;
+  return Array.from({ length: n }, (_, i) => ({ k: 'ft' as const, by: sp, made: rng() < pFt, n: i + 1, of: n }));
 }
 
-function rebound(off: Side, def: Side, rng: Rng): boolean {
-  const crash = (off.team.tactics.crashGlass - 50) * 0.0012;
-  const pOrb = K.orb + (avg(off.court, (x) => a(x).offRebound) - avg(def.court, (x) => a(x).defRebound)) * 0.004 + crash;
-  if (rng() < pOrb) {
-    pick(off.court, (x) => a(x).offRebound ** 2 * (posRank(x) + 2), rng).line.orb++;
-    return true;
-  }
-  if (rng() > 0.11) pick(def.court, (x) => a(x).defRebound ** 2 * (posRank(x) + 2), rng).line.drb++; // else team rebound
-  return false;
+function reboundEvent(off: Side, def: Side, rng: Rng): Ev & { k: 'reb' } {
+  const t = off.team.tactics;
+  const pOrb = K.orb + SCHEMES[def.team.tactics.defense].orbAllowed + (t.crashGlass - 50) * 0.0012
+    + (avg(off.court, (x) => a(x).offRebound) - avg(def.court, (x) => a(x).defRebound)) * 0.004;
+  if (rng() < pOrb) return { k: 'reb', by: pick(off.court, (x) => a(x).offRebound ** 2 * (posRank(x) + 2), rng), off: true };
+  return { k: 'reb', by: rng() > 0.11 ? pick(def.court, (x) => a(x).defRebound ** 2 * (posRank(x) + 2), rng) : null, off: false };
 }
 
 /** Team-level shot quality: creation by the handler vs opponent help defense. */
@@ -161,117 +179,177 @@ export function contextEdge(handler: SP, def: SP[]): number {
   return create * K.create - help * K.help;
 }
 
-export function shotProb(sp: SP, defender: SP, protector: SP, type: ShotType, homeEdge: number): number {
+export function shotProb(sp: SP, defender: SP, protector: SP, type: ShotType, edge: number): number {
   const skill = type === 'rim' ? (a(sp).layup + a(sp).closeShot + a(sp).dunk) / 3 : type === 'mid' ? a(sp).midRange : a(sp).threePoint;
   const d = type === 'rim' ? (a(protector).interiorD + a(defender).interiorD) / 2 : a(defender).perimeterD;
-  const p = K.base[type] + (skill - 62) * K.skill[type] - (d - 62) * K.def[type] + homeEdge;
-  return Math.min(0.9, Math.max(0.12, p * fatigue(sp)));
+  const p = K.base[type] + (skill - 62) * K.skill[type] - (d - 62) * K.def[type] + edge;
+  return Math.min(0.92, Math.max(0.1, p * fatigue(sp)));
 }
 
-export function possession(off: Side, def: Side, rng: Rng, rules: Rules): PossOut {
+export function decide(off: Side, def: Side, rng: Rng, rules: Rules, ctx: DecideCtx): Outcome {
+  const t = off.team.tactics;
+  const sys = SYSTEMS[t.offense];
+  const sch = SCHEMES[def.team.tactics.defense];
+  const fastBreak = ctx.transition && rng() < 0.25 + t.transition / 250;
+  const play = choosePlay(off, rng, ctx);
   const usage = (sp: SP) => sp.p.ratings.tend.usage ** K.usgExp * fatigue(sp);
-  const handler = pick(off.court, (x) => usage(x) * (a(x).ballHandle + a(x).passing), rng);
+  const handler = pick(off.court, (x) => usage(x) * (a(x).ballHandle + a(x).passing) * (roleOf(off, x) === 1 ? 1.5 : 1), rng);
+  const out = (events: Ev[], keep: boolean, transition: boolean, event: string): Outcome => ({ play, handler, events, keep, transition, event });
 
   // Turnover
-  const pTo = K.toBase * (1 + (62 - (a(handler).ballHandle + a(handler).passing) / 2) * 0.01) * (1 + (avg(def.court, (x) => a(x).steal) - 62) * 0.008);
+  const pTo = K.toBase * sys.toMul * sch.toMul
+    * (1 + (62 - (a(handler).ballHandle + a(handler).passing) / 2) * 0.01)
+    * (1 + (avg(def.court, (x) => a(x).steal) - 62) * 0.008);
   if (rng() < pTo) {
-    const loser = pick(off.court, (x) => usage(x) * (130 - a(x).ballHandle), rng);
-    loser.line.tov++;
-    if (rng() < K.stealShare) {
-      pick(def.court, (x) => a(x).steal ** 2, rng).line.stl++;
-      return { keep: false, transition: true, event: 'steal' };
-    }
-    return { keep: false, transition: false, event: 'turnover' };
+    const by = pick(off.court, (x) => usage(x) * (130 - a(x).ballHandle), rng);
+    const steal = rng() < K.stealShare ? pick(def.court, (x) => a(x).steal ** 2, rng) : null;
+    return out([{ k: 'to', by, steal }], false, !!steal, steal ? 'steal' : 'turnover');
   }
 
   // Non-shooting foul
-  if (rng() < K.nsFoul) {
-    const fouler = pick(def.court, (x) => 100 - a(x).perimeterD / 2, rng);
-    fouler.line.pf++;
-    def.fouls++;
-    if (def.fouls >= rules.bonusAt) {
-      const lastMade = freeThrows(off, def, handler, 2, rng);
-      if (!lastMade && rebound(off, def, rng)) return { keep: true, transition: false, event: 'ft-orb' };
-      return { keep: false, transition: false, event: 'bonus-ft' };
+  if (!fastBreak && rng() < K.nsFoul * sch.foulMul) {
+    const by = pick(def.court, (x) => 100 - a(x).perimeterD / 2, rng);
+    const ev: Ev[] = [{ k: 'foul', by, on: handler, shooting: false }];
+    if (def.fouls + 1 >= rules.bonusAt) {
+      const fts = freeThrowEvents(handler, 2, rng);
+      ev.push(...fts);
+      if (!(fts[1] as { made: boolean }).made) {
+        const reb = reboundEvent(off, def, rng);
+        ev.push(reb);
+        return out(ev, reb.off, false, 'bonus-ft');
+      }
+      return out(ev, false, false, 'bonus-ft');
     }
-    return { keep: true, transition: false, event: 'foul' };
+    return out(ev, true, false, 'foul');
   }
 
-  // Shot
-  const shooter = pick(off.court, usage, rng);
-  const t = shooter.p.ratings.tend;
-  const threeP = Math.min(0.85, t.threeRate * K.threeMul * (1 + (off.team.tactics.threeFocus - 50) / 100));
-  const r = rng();
-  const type: ShotType = r < threeP ? 'three' : rng() < t.rimRate ? 'rim' : 'mid';
+  // Shooter: player usage steered by the play's options.
+  const optW = new Map<SP, number>();
+  const optTotal = play.options.reduce((s, o) => s + o.weight, 0);
+  const focus = off.court.find((x) => x.p.id === t.focusPlayer) ?? null;
+  const optSp = (role: Role | 'focus') => (role === 'focus' ? focus ?? off.court[0] : off.court[role - 1]);
+  for (const o of play.options) {
+    const sp = optSp(o.role);
+    if (sp) optW.set(sp, (optW.get(sp) ?? 0) + o.weight / optTotal);
+  }
+  const boxed = def.team.tactics.defense === 'box1' ? focus : null;
+  const shooter = fastBreak
+    ? pick(off.court, (x) => usage(x) * (a(x).speed + 20), rng)
+    : pick(off.court, (x) => usage(x) * (1 + (optW.get(x) ?? 0) * 5 * K.playFocus) * (x === focus ? 1.25 : 1) * (x === boxed ? 0.65 : 1), rng);
+
+  let type: ShotType;
+  const myOpts = play.options.filter((o) => optSp(o.role) === shooter);
+  if (fastBreak) type = rng() < 0.75 ? 'rim' : 'three';
+  else if (myOpts.length && rng() < K.playShot) type = pick(myOpts, (o) => o.weight, rng).shot;
+  else {
+    const tn = shooter.p.ratings.tend;
+    const threeP = Math.min(0.88, tn.threeRate * K.threeMul * sys.threeMul * sch.threeRateMul * (1 + (t.threeFocus - 50) / 100));
+    type = rng() < threeP ? 'three' : rng() < Math.min(0.95, tn.rimRate * sch.rimRateMul) ? 'rim' : 'mid';
+  }
+
   const defender = def.court[off.court.indexOf(shooter)] ?? def.court[0];
   const protector = def.court.reduce((b, x) => (a(x).block + a(x).interiorD > a(b).block + a(b).interiorD ? x : b));
   const pts = type === 'three' ? 3 : 2;
-  const pMake = shotProb(shooter, defender, protector, type, (off.home ? K.homeEdge : 0) + contextEdge(handler, def.court) + K.offIQ * (a(shooter).offIQ - 62));
+  const schemeD = type === 'rim' ? sch.rimD : type === 'mid' ? sch.midD : sch.threeD;
+  const playEdge = play.strongVs.includes(sch.id) ? K.playEdge : play.weakVs.includes(sch.id) ? -K.playEdge : 0;
+  const edge = (off.home ? K.homeEdge : 0) + contextEdge(handler, def.court) + K.offIQ * (a(shooter).offIQ - 62)
+    - schemeD + (fastBreak ? (type === 'rim' ? K.breakBonus : 0.02) : playEdge) - (shooter === boxed ? 0.03 : 0);
+  const pMake = shotProb(shooter, defender, protector, type, edge);
+  const passers = off.court.filter((x) => x !== shooter);
+  const assistBy = (): SP | null => (rng() < K.assist[type] * sys.assistMul
+    ? pick(passers, (x) => (a(x).passing * a(x).vision) ** 1.5 * x.p.ratings.tend.usage, rng) : null);
 
-  const pFoul = K.sfoul[type] * (0.55 + a(shooter).drawFoul / 110);
-  if (rng() < pFoul) {
+  // Shooting foul
+  if (rng() < K.sfoul[type] * sch.foulMul * (0.55 + a(shooter).drawFoul / 110)) {
     const fouler = type === 'rim' && rng() < 0.5 ? protector : defender;
-    fouler.line.pf++;
-    def.fouls++;
+    const ev: Ev[] = [];
     if (rng() < pMake * K.andOne) {
-      shooter.line.fga++; shooter.line.fgm++;
-      if (type === 'three') { shooter.line.tpa++; shooter.line.tpm++; }
-      score(off, def, shooter, pts);
-      assist(off, shooter, type, rng);
-      freeThrows(off, def, shooter, 1, rng);
-      return { keep: false, transition: false, event: 'and-one' };
+      ev.push({ k: 'shot', by: shooter, type, made: true, defender, block: null, assist: assistBy(), fastBreak });
+      ev.push({ k: 'foul', by: fouler, on: shooter, shooting: true }, ...freeThrowEvents(shooter, 1, rng));
+      return out(ev, false, false, 'and-one');
     }
-    const lastMade = freeThrows(off, def, shooter, pts, rng);
-    if (!lastMade && rebound(off, def, rng)) return { keep: true, transition: false, event: 'ft-orb' };
-    return { keep: false, transition: false, event: 'shooting-foul' };
+    ev.push({ k: 'foul', by: fouler, on: shooter, shooting: true });
+    const fts = freeThrowEvents(shooter, pts, rng);
+    ev.push(...fts);
+    if (!(fts[fts.length - 1] as { made: boolean }).made) {
+      const reb = reboundEvent(off, def, rng);
+      ev.push(reb);
+      return out(ev, reb.off, false, 'shooting-foul');
+    }
+    return out(ev, false, false, 'shooting-foul');
   }
 
-  shooter.line.fga++;
-  if (type === 'three') shooter.line.tpa++;
   const pBlock = K.block[type] * (1 + (a(protector).block - 62) * 0.025);
   if (rng() < pBlock) {
-    (type === 'rim' ? protector : defender).line.blk++;
-  } else if (rng() < pMake) {
-    shooter.line.fgm++;
-    if (type === 'three') shooter.line.tpm++;
-    score(off, def, shooter, pts);
-    assist(off, shooter, type, rng);
-    return { keep: false, transition: false, event: `make-${type}` };
+    const reb = reboundEvent(off, def, rng);
+    return out([{ k: 'shot', by: shooter, type, made: false, defender, block: type === 'rim' ? protector : defender, assist: null, fastBreak }, reb],
+      reb.off, !reb.off && rng() < 0.3, 'block');
   }
-  const orb = rebound(off, def, rng);
-  return { keep: orb, transition: !orb && rng() < 0.18, event: orb ? 'orb' : 'drb' };
+  if (rng() < pMake) {
+    return out([{ k: 'shot', by: shooter, type, made: true, defender, block: null, assist: assistBy(), fastBreak }], false, false, `make-${type}`);
+  }
+  const reb = reboundEvent(off, def, rng);
+  return out([{ k: 'shot', by: shooter, type, made: false, defender, block: null, assist: null, fastBreak }, reb],
+    reb.off, !reb.off && rng() < 0.18, reb.off ? 'orb' : 'drb');
 }
 
-function assist(off: Side, shooter: SP, type: ShotType, rng: Rng) {
-  if (rng() >= K.assist[type]) return;
-  const mates = off.court.filter((x) => x !== shooter);
-  pick(mates, (x) => (a(x).passing * a(x).vision) ** 1.5 * x.p.ratings.tend.usage, rng).line.ast++;
+// ---------- commit ----------
+
+function score(off: Side, def: Side, sp: SP, pts: number) {
+  sp.line.pts += pts;
+  off.pts += pts;
+  off.court.forEach((x) => (x.line.pm += pts));
+  def.court.forEach((x) => (x.line.pm -= pts));
+}
+
+export function commitEvent(off: Side, def: Side, ev: Ev) {
+  switch (ev.k) {
+    case 'to': ev.by.line.tov++; if (ev.steal) ev.steal.line.stl++; break;
+    case 'foul': ev.by.line.pf++; def.fouls++; break;
+    case 'ft': ev.by.line.fta++; if (ev.made) { ev.by.line.ftm++; score(off, def, ev.by, 1); } break;
+    case 'shot': {
+      ev.by.line.fga++;
+      if (ev.type === 'three') ev.by.line.tpa++;
+      if (ev.block) ev.block.line.blk++;
+      if (ev.made) {
+        ev.by.line.fgm++;
+        if (ev.type === 'three') ev.by.line.tpm++;
+        score(off, def, ev.by, ev.type === 'three' ? 3 : 2);
+        if (ev.assist) ev.assist.line.ast++;
+      }
+      break;
+    }
+    case 'reb': if (ev.by) ev.by.line[ev.off ? 'orb' : 'drb']++; break;
+  }
 }
 
 // ---------- game ----------
 
-export function possessionLength(off: Side, def: Side, prev: PossOut | null, rng: Rng): number {
+export function possessionLength(off: Side, def: Side, prev: Outcome | null, rng: Rng): number {
   if (prev?.keep && prev.event !== 'foul') return 4 + rng() * 9;
   if (prev?.transition) return 4 + rng() * 7;
-  const pace = (off.team.tactics.pace + def.team.tactics.pace) / 2;
+  const pace = (off.team.tactics.pace + def.team.tactics.pace) / 2 + (def.team.tactics.defense === 'press' ? 8 : 0);
   const mean = K.possSec * (1 - (pace - 50) / 250);
   return Math.min(24, Math.max(4, mean + gauss(rng) * 4.5));
 }
+
+export const drainFor = (home: TeamState, away: TeamState) =>
+  Math.max(SCHEMES[home.tactics.defense].drainMul, SCHEMES[away.tactics.defense].drainMul);
 
 export function simGame(home: TeamState, away: TeamState, players: Record<string, Player>, rng: Rng, rules: Rules = NBA_RULES): GameResult {
   const H = makeSide(home, players, true), A = makeSide(away, players, false);
   const periods: [number, number][] = [];
   const total = rules.periods * rules.periodSec;
+  const drain = drainFor(home, away);
   let elapsed = 0;
   let off = rng() < 0.5 ? H : A; // tip-off
   for (let period = 1; period <= rules.periods || H.pts === A.pts; period++) {
-    const len = period <= rules.periods ? rules.periodSec : rules.otSec;
-    let clock = len;
+    let clock = period <= rules.periods ? rules.periodSec : rules.otSec;
     const start: [number, number] = [H.pts, A.pts];
     H.fouls = A.fouls = 0;
     if (period > 1) for (const s of [H, A]) s.roster.forEach((sp) => (sp.energy = Math.min(1, sp.energy + (period === 3 ? 0.35 : 0.18))));
     if (period > 1) off = period % 2 === 0 ? (off === H ? A : H) : off;
-    let prev: PossOut | null = null;
+    let prev: Outcome | null = null;
     while (clock > 0) {
       const def = off === H ? A : H;
       if (!prev || !prev.transition) {
@@ -280,9 +358,11 @@ export function simGame(home: TeamState, away: TeamState, players: Record<string
         doSubs(A, elapsed, total, { ...ctx, margin: -ctx.margin }, rules);
       }
       const dur = Math.min(clock, possessionLength(off, def, prev, rng));
-      tickEnergy(H, dur); tickEnergy(A, dur);
+      tickEnergy(H, dur, drain); tickEnergy(A, dur, drain);
       clock -= dur; elapsed += dur;
-      prev = possession(off, def, rng, rules);
+      const clutch = period >= rules.periods && clock < 120 && Math.abs(H.pts - A.pts) <= 5;
+      prev = decide(off, def, rng, rules, { transition: !!prev?.transition, clutch });
+      for (const ev of prev.events) commitEvent(off, def, ev);
       if (!prev.keep) off = def;
     }
     periods.push([H.pts - start[0], A.pts - start[1]]);
