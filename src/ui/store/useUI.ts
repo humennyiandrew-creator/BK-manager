@@ -20,7 +20,7 @@ export const TAB_IDS = [
 
 export type TabId = (typeof TAB_IDS)[number];
 
-export type AppView = 'startMenu' | 'chooseTeam' | 'shell';
+export type AppView = 'startMenu' | 'chooseTeam' | 'shell' | 'match';
 
 interface UIState {
   view: AppView;

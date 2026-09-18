@@ -1,0 +1,453 @@
+.wrap {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  min-height: 0;
+}
+
+.subTabs {
+  flex-shrink: 0;
+  display: flex;
+  gap: 0.4rem;
+}
+
+.subTab {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  color: var(--text-muted);
+  border-radius: var(--radius);
+  padding: 0.45rem 1rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.subTab:hover {
+  color: var(--text);
+}
+
+.subTabActive {
+  color: var(--bg);
+  background: var(--cyan);
+  border-color: var(--cyan);
+}
+
+.fullPanel {
+  flex: 1;
+  min-height: 0;
+}
+
+/* ---------- offense ---------- */
+
+.offenseGrid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1.1fr 1.1fr 1fr;
+  gap: var(--gap);
+}
+
+.col {
+  min-height: 0;
+}
+
+.sysGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.sysCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  background: var(--panel-alt);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  padding: 0.55rem 0.7rem;
+  text-align: left;
+  color: var(--text);
+}
+
+.sysCard:hover {
+  border-color: var(--cyan-dim);
+}
+
+.sysCardActive {
+  border-color: var(--cyan);
+  box-shadow: inset 0 0 0 1px var(--cyan);
+}
+
+.sysName {
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.sysDesc {
+  font-size: 0.66rem;
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+
+.chipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.chip {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 2px;
+  padding: 0.1rem 0.35rem;
+  text-transform: capitalize;
+}
+
+.sectionLabel {
+  margin-top: 0.7rem;
+  font-size: 0.62rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.sysPlayList {
+  display: flex;
+  flex-direction: column;
+}
+
+.sysPlayRow {
+  display: flex;
+  justify-content: space-between;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--panel-border);
+  color: var(--text-muted);
+  padding: 0.4rem 0.1rem;
+  font-size: 0.72rem;
+  text-align: left;
+}
+
+.sysPlayRow:hover {
+  color: var(--cyan);
+}
+
+.freqDots {
+  color: var(--cyan);
+  letter-spacing: 0.1em;
+}
+
+.catSelect {
+  background: var(--panel-alt);
+  border: 1px solid var(--panel-border);
+  color: var(--text);
+  border-radius: var(--radius);
+  padding: 0.25rem 0.4rem;
+  font-size: 0.68rem;
+}
+
+.playList {
+  display: flex;
+  flex-direction: column;
+}
+
+.playRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.5rem 0.9rem;
+  border-bottom: 1px solid var(--panel-border);
+  cursor: pointer;
+}
+
+.playRow:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.playRowActive {
+  background: rgba(25, 195, 214, 0.08);
+  box-shadow: inset 3px 0 0 var(--cyan);
+}
+
+.playRowMain {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.playName {
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.playCat {
+  font-size: 0.62rem;
+  color: var(--text-dim);
+  text-transform: capitalize;
+}
+
+.schemeChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.strongChip {
+  font-size: 0.58rem;
+  color: var(--positive);
+  border: 1px solid var(--positive);
+  border-radius: 2px;
+  padding: 0 0.3rem;
+}
+
+.weakChip {
+  font-size: 0.58rem;
+  color: var(--negative);
+  border: 1px solid var(--negative);
+  border-radius: 2px;
+  padding: 0 0.3rem;
+}
+
+.freqStepper {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.freqStepper button {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  color: var(--text);
+  border-radius: var(--radius);
+  width: 1.4rem;
+  height: 1.4rem;
+  font-size: 0.75rem;
+}
+
+.freqStepper span {
+  font-size: 0.75rem;
+  font-weight: 700;
+  min-width: 1ch;
+  text-align: center;
+}
+
+.freqOverridden {
+  color: var(--cyan);
+}
+
+.resetBtn {
+  margin-left: 0.3rem;
+  width: auto !important;
+  padding: 0 0.4rem;
+  font-size: 0.6rem !important;
+  color: var(--text-muted);
+}
+
+.playDetail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  height: 100%;
+}
+
+.diagramWrap {
+  flex: 1;
+  min-height: 10rem;
+}
+
+.playDesc {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.keyAttrs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.vsRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+.vsLabel {
+  color: var(--text-dim);
+  margin-right: 0.4rem;
+  text-transform: uppercase;
+  font-size: 0.6rem;
+  letter-spacing: 0.05em;
+}
+
+/* ---------- defense ---------- */
+
+.schemeGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.6rem;
+}
+
+.effectRow {
+  display: grid;
+  grid-template-columns: 6.5rem 1fr;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.effectLabel {
+  font-size: 0.6rem;
+  color: var(--text-dim);
+}
+
+/* ---------- style ---------- */
+
+.styleWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  max-width: 26rem;
+}
+
+.styleSlider {
+  display: grid;
+  grid-template-columns: 7rem 1fr 2.2rem;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.styleSlider input {
+  accent-color: var(--cyan);
+}
+
+.styleSlider span {
+  text-align: right;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.styleField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.styleField label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.styleField select {
+  background: var(--panel-alt);
+  border: 1px solid var(--panel-border);
+  color: var(--text);
+  border-radius: var(--radius);
+  padding: 0.4rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+/* ---------- rotation ---------- */
+
+.autoBtn {
+  background: var(--panel-alt);
+  border: 1px solid var(--panel-border);
+  color: var(--cyan);
+  border-radius: var(--radius);
+  padding: 0.25rem 0.7rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.rotationHead {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.warn {
+  color: var(--negative);
+  font-weight: 700;
+}
+
+.rotationList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.rotRow {
+  display: grid;
+  grid-template-columns: 1.6rem 1fr 3rem 5rem 4rem;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--panel-alt);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  padding: 0.4rem 0.7rem;
+  font-size: 0.72rem;
+}
+
+.rotRowInjured {
+  opacity: 0.5;
+}
+
+.rotOrder {
+  color: var(--text-dim);
+}
+
+.rotName {
+  font-weight: 600;
+}
+
+.rotPos {
+  color: var(--text-muted);
+}
+
+.injChip {
+  font-size: 0.6rem;
+  color: var(--negative);
+}
+
+.rotMinutes {
+  width: 3.5rem;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  color: var(--text);
+  border-radius: var(--radius);
+  padding: 0.2rem 0.4rem;
+  font-size: 0.7rem;
+}
+
+.rotBtns {
+  display: flex;
+  gap: 0.2rem;
+  justify-self: end;
+}
+
+.rotBtns button {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  color: var(--text);
+  border-radius: var(--radius);
+  width: 1.4rem;
+  height: 1.4rem;
+  font-size: 0.65rem;
+}
+
+.rotBtns button:disabled {
+  opacity: 0.3;
+}

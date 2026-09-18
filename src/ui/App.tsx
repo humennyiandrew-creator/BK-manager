@@ -5,6 +5,7 @@ import TabBar from './components/TabBar';
 import InfoStrip from './components/InfoStrip';
 import StartMenuScreen from './screens/StartMenuScreen';
 import ChooseTeamScreen from './screens/ChooseTeamScreen';
+import MatchScreen from './screens/MatchScreen';
 import { SCREENS } from './screens';
 import { userGameToday, nextUserGame, opponentOf, daysUntil, payroll, userTeam } from './selectors';
 import { formatDate, formatMoney } from './format';
@@ -77,5 +78,6 @@ export default function App() {
 
   if (view === 'startMenu') return <StartMenuScreen />;
   if (view === 'chooseTeam') return <ChooseTeamScreen />;
+  if (view === 'match') return <MatchScreen />;
   return <Shell />;
 }

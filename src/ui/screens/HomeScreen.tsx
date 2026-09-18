@@ -24,7 +24,7 @@ const eventIcon: Record<UpcomingEvent['icon'], typeof IconCalendar> = {
 
 export default function HomeScreen() {
   const s = useGameState();
-  const [conference, setConference] = useState<'East' | 'West'>('East');
+  const [conference, setConference] = useState<'East' | 'West'>(s ? userTeam(s).conference : 'East');
   if (!s) return null;
 
   const team = userTeam(s);

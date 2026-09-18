@@ -5,11 +5,8 @@ import { continueGame, userGameToday } from '../../engine/season';
 import type { SaveData } from '../../types/bk';
 import { loadGame, saveGame } from '../saves';
 import { loadLeagueData } from '../loadData';
-
-/** Sim the user's game today. Placeholder for the live 2D match, which will replace this call. */
-function playUserMatch(s: GameState) {
-  continueGame(s);
-}
+import { useMatch } from './useMatch';
+import { useUI } from './useUI';
 
 function toSaveData(s: GameState): SaveData {
   const team = s.teams[s.userTeamId];
@@ -71,10 +68,15 @@ export const useGame = create<GameStore>((set, get) => ({
   continue: () => {
     const { s, slot, busy } = get();
     if (!s || busy) return;
+    const today = userGameToday(s);
+    if (today) {
+      useMatch.getState().start(s, today);
+      useUI.getState().setView('match');
+      return;
+    }
     set({ busy: true });
     setTimeout(() => {
-      if (userGameToday(s)) playUserMatch(s);
-      else continueGame(s);
+      continueGame(s);
       set((st) => ({ rev: st.rev + 1, busy: false }));
       if (slot != null) void saveGame(slot, toSaveData(s));
     }, 30);
