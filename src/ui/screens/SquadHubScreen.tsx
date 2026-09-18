@@ -8,10 +8,12 @@ import { teamRoster } from '../selectors';
 import { ageOf } from '../../engine/ratings';
 import type { GameState, Player } from '../../engine/model';
 import { releasePlayer } from '../../engine/freeagency';
-import { expiring, resignAsk, resignPlayer } from '../../engine/offseason';
-import { capNumbers, isTwoWay, payroll as cbaPayroll, seasonLabel } from '../../engine/cba';
+import { expiring, resignAsk } from '../../engine/offseason';
+import { capNumbers, isTwoWay, marketValue, payroll as cbaPayroll, seasonLabel } from '../../engine/cba';
+import { extensionEligible } from '../../engine/negotiation';
 import { formatMoney, formatMoneyShort } from '../format';
 import { CAP_LINES, SALARY_SEASONS } from '../cba';
+import NegotiationModal from '../components/NegotiationModal';
 import styles from './SquadHubScreen.module.css';
 
 type Mutate = (fn: (s: GameState) => void) => void;
@@ -100,47 +102,6 @@ function CapSheetTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
   );
 }
 
-function ResignOfferModal({ s, mutate, player, ask, onClose }: { s: GameState; mutate: Mutate; player: Player; ask: { amount: number; years: number }; onClose: () => void }) {
-  const [amount, setAmount] = useState(ask.amount);
-  const [years, setYears] = useState(ask.years);
-  const [error, setError] = useState<string | null>(null);
-  const min = Math.round(ask.amount * 0.6 / 10_000) * 10_000;
-  const max = Math.round(ask.amount * 1.6 / 10_000) * 10_000;
-
-  const submit = () => {
-    let result: string | null = null;
-    mutate((st) => { result = resignPlayer(st, player.id, amount, years); });
-    if (result) setError(result); else onClose();
-  };
-
-  return (
-    <div className={styles.backdrop} onClick={onClose}>
-      <div className={styles.offerModal} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.offerModalHead}>
-          <BkImage path={player.face} alt={player.lastName} className={styles.offerModalFace} />
-          <div>
-            <div className={styles.offerModalName}>{player.firstName} {player.lastName}</div>
-            <div className={styles.offerModalMeta}>{player.positions.join('/')} · OVR {player.ratings.ovr} · Wants {formatMoneyShort(ask.amount)} / {ask.years}y</div>
-          </div>
-        </div>
-        <label className={styles.offerField}>
-          <span>Amount: {formatMoney(amount)}</span>
-          <input type="range" min={min} max={max} step={10_000} value={amount} onChange={(e) => setAmount(Number(e.target.value))} />
-        </label>
-        <label className={styles.offerField}>
-          <span>Years: {years}</span>
-          <input type="range" min={1} max={5} step={1} value={years} onChange={(e) => setYears(Number(e.target.value))} />
-        </label>
-        {error && <div className={styles.legalBad}>{error}</div>}
-        <div className={styles.offerModalBtns}>
-          <button type="button" className={styles.cancelBtn} onClick={onClose}>Cancel</button>
-          <button type="button" className={styles.proposeBtn} onClick={submit}>Offer</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function ResignTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
   const [letGo, setLetGo] = useState<Set<string>>(new Set());
   const [offerId, setOfferId] = useState<string | null>(null);
@@ -196,7 +157,41 @@ function ResignTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
         {list.length === 0 && <div className={styles.empty}>No expiring contracts this summer.</div>}
         {list.length > 0 && <DataTable columns={columns} rows={list} rowKey={(p) => p.id} compact />}
       </Panel>
-      {offering && <ResignOfferModal s={s} mutate={mutate} player={offering} ask={resignAsk(s, offering)} onClose={() => setOfferId(null)} />}
+      {offering && <NegotiationModal s={s} mutate={mutate} playerId={offering.id} kind="resign" onClose={() => setOfferId(null)} />}
+    </div>
+  );
+}
+
+function ExtensionsTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
+  const [offerId, setOfferId] = useState<string | null>(null);
+  const eligible = extensionEligible(s);
+  const offering = offerId ? s.players[offerId] : null;
+  const closed = s.phase === 'offseason' || s.phase === 'playoffs' || (s.phase === 'regular' && s.date > s.keyDates.tradeDeadline);
+
+  const columns: DataTableColumn<Player>[] = [
+    { key: 'face', header: '', render: (p) => <BkImage path={p.face} alt={p.lastName} className={styles.faceThumb} /> },
+    { key: 'name', header: 'Player', render: (p) => `${p.firstName} ${p.lastName}` },
+    { key: 'pos', header: 'Pos', render: (p) => p.positions.join('/') },
+    { key: 'age', header: 'Age', align: 'right', render: (p) => Math.floor(ageOf(p.birthDate)) },
+    { key: 'ovrpot', header: 'OVR/POT', align: 'right', render: (p) => `${p.ratings.ovr}/${p.ratings.pot}` },
+    { key: 'form', header: 'Form', align: 'right', render: (p) => `${(p.form ?? 0) > 0 ? '+' : ''}${(p.form ?? 0).toFixed(1)}` },
+    { key: 'salary', header: 'Current Salary', align: 'right', render: (p) => (p.contract ? formatMoneyShort(salaryFor(p, s.season)?.amount ?? 0) : '—') },
+    { key: 'mv', header: 'Market Value', align: 'right', render: (p) => formatMoneyShort(marketValue(p, s.seasonYear + 1)) },
+    {
+      key: 'actions', header: '', align: 'right', render: (p) => (
+        <button type="button" className={styles.offerBtn} onClick={() => setOfferId(p.id)}>Negotiate</button>
+      )
+    }
+  ];
+
+  return (
+    <div className={styles.resignWrap}>
+      <Panel title="Extension-Eligible" className={styles.tablePanel} flush>
+        {closed && <div className={styles.empty}>Extensions are closed until next preseason (trade deadline has passed).</div>}
+        {!closed && eligible.length === 0 && <div className={styles.empty}>No players with one season left on their deal.</div>}
+        {!closed && eligible.length > 0 && <DataTable columns={columns} rows={eligible} rowKey={(p) => p.id} compact />}
+      </Panel>
+      {offering && <NegotiationModal s={s} mutate={mutate} playerId={offering.id} kind="extension" onClose={() => setOfferId(null)} />}
     </div>
   );
 }
@@ -204,23 +199,27 @@ function ResignTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
 export default function SquadHubScreen() {
   const s = useGameState();
   const mutate = useGame((g) => g.mutate);
-  const [tab, setTab] = useState<'cap' | 'resign'>(() => (s?.offseason?.stage === 'resign' ? 'resign' : 'cap'));
+  const [tab, setTab] = useState<'cap' | 'resign' | 'ext'>(() => (s?.offseason?.stage === 'resign' ? 'resign' : 'cap'));
   if (!s) return null;
   const showResign = s.offseason?.stage === 'resign';
-  const activeTab = showResign ? tab : 'cap';
+  const activeTab = showResign ? tab : tab === 'resign' ? 'cap' : tab;
 
   return (
     <div className={styles.screenWrap}>
-      {showResign && (
-        <div className={styles.subTabs}>
-          <button type="button" className={activeTab === 'cap' ? `${styles.subTab} ${styles.subTabActive}` : styles.subTab} onClick={() => setTab('cap')}>Cap Sheet</button>
+      <div className={styles.subTabs}>
+        <button type="button" className={activeTab === 'cap' ? `${styles.subTab} ${styles.subTabActive}` : styles.subTab} onClick={() => setTab('cap')}>Cap Sheet</button>
+        {showResign && (
           <button type="button" className={activeTab === 'resign' ? `${styles.subTab} ${styles.subTabActive}` : styles.subTab} onClick={() => setTab('resign')}>
             Re-sign{expiring(s, s.userTeamId).length ? ` (${expiring(s, s.userTeamId).length})` : ''}
           </button>
-        </div>
-      )}
+        )}
+        <button type="button" className={activeTab === 'ext' ? `${styles.subTab} ${styles.subTabActive}` : styles.subTab} onClick={() => setTab('ext')}>
+          Extensions{extensionEligible(s).length ? ` (${extensionEligible(s).length})` : ''}
+        </button>
+      </div>
       {activeTab === 'cap' && <CapSheetTab s={s} mutate={mutate} />}
       {activeTab === 'resign' && <ResignTab s={s} mutate={mutate} />}
+      {activeTab === 'ext' && <ExtensionsTab s={s} mutate={mutate} />}
     </div>
   );
 }

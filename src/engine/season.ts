@@ -6,7 +6,9 @@ import { refreshRotation } from './rotation';
 import { simGame } from './sim/fast';
 import { dailyUpdate } from './daily';
 import { boardOnPhase } from './mgmt/board';
-import { trainingEffects } from './progression';
+import { fatigueInjuryMul, trainingEffects } from './progression';
+import { clamp } from './mgmt/market';
+import { hasNode } from './mgmt/facilities';
 import { offseasonStep } from './offseason';
 import { eventsDaily } from './events';
 
@@ -93,7 +95,9 @@ export function applyResult(s: GameState, g: Game, res: GameResult) {
   for (const b of [...res.box!.home, ...res.box!.away]) {
     const p = s.players[b.id];
     addLine(g.type === 'regular' ? p.season : p.playoffs, b);
-    if (rollInjury(p, b.min, rng, injMul[p.teamId!] ?? 1)) {
+    const loadMgmt = p.teamId && hasNode(s, p.teamId, 'analytics_loadMgmt');
+    p.fatigue = clamp((p.fatigue ?? 0) + b.min * 0.35 * (loadMgmt ? 0.85 : 1), 0, 100);
+    if (rollInjury(p, b.min, rng, (injMul[p.teamId!] ?? 1) * fatigueInjuryMul(p))) {
       refreshRotation(s.teams[p.teamId!], s.players);
       if (p.teamId === s.userTeamId) {
         msg(s, 'Medical Staff', `${p.firstName} ${p.lastName} injured`, `${p.injury!.name}. Expected out ${p.injury!.daysLeft} days.`, 'injury');

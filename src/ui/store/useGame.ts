@@ -64,6 +64,7 @@ export const useGame = create<GameStore>((set, get) => ({
       return false;
     }
     if (!loaded.events) loaded.events = [];
+    if (!loaded.negotiations) loaded.negotiations = [];
     set({ s: loaded, slot, rev: 0, busy: false });
     return true;
   },

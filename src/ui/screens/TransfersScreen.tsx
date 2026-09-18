@@ -8,9 +8,10 @@ import { useTransfersNav } from '../store/useTransfersNav';
 import { ageOf } from '../../engine/ratings';
 import type { DraftPick, GameState, Player, TradeSide } from '../../engine/model';
 import { evaluateTrade, playerValue, pickValue, proposeTrade, respondToOffer, tradeLegal, tradeWindowOpen } from '../../engine/trade';
-import { askingPrice, freeAgents, offerContract } from '../../engine/freeagency';
-import { capNumbers, isTwoWay, marketValue, maxSalary, minSalary, payroll as cbaPayroll, rosterOf, salaryIn, signingCheck, yearsLeft } from '../../engine/cba';
-import { formatDate, formatMoney, formatMoneyShort } from '../format';
+import { askingPrice, freeAgents } from '../../engine/freeagency';
+import { capNumbers, isTwoWay, marketValue, payroll as cbaPayroll, rosterOf, salaryIn, yearsLeft } from '../../engine/cba';
+import { formatDate, formatMoneyShort } from '../format';
+import NegotiationModal from '../components/NegotiationModal';
 import styles from './TransfersScreen.module.css';
 
 type SubTab = 'trade' | 'offers' | 'fa' | 'tx';
@@ -186,56 +187,6 @@ function OffersTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
 type FaSortKey = 'name' | 'pos' | 'age' | 'ovr' | 'pot' | 'ask' | 'mv';
 interface FaRow { p: Player; ask: { amount: number; years: number }; mv: number }
 
-function OfferModal({ s, mutate, player, ask, onClose }: { s: GameState; mutate: Mutate; player: Player; ask: { amount: number; years: number }; onClose: () => void }) {
-  const eligibleTwoWay = player.yearsPro <= 4 && player.ratings.ovr <= 72;
-  const [amount, setAmount] = useState(ask.amount);
-  const [years, setYears] = useState(ask.years);
-  const [twoWay, setTwoWay] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const min = minSalary(s.seasonYear, player.yearsPro);
-  const max = Math.max(maxSalary(s.seasonYear, player.yearsPro), ask.amount);
-  const check = signingCheck(s, s.userTeamId, player, twoWay ? 0 : amount, twoWay);
-
-  const submit = () => {
-    let result: string | null = null;
-    mutate((st) => { result = offerContract(st, st.userTeamId, player.id, amount, years, twoWay); });
-    if (result) setError(result); else onClose();
-  };
-
-  return (
-    <div className={styles.backdrop} onClick={onClose}>
-      <div className={styles.offerModal} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.offerModalHead}>
-          <BkImage path={player.face} alt={player.lastName} className={styles.offerModalFace} />
-          <div>
-            <div className={styles.offerModalName}>{player.firstName} {player.lastName}</div>
-            <div className={styles.offerModalMeta}>{player.positions.join('/')} · OVR {player.ratings.ovr} · Wants {formatMoneyShort(ask.amount)} / {ask.years}y</div>
-          </div>
-        </div>
-        <label className={styles.offerField}>
-          <span>Amount: {formatMoney(amount)}</span>
-          <input type="range" min={min} max={max} step={10000} value={amount} disabled={twoWay} onChange={(e) => setAmount(Number(e.target.value))} />
-        </label>
-        <label className={styles.offerField}>
-          <span>Years: {years}</span>
-          <input type="range" min={1} max={5} step={1} value={years} disabled={twoWay} onChange={(e) => setYears(Number(e.target.value))} />
-        </label>
-        {eligibleTwoWay && (
-          <label className={styles.checkField}>
-            <input type="checkbox" checked={twoWay} onChange={(e) => setTwoWay(e.target.checked)} /> Two-way contract
-          </label>
-        )}
-        <div className={check.reason ? styles.legalBad : styles.legalOk}>{check.reason ?? (check.usesMle ? 'Uses Mid-Level Exception' : 'Signing is legal')}</div>
-        {error && <div className={styles.legalBad}>{error}</div>}
-        <div className={styles.offerModalBtns}>
-          <button type="button" className={styles.cancelBtn} onClick={onClose}>Cancel</button>
-          <button type="button" className={styles.proposeBtn} disabled={!!check.reason} onClick={submit}>Submit Offer</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function FreeAgentsTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
   const [sortKey, setSortKey] = useState<FaSortKey>('ovr');
   const [sortDir, setSortDir] = useState<1 | -1>(-1);
@@ -291,7 +242,7 @@ function FreeAgentsTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
       <Panel title="Free Agents" className={styles.faPanel} flush>
         <DataTable columns={columns} rows={rows} rowKey={(r) => r.p.id} onRowClick={(r) => setOfferId(r.p.id)} compact />
       </Panel>
-      {offering && <OfferModal s={s} mutate={mutate} player={offering.p} ask={offering.ask} onClose={() => setOfferId(null)} />}
+      {offering && <NegotiationModal s={s} mutate={mutate} playerId={offering.p.id} kind="fa" onClose={() => setOfferId(null)} />}
     </div>
   );
 }

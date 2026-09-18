@@ -1,6 +1,6 @@
 // World state. Plain JSON — whole object is the save file.
 import type { Contract, Position, SeasonStats, Team } from './types';
-import type { PlayerRatings } from './ratings';
+import type { Attr, PlayerRatings } from './ratings';
 import type { DefScheme, OffSystem } from './playbook/types';
 
 export interface StatLine {
@@ -40,6 +40,8 @@ export interface Player {
   lastChange?: number;            // OVR change from last progression tick (UI arrows)
   prog?: number;                  // fractional OVR progress accumulator
   form?: number;                  // performance vs rating expectation, −3..+3 (weekly)
+  fatigue?: number;               // 0–100 accumulated load; lowers starting energy in games
+  devPlan?: Attr;                 // individual development target attribute
   potSeason?: number;             // POT change this season from performance (UI)
   minutesPromise?: { baselineMpg: number; checkDate: string; season: string }; // dynamic event follow-up
 }
@@ -61,6 +63,7 @@ export interface TeamState extends Team {
   minutes: Record<string, number>; // target minutes, sums ~240
   tactics: Tactics;
   customRotation?: boolean;        // user-set depth chart: injuries only shuffle, never rebuild
+  familiarity?: number;            // 0–100 how well the team knows its current offense/defense (practice + time)
   mleUsed?: boolean;               // mid-level exception used this season
   deadCap?: { season: string; amount: number }[]; // waived salary still on the cap
 }
@@ -147,7 +150,8 @@ export interface GameState {
   history: SeasonRecord[];                 // one per completed season
   careerOver?: boolean;
   // ---- dynamic events ----
-  events: GameEvent[];                     // pending + resolved log, newest first, kept to 60
+  events: GameEvent[];
+  negotiations: Negotiation[];            // contract talks (user team), open + recent                     // pending + resolved log, newest first, kept to 60
   offseasonEventStage?: string;            // last offseason stage an event was rolled for
 }
 
@@ -177,6 +181,8 @@ export interface Staff {
 export type FacilityId = 'training' | 'medical' | 'arena' | 'scouting' | 'analytics';
 export interface Facility {
   level: number;         // 1–5
+  nodes?: string[];      // unlocked upgrade-tree nodes
+  building?: { node: string; done: string; cost: number };
   upgrade?: { to: number; done: string; cost: number };
 }
 
@@ -202,7 +208,9 @@ export interface Board {
 }
 
 export type TrainingFocus = 'balanced' | 'shooting' | 'finishing' | 'playmaking' | 'defense' | 'rebounding' | 'conditioning';
+export type Session = 'high' | 'light' | 'shootaround' | 'film' | 'rest';
 export interface TrainingPlan {
+  schedule?: Session[];                    // 7 days Mon..Sun; game days override to shootaround
   intensity: number;                       // 1–5: growth vs fatigue/injury risk
   focus: TrainingFocus;
   individual: Record<string, TrainingFocus>; // playerId → personal focus
@@ -228,4 +236,18 @@ export interface Transaction { date: string; kind: 'trade' | 'sign' | 'release' 
 
 export interface KeyDates {
   tradeDeadline: string; regularEnd: string; draft: string; freeAgency: string;
+}
+
+// ---------- A4: negotiations ----------
+export interface ContractOffer { amount: number; years: number; playerOption?: boolean; teamOption?: boolean; incentives?: number }
+export interface Negotiation {
+  id: number; playerId: string; teamId: string;
+  kind: 'fa' | 'resign' | 'extension';
+  round: number; patience: number;          // agent patience 0–100; walks at 0
+  ask: ContractOffer;                        // agent's current demand (visible)
+  floor: number;                             // hidden minimum annual amount he'd accept now
+  rivals: number;                            // other teams interested (raises ask)
+  status: 'open' | 'signed' | 'walked';
+  log: { by: 'team' | 'agent'; text: string; offer?: ContractOffer }[];
+  date: string;
 }

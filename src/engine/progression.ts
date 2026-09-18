@@ -3,8 +3,9 @@ import type { GameState, Player, TrainingFocus, TrainingPlan } from './model';
 import { ageOf, type Attr } from './ratings';
 import { gauss, hashString, mulberry32, type Rng } from './rng';
 import { staffRating } from './mgmt/staff';
-import { facilityLevel } from './mgmt/facilities';
+import { facilityLevel, hasNode } from './mgmt/facilities';
 import { daysBetween } from './schedule';
+import { filmSessionsThisWeek, scheduleGrowthMul, scheduleInjuryMul } from './training';
 
 export const FOCUS_ATTRS: Record<TrainingFocus, Attr[]> = {
   balanced: [],
@@ -25,12 +26,22 @@ export function trainingEffects(s: GameState, teamId: string): { growthMul: numb
   const i = plan.intensity - 1; // 0–4
   const dev = 0.85 + staffRating(s, teamId, 'development') / 333;
   const fac = 0.9 + facilityLevel(s, teamId, 'training') * 0.04;
-  const med = (1.1 - staffRating(s, teamId, 'medical') / 250) * (1.08 - facilityLevel(s, teamId, 'medical') * 0.03);
+  const med = (1.1 - staffRating(s, teamId, 'medical') / 250) * (1.08 - facilityLevel(s, teamId, 'medical') * 0.03) * (hasNode(s, teamId, 'medical_sportsScience') ? 0.9 : 1);
   return {
     growthMul: (0.7 + 0.15 * i) * dev * fac,
-    injuryMul: (0.8 + 0.1 * i) * med,
+    injuryMul: (0.8 + 0.1 * i) * med * scheduleInjuryMul(s, teamId),
     fatigueMul: 0.9 + 0.05 * i,
   };
+}
+
+/** Fatigue >70 slows growth and raises injury risk. */
+export function fatigueGrowthMul(p: Player): number {
+  const f = p.fatigue ?? 0;
+  return f > 70 ? Math.max(0.4, 1 - (f - 70) * 0.02) : 1;
+}
+export function fatigueInjuryMul(p: Player): number {
+  const f = p.fatigue ?? 0;
+  return f > 70 ? 1 + (f - 70) * 0.02 : 1;
 }
 
 /** Expected OVR change over a full year at this age. */
@@ -45,12 +56,16 @@ export function annualExpected(age: number, ovr: number, pot: number): number {
   return -3.5;
 }
 
-function shiftAttrs(p: Player, delta: number, focus: TrainingFocus, rng: Rng) {
+function shiftAttrs(s: GameState, p: Player, delta: number, focus: TrainingFocus, rng: Rng) {
   const a = p.ratings.attrs;
   const pool = FOCUS_ATTRS[focus].length ? FOCUS_ATTRS[focus] : SKILL_ATTRS;
   const age = ageOf(p.birthDate);
+  const shootingLab = focus === 'shooting' && p.teamId && hasNode(s, p.teamId, 'training_shootingLab') ? 1.15 : 1;
+  const weightRoom = (focus === 'conditioning' || focus === 'rebounding') && p.teamId && hasNode(s, p.teamId, 'training_weightRoom') ? 1.15 : 1;
+  const perfCenter = p.teamId && hasNode(s, p.teamId, 'training_perfCenter') ? 1.1 : 1;
+  const nodeMul = shootingLab * weightRoom * perfCenter;
   // Focused attrs move ~2x, a few random skill attrs move 1x; physicals decline with age.
-  for (const k of pool) a[k] = Math.max(25, Math.min(99, a[k] + Math.sign(delta) * Math.round(Math.abs(delta) * (focus === 'balanced' ? 1 : 2) * (0.5 + rng()))));
+  for (const k of pool) a[k] = Math.max(25, Math.min(99, a[k] + Math.sign(delta) * Math.round(Math.abs(delta) * (focus === 'balanced' ? 1 : 2) * (0.5 + rng()) * nodeMul)));
   if (focus !== 'balanced') for (let i = 0; i < 3; i++) {
     const k = SKILL_ATTRS[Math.floor(rng() * SKILL_ATTRS.length)];
     a[k] = Math.max(25, Math.min(99, a[k] + Math.sign(delta)));
@@ -58,7 +73,7 @@ function shiftAttrs(p: Player, delta: number, focus: TrainingFocus, rng: Rng) {
   if (delta < 0 && age > 29) for (const k of PHYSICAL) a[k] = Math.max(25, a[k] - Math.round(rng() * 1.5));
 }
 
-function applyDelta(p: Player, raw: number, focus: TrainingFocus, rng: Rng) {
+function applyDelta(s: GameState, p: Player, raw: number, focus: TrainingFocus, rng: Rng) {
   p.prog = (p.prog ?? 0) + raw;
   const whole = Math.trunc(p.prog);
   if (!whole) return;
@@ -68,7 +83,12 @@ function applyDelta(p: Player, raw: number, focus: TrainingFocus, rng: Rng) {
   p.ratings.ovr = Math.max(35, Math.min(99, p.ratings.ovr + gain));
   if (p.ratings.ovr > p.ratings.pot) p.ratings.pot = p.ratings.ovr;
   p.lastChange = whole;
-  shiftAttrs(p, whole, focus, rng);
+  shiftAttrs(s, p, whole, focus, rng);
+  // Individual development plan: 50% chance of +1 extra on the target attribute on a positive tick.
+  if (whole > 0 && p.devPlan && rng() < 0.5) {
+    const a = p.ratings.attrs;
+    a[p.devPlan] = Math.max(25, Math.min(99, a[p.devPlan] + 1));
+  }
 }
 
 const IN_SEASON_SHARE = 0.35;
@@ -127,10 +147,17 @@ export function progressionDaily(s: GameState) {
     const minutesMul = age <= 25 ? 0.85 + Math.min(1, mpg / 30) * 0.3 : 1;
     const work = 0.85 + p.ratings.personality.workEthic / 66;
     const base = annualExpected(age, p.ratings.ovr, p.ratings.pot) * IN_SEASON_SHARE / WEEKS;
-    const growth = base > 0 ? base * e.growthMul * minutesMul * work : base / Math.max(0.8, e.growthMul * 0.5 + 0.5);
+    const schedMul = scheduleGrowthMul(s, p.teamId) * fatigueGrowthMul(p);
+    const growth = base > 0 ? base * e.growthMul * schedMul * minutesMul * work : base / Math.max(0.8, e.growthMul * 0.5 + 0.5);
     // Performance feeds back: overperformers grow a little faster and raise their ceiling, flops the reverse.
     const form = p.form ?? 0;
-    applyDelta(p, growth + form * 0.035 + gauss(rng) * 0.12, plan.individual[p.id] ?? plan.focus, rng);
+    applyDelta(s, p, growth + form * 0.035 + gauss(rng) * 0.12, plan.individual[p.id] ?? plan.focus, rng);
+    const filmN = filmSessionsThisWeek(s, p.teamId);
+    if (filmN > 0) {
+      const bump = filmN * 0.15;
+      p.ratings.attrs.offIQ = Math.min(99, p.ratings.attrs.offIQ + bump);
+      p.ratings.attrs.helpD = Math.min(99, p.ratings.attrs.helpD + bump);
+    }
     const potStep = form * (age <= 25 ? 0.12 : 0.05);
     const room = 6 - Math.abs(p.potSeason ?? 0); // max ±6 POT per season from form
     if (Math.abs(potStep) > 0.01 && room > 0) {
@@ -158,7 +185,7 @@ export function annualProgression(s: GameState) {
     const plan = p.teamId ? s.training[p.teamId] ?? defaultTraining() : defaultTraining();
     const work = 0.85 + p.ratings.personality.workEthic / 66;
     const delta = (base > 0 ? base * e.growthMul * work : base) + gauss(rng) * 1.5;
-    applyDelta(p, delta, plan.individual[p.id] ?? plan.focus, rng);
+    applyDelta(s, p, delta, plan.individual[p.id] ?? plan.focus, rng);
     // Potential drifts: young players' ceilings move, vets' pot converges to ovr.
     if (age <= 24) p.ratings.pot = Math.max(p.ratings.ovr, Math.min(99, Math.round(p.ratings.pot + gauss(rng) * 2)));
     else p.ratings.pot = Math.max(p.ratings.ovr, Math.round(p.ratings.pot - (p.ratings.pot - p.ratings.ovr) * 0.5));

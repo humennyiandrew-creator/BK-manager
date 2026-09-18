@@ -17,7 +17,8 @@ export function askingPrice(s: GameState, p: Player): { amount: number; years: n
   return { amount, years: desiredYears(p, s.seasonYear) };
 }
 
-function sign(s: GameState, teamId: string, p: Player, amount: number, years: number, twoWay: boolean) {
+/** Exported for negotiation.ts: commits a deal once terms are already agreed (bypasses the ask-price gate below, which re-derives a fresh ask and would fight an already-negotiated number). */
+export function sign(s: GameState, teamId: string, p: Player, amount: number, years: number, twoWay: boolean) {
   const startYear = s.phase === 'offseason' ? s.seasonYear + 1 : s.seasonYear;
   p.teamId = teamId;
   p.contract = { salaries: contractRows(startYear, amount, years), type: twoWay ? 'two-way' : amount <= minSalary(s.seasonYear, p.yearsPro) * 1.001 ? 'min' : 'standard' };

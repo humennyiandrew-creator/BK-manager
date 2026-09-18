@@ -4,6 +4,7 @@ import { financeDaily } from './mgmt/finance';
 import { facilitiesDaily } from './mgmt/facilities';
 import { boardAfterGame } from './mgmt/board';
 import { progressionDaily } from './progression';
+import { trainingDaily } from './training';
 import { aiTradeDaily } from './trade';
 import { freeAgencyDaily } from './freeagency';
 import { eventsDaily } from './events';
@@ -12,6 +13,7 @@ export function dailyUpdate(s: GameState, playedToday: Game[]) {
   for (const g of playedToday) if (g.home === s.userTeamId || g.away === s.userTeamId) boardAfterGame(s, g);
   financeDaily(s, playedToday);
   facilitiesDaily(s);
+  trainingDaily(s);
   progressionDaily(s);
   if (s.phase === 'regular' && s.date <= s.keyDates.tradeDeadline) aiTradeDaily(s);
   freeAgencyDaily(s);

@@ -107,9 +107,14 @@ export function resignPlayer(s: GameState, pid: string, amount: number, years: n
   const ask = resignAsk(s, p);
   if (amount < ask.amount * 0.97) return `${p.lastName} wants at least $${(ask.amount / 1e6).toFixed(2)}M`;
   if (years < 1 || years > 5) return 'Contract length must be 1–5 years';
-  p.contract = { salaries: contractRows(s.seasonYear + 1, amount, years), type: 'standard' };
-  s.transactions.unshift({ date: s.date, kind: 'extend', text: `${s.teams[p.teamId].abbr} re-sign ${fullName(p)} (${years}y, $${(amount / 1e6).toFixed(1)}M)`, teams: [p.teamId] });
+  commitResign(s, p, amount, years);
   return null;
+}
+
+/** Exported for negotiation.ts: commits a re-sign once terms are already agreed (bypasses the ask-price gate above). */
+export function commitResign(s: GameState, p: Player, amount: number, years: number) {
+  p.contract = { salaries: contractRows(s.seasonYear + 1, amount, years), type: 'standard' };
+  s.transactions.unshift({ date: s.date, kind: 'extend', text: `${s.teams[p.teamId!].abbr} re-sign ${fullName(p)} (${years}y, $${(amount / 1e6).toFixed(1)}M)`, teams: [p.teamId!] });
 }
 
 /** Player options (opt out if underpaid) and team options (keep if fair value), all teams. */

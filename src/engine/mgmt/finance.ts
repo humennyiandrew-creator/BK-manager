@@ -3,7 +3,7 @@ import type { Finances, Game, GameState } from '../model';
 import { luxuryTax, payroll } from '../cba';
 import { standings } from '../season';
 import { daysBetween } from '../schedule';
-import { facilityLevel } from './facilities';
+import { FACILITY_IDS, facilityLevel } from './facilities';
 import { clamp, marketFactor, top3Ovr } from './market';
 
 export function initFinances(s: GameState): void {
@@ -53,6 +53,15 @@ export function financeDaily(s: GameState, playedToday: Game[]): void {
     f.cash += rev;
     f.attendance.push(frac);
     if (f.attendance.length > 40) f.attendance.shift();
+  }
+
+  // (a2) facility maintenance: sum(levels)×$0.25M + nodes×$0.1M per month, spread daily, year-round
+  {
+    const levels = FACILITY_IDS.reduce((sum, id) => sum + facilityLevel(s, team.id, id), 0);
+    const nodeCount = FACILITY_IDS.reduce((sum, id) => sum + (s.facilities[team.id][id].nodes?.length ?? 0), 0);
+    const maintDaily = (levels * 250_000 + nodeCount * 100_000) / 30;
+    f.expense.facilities += maintDaily;
+    f.cash -= maintDaily;
   }
 
   // (b) daily spread of salaries/staff/operations/tv/merch while the season is live

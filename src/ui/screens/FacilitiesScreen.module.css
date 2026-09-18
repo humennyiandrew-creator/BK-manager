@@ -2,10 +2,19 @@
   height: 100%;
   min-height: 0;
   padding: 0 1.4rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
 }
 
 .panel {
-  height: 100%;
+  flex: none;
+  max-height: 46%;
+  min-height: 0;
+}
+
+.treePanel {
+  flex: 1;
   min-height: 0;
 }
 
@@ -24,6 +33,106 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  appearance: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  color: var(--text);
+}
+
+.cardActive {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 1px var(--cyan) inset;
+}
+
+.nodeCount {
+  font-size: 0.62rem;
+  color: var(--text-dim);
+}
+
+.maintLine {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.tree {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  padding: 0.9rem;
+  align-items: flex-start;
+}
+
+.nodeWrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.nodeLine {
+  width: 1.4rem;
+  height: 2px;
+  background: var(--panel-border);
+  flex: none;
+}
+
+.node {
+  width: 14rem;
+  background: var(--panel-alt);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  padding: 0.7rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.node_locked {
+  opacity: 0.55;
+}
+
+.node_available {
+  border-color: var(--cyan);
+}
+
+.node_building {
+  border-color: var(--yellow, #d9a441);
+}
+
+.node_built {
+  border-color: var(--positive);
+}
+
+.nodeHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nodeTitle {
+  font-weight: 800;
+  font-size: 0.76rem;
+}
+
+.nodeState {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-dim);
+  font-weight: 700;
+}
+
+.nodeDesc {
+  margin: 0;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  min-height: 2.4em;
+}
+
+.lockedHint {
+  font-size: 0.62rem;
+  color: var(--text-dim);
 }
 
 .cardHead {

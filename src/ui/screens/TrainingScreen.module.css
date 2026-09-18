@@ -2,9 +2,21 @@
   height: 100%;
   min-height: 0;
   display: grid;
-  grid-template-columns: 18rem 1fr;
+  grid-template-columns: 20rem 1fr;
   gap: var(--gap);
   padding: 0 1.4rem 1rem;
+}
+
+.left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  min-height: 0;
+  overflow: auto;
+}
+
+.weekPanel {
+  flex: none;
 }
 
 .planPanel {
@@ -13,6 +25,94 @@
 
 .rosterPanel {
   min-height: 0;
+}
+
+.weekGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.3rem;
+  padding: 0.6rem;
+}
+
+.dayCol {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  background: var(--panel-alt);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  padding: 0.4rem 0.2rem;
+  min-height: 5.5rem;
+  color: var(--text);
+}
+
+.dayLocked {
+  opacity: 0.85;
+  cursor: default;
+}
+
+.dayLabel {
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.dayIcon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.daySession {
+  font-size: 0.58rem;
+  color: var(--text-muted);
+  font-weight: 700;
+  text-align: center;
+}
+
+.oppBadge {
+  transform: scale(0.7);
+  margin-top: -0.2rem;
+}
+
+.fatigueCell {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 8rem;
+}
+
+.fatigueBar {
+  flex: 1;
+}
+
+.fatigueNum {
+  font-size: 0.68rem;
+  font-weight: 700;
+  width: 1.6rem;
+  text-align: right;
+}
+
+.restFlag {
+  font-size: 0.6rem;
+  font-weight: 800;
+  color: var(--negative);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  padding: 0.2rem 0;
+}
+
+.summaryRow span:last-child {
+  color: var(--text);
+  font-weight: 700;
 }
 
 .section {

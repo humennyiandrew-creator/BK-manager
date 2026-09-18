@@ -4,7 +4,7 @@ import { contractRows, minSalary, rookieScale } from './cba';
 import { gauss, hashString, mulberry32 } from './rng';
 import { genPlayer } from './gen';
 import { staffRating } from './mgmt/staff';
-import { facilityLevel } from './mgmt/facilities';
+import { facilityLevel, hasNode } from './mgmt/facilities';
 import { standings } from './season';
 import { refreshRotation } from './rotation';
 
@@ -39,7 +39,7 @@ export function generateDraftClass(s: GameState, year: number) {
 export function scoutView(s: GameState, pid: string, teamId: string): { ovr: number; pot: number; range: number } {
   const p = s.players[pid];
   const skill = staffRating(s, teamId, 'scout') / 100 * 0.7 + facilityLevel(s, teamId, 'scouting') / 5 * 0.3;
-  const range = Math.round(2 + (1 - skill) * 10);
+  const range = Math.max(1, Math.round(2 + (1 - skill) * 10) - (hasNode(s, teamId, 'scouting_analyticsScouts') ? 1 : 0) - (hasNode(s, teamId, 'scouting_intlOffice') && p.country !== 'USA' ? 2 : 0));
   const rng = mulberry32(hashString(`${s.seed}|scout|${teamId}|${pid}`));
   const noise = (rng() - 0.5) * 2 * range;
   return { ovr: Math.round(p.ratings.ovr + noise * 0.4), pot: Math.round(p.ratings.pot + noise), range };

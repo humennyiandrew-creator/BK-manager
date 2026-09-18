@@ -7,6 +7,7 @@ import { useGame, useGameState } from '../store/useGame';
 import { SYSTEMS, SCHEMES } from '../../engine/playbook/systems';
 import { PLAYS } from '../../engine/playbook/plays';
 import { refreshRotation } from '../../engine/rotation';
+import { onTacticsChanged } from '../../engine/training';
 import type { OffSystem, DefScheme, Play, PlayCategory, SchemeDef } from '../../engine/playbook/types';
 import styles from './PlaybookScreen.module.css';
 
@@ -50,8 +51,8 @@ export default function PlaybookScreen() {
   const tactics = team.tactics;
   const selectedPlay = PLAYS.find((p) => p.id === selectedPlayId)!;
 
-  const setOffense = (id: OffSystem) => mutate((st) => (st.teams[st.userTeamId].tactics.offense = id));
-  const setDefense = (id: DefScheme) => mutate((st) => (st.teams[st.userTeamId].tactics.defense = id));
+  const setOffense = (id: OffSystem) => mutate((st) => { st.teams[st.userTeamId].tactics.offense = id; onTacticsChanged(st.teams[st.userTeamId]); });
+  const setDefense = (id: DefScheme) => mutate((st) => { st.teams[st.userTeamId].tactics.defense = id; onTacticsChanged(st.teams[st.userTeamId]); });
   const setSlider = (key: 'pace' | 'threeFocus' | 'crashGlass' | 'transition', v: number) =>
     mutate((st) => (st.teams[st.userTeamId].tactics[key] = v));
   const setFocus = (id: string) => mutate((st) => (st.teams[st.userTeamId].tactics.focusPlayer = id || null));
