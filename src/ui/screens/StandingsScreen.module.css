@@ -103,3 +103,65 @@
   color: var(--cyan);
   font-weight: 700;
 }
+
+.historyGrid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap: var(--gap);
+}
+
+.historyPanel,
+.allNbaPanel {
+  min-height: 0;
+}
+
+.empty {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  padding: 1rem;
+}
+
+.allNbaWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow-y: auto;
+}
+
+.allNbaTeam {
+  display: flex;
+  flex-direction: column;
+}
+
+.sectionTitle {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+  font-weight: 700;
+  margin-bottom: 0.4rem;
+}
+
+.allNbaPlayers {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.allNbaPlayer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+}
+
+.allNbaFace {
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--panel-alt);
+  flex-shrink: 0;
+}

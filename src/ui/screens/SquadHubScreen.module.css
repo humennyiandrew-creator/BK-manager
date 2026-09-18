@@ -1,10 +1,212 @@
-.wrap {
+.screenWrap {
   height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0 1.4rem 1rem;
+}
+
+.subTabs {
+  display: flex;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.subTab {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  color: var(--text-muted);
+  border-radius: var(--radius);
+  padding: 0.4rem 0.9rem;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+}
+
+.subTabActive {
+  background: var(--red);
+  border-color: var(--red);
+  color: var(--text);
+}
+
+.capGrid {
+  flex: 1;
   min-height: 0;
   display: grid;
   grid-template-columns: 1fr 20rem;
   gap: var(--gap);
-  padding: 0 1.4rem 1rem;
+}
+
+.resignWrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.resignHeader {
+  display: flex;
+  gap: 1.4rem;
+  flex-shrink: 0;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.9rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.empty {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  padding: 1rem;
+}
+
+.faceThumb {
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.resignActions {
+  display: flex;
+  gap: 0.4rem;
+  justify-content: flex-end;
+}
+
+.offerBtn {
+  background: var(--cyan);
+  color: var(--bg);
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.25rem 0.6rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.letGoBtn {
+  background: var(--panel-alt);
+  border: 1px solid var(--negative);
+  color: var(--negative);
+  border-radius: var(--radius);
+  padding: 0.25rem 0.6rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.letGoTag {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  justify-content: flex-end;
+  color: var(--text-dim);
+  font-size: 0.68rem;
+  font-style: italic;
+}
+
+.undoBtn {
+  background: transparent;
+  border: 1px solid var(--panel-border);
+  color: var(--text-muted);
+  border-radius: var(--radius);
+  padding: 0.15rem 0.45rem;
+  font-size: 0.6rem;
+}
+
+/* ---------- offer modal ---------- */
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 9, 16, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.offerModal {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  padding: 1.4rem 1.6rem;
+  min-width: 24rem;
+}
+
+.offerModalHead {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.offerModalFace {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.offerModalName {
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+.offerModalMeta {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.offerField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+}
+
+.legalBad {
+  color: var(--negative);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.offerModalBtns {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  margin-top: 0.2rem;
+}
+
+.cancelBtn {
+  background: var(--panel-alt);
+  border: 1px solid var(--panel-border);
+  color: var(--text-muted);
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.5rem 1rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.proposeBtn {
+  background: var(--cyan);
+  color: var(--bg);
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.5rem 1rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
 }
 
 .tablePanel {

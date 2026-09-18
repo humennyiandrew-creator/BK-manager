@@ -7,6 +7,42 @@
   padding: 0 1.4rem 1rem;
 }
 
+.clockBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-shrink: 0;
+  background: linear-gradient(90deg, var(--red), var(--panel));
+  border: 1px solid var(--red);
+  border-radius: var(--radius);
+  padding: 0.7rem 1.1rem;
+}
+
+.clockText {
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.clockDraftBtn {
+  background: var(--text);
+  color: var(--bg);
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.55rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.clockDraftBtn:disabled {
+  background: var(--panel-alt);
+  color: var(--text-dim);
+}
+
 .header {
   display: flex;
   align-items: center;

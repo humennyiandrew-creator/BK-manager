@@ -154,8 +154,18 @@ export default function DraftScreen() {
   const autoPick = () => mutate((st) => { const p = nextPick(st); if (p) aiPick(st, p.id); });
   const runLotteryTest = () => mutate((st) => { runLottery(st); });
 
+  const onTheClock = s.offseason?.stage === 'draft' && pending?.owner === s.userTeamId;
+
   return (
     <div className={styles.wrap}>
+      {onTheClock && (
+        <div className={styles.clockBanner}>
+          <span className={styles.clockText}>You&rsquo;re on the clock — Pick #{s.draftOrder.indexOf(pending!.id) + 1}</span>
+          <button type="button" className={styles.clockDraftBtn} disabled={!selected} onClick={draftSelected}>
+            Draft selected player{selected ? `: ${selected.p.firstName} ${selected.p.lastName}` : ''}
+          </button>
+        </div>
+      )}
       <div className={styles.header}>
         <div className={styles.headerBlock}>
           <span className={styles.headerLabel}>Draft Date</span>

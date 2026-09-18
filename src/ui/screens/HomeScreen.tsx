@@ -7,13 +7,16 @@ import BkImage from '../components/BkImage';
 import ProgressBar from '../components/ProgressBar';
 import { IconCalendar, IconTraining, IconStaff } from '../components/tabIcons';
 import { useGameState } from '../store/useGame';
+import { useUI } from '../store/useUI';
+import { useTransfersNav } from '../store/useTransfersNav';
 import {
   userTeam, topPlayers, playerRankOnTeam, conferenceRank, teamStrengthRank, seasonObjective,
   conferenceStandings, nextUserGame, opponentOf, daysUntil, lastMeeting, teamRecord, starters,
   upcomingEvents, type UpcomingEvent
 } from '../selectors';
-import type { Player } from '../../engine/model';
+import type { GameState, Player, SeasonRecord } from '../../engine/model';
 import type { StandingRow } from '../../engine/season';
+import { offseasonStageLabel } from '../../engine/offseason';
 import styles from './HomeScreen.module.css';
 
 const eventIcon: Record<UpcomingEvent['icon'], typeof IconCalendar> = {
@@ -21,6 +24,98 @@ const eventIcon: Record<UpcomingEvent['icon'], typeof IconCalendar> = {
   injury: IconStaff,
   league: IconTraining
 };
+
+const OFFSEASON_STAGES = ['Season Review', 'Draft', 'Re-sign', 'Free Agency', 'Training Camp', 'New Season'] as const;
+
+function offseasonStageIndex(s: GameState): number {
+  const st = s.offseason?.stage;
+  if (!st) return 0;
+  if (st === 'draft') return 1;
+  if (st === 'resign') return 2;
+  if (st === 'fa') return 3;
+  return 4; // camp
+}
+
+function OffseasonPanel({ s }: { s: GameState }) {
+  const setTab = useUI((u) => u.setTab);
+  const idx = offseasonStageIndex(s);
+  const st = s.offseason?.stage;
+
+  const hint = !st
+    ? 'Press Continue to finalize the season and open the draft lottery.'
+    : st === 'draft'
+    ? 'Scout the board and make your picks when it’s your turn on the clock.'
+    : st === 'resign'
+    ? 'Re-sign your own expiring free agents before the market opens July 1.'
+    : st === 'fa'
+    ? 'Sign free agents to fill out next season’s roster.'
+    : 'Progression and retirements run on your next Continue.';
+
+  const jump = !st ? null
+    : st === 'draft' ? { label: 'Go to Draft', fn: () => setTab('draft') }
+    : st === 'resign' ? { label: 'Go to Squad Hub', fn: () => setTab('squadHub') }
+    : st === 'fa' ? { label: 'Go to Free Agents', fn: () => { useTransfersNav.getState().requestTab('fa'); setTab('transfers'); } }
+    : null;
+
+  return (
+    <Panel title="Offseason" className={styles.offseasonPanel}>
+      <div className={styles.stageTimeline}>
+        {OFFSEASON_STAGES.map((label, i) => (
+          <div key={label} className={styles.stageStep}>
+            <div className={i < idx ? `${styles.stageDot} ${styles.stageDotDone}` : i === idx ? `${styles.stageDot} ${styles.stageDotActive}` : styles.stageDot} />
+            <span className={i === idx ? `${styles.stageLabel} ${styles.stageLabelActive}` : styles.stageLabel}>{label}</span>
+            {i < OFFSEASON_STAGES.length - 1 && <div className={i < idx ? `${styles.stageLine} ${styles.stageLineDone}` : styles.stageLine} />}
+          </div>
+        ))}
+      </div>
+      <div className={styles.stageCurrent}>{offseasonStageLabel(s)}</div>
+      <div className={styles.stageHint}>{hint}</div>
+      {jump && <button type="button" className={styles.stageJumpBtn} onClick={jump.fn}>{jump.label}</button>}
+    </Panel>
+  );
+}
+
+function LastSeasonPanel({ s }: { s: GameState }) {
+  const rec: SeasonRecord | undefined = s.history[s.history.length - 1];
+  if (!rec) {
+    return (
+      <Panel title="Last Season" className={styles.lastSeasonPanel}>
+        <div className={styles.lastSeasonEmpty}>No completed seasons yet.</div>
+      </Panel>
+    );
+  }
+  const awardRow = (label: string, id: string | null) => {
+    const p = id ? s.players[id] : null;
+    return (
+      <div className={styles.awardRow}>
+        <BkImage path={p?.face ?? null} alt={p?.lastName ?? label} className={styles.awardFace} />
+        <div className={styles.awardInfo}>
+          <span className={styles.awardLabel}>{label}</span>
+          <span className={styles.awardName}>{p ? `${p.firstName[0]}. ${p.lastName}` : '—'}</span>
+        </div>
+      </div>
+    );
+  };
+  return (
+    <Panel title={`${rec.season} Recap`} className={styles.lastSeasonPanel}>
+      <div className={styles.lastSeasonHead}>
+        <span className={styles.lastSeasonRecord}>{rec.w}-{rec.l}</span>
+        <span className={styles.lastSeasonResult}>{rec.result}</span>
+      </div>
+      <div className={styles.lastSeasonObjective}>
+        <span>{rec.objective}</span>
+        <span className={rec.objectiveMet ? styles.objectiveMet : styles.objectiveMissed}>{rec.objectiveMet ? '✓ Met' : '✗ Missed'}</span>
+      </div>
+      <div className={styles.awardsGrid}>
+        {awardRow('MVP', rec.awards.mvp)}
+        {awardRow('DPOY', rec.awards.dpoy)}
+        {awardRow('ROY', rec.awards.roy)}
+        {awardRow('6MOY', rec.awards.sixth)}
+        {awardRow('MIP', rec.awards.mip)}
+      </div>
+    </Panel>
+  );
+}
 
 export default function HomeScreen() {
   const s = useGameState();
@@ -105,7 +200,7 @@ export default function HomeScreen() {
           <DataTable columns={columns} rows={rows} rowKey={(r) => r.teamId} highlightedRowKey={s.userTeamId} compact />
         </Panel>
 
-        <Panel title="Next Opponent">
+        {s.phase === 'offseason' ? <OffseasonPanel s={s} /> : <Panel title="Next Opponent">
           {!next && <div className={styles.objectiveValue}>Season complete</div>}
           {next && (() => {
             const opp = opponentOf(s, next);
@@ -131,11 +226,11 @@ export default function HomeScreen() {
               </div>
             );
           })()}
-        </Panel>
+        </Panel>}
       </div>
 
       <div className={styles.col}>
-        <Panel title="Starting Five">
+        {s.phase === 'offseason' ? <LastSeasonPanel s={s} /> : <Panel title="Starting Five">
           <div className={styles.startersList}>
             {five.map((p: Player) => (
               <div key={p.id} className={styles.starterRow}>
@@ -154,7 +249,7 @@ export default function HomeScreen() {
               </div>
             ))}
           </div>
-        </Panel>
+        </Panel>}
 
         <Panel title="Upcoming Events" className={styles.eventsPanel}>
           {events.map((group) => (

@@ -80,7 +80,12 @@ export default function MatchScreen() {
       const snap = match!.snapshot();
       const ctx = fit.ctx;
       ctx.clearRect(0, 0, COURT_W, COURT_H);
-      drawCourt(ctx, 'full', { home: hexAlpha(homeColor, 0.08), away: hexAlpha(awayColor, 0.08) });
+      // Home attacks the right basket in periods 1-2, the left basket from period 3 on (post-halftime end swap).
+      // drawCourt's `home` tint paints the left end and `away` paints the right end, so swap the colors to match.
+      const homeAttacksRight = snap.period <= 2;
+      drawCourt(ctx, 'full', homeAttacksRight
+        ? { home: hexAlpha(awayColor, 0.08), away: hexAlpha(homeColor, 0.08) }
+        : { home: hexAlpha(homeColor, 0.08), away: hexAlpha(awayColor, 0.08) });
       for (const [aId, bId] of snap.screens) {
         const a = snap.players.find((p) => p.id === aId), b = snap.players.find((p) => p.id === bId);
         if (a && b) drawScreen(ctx, a.x, a.y, b.x, b.y);
@@ -362,10 +367,8 @@ const BOX_COLS: { key: string; label: string; render: (sp: SP) => string }[] = [
   { key: 'stl', label: 'STL', render: (sp) => String(sp.line.stl) },
   { key: 'blk', label: 'BLK', render: (sp) => String(sp.line.blk) },
   { key: 'tov', label: 'TOV', render: (sp) => String(sp.line.tov) },
-  { key: 'fg', label: 'FG', render: (sp) => `${sp.line.fgm}-${sp.line.fga}` },
-  { key: 'tp', label: '3P', render: (sp) => `${sp.line.tpm}-${sp.line.tpa}` },
-  { key: 'ft', label: 'FT', render: (sp) => `${sp.line.ftm}-${sp.line.fta}` },
   { key: 'pf', label: 'PF', render: (sp) => String(sp.line.pf) },
+  { key: 'shooting', label: 'FG 3P FT', render: (sp) => `${sp.line.fgm}-${sp.line.fga} ${sp.line.tpm}-${sp.line.tpa} ${sp.line.ftm}-${sp.line.fta}` },
   { key: 'pm', label: '+/-', render: (sp) => (sp.line.pm > 0 ? `+${sp.line.pm}` : String(sp.line.pm)) }
 ];
 

@@ -486,21 +486,24 @@
 
 .boxTable {
   width: 100%;
+  table-layout: auto;
   border-collapse: collapse;
-  font-size: 0.66rem;
+  font-size: 0.58rem;
 }
 
 .boxTable th {
   text-align: right;
   color: var(--text-dim);
   font-weight: 700;
-  padding: 0.2rem 0.3rem;
+  padding: 0.2rem 0.2rem;
+  white-space: nowrap;
 }
 
 .boxTable td {
   text-align: right;
-  padding: 0.2rem 0.3rem;
+  padding: 0.2rem 0.2rem;
   color: var(--text-muted);
+  white-space: nowrap;
 }
 
 .boxName {

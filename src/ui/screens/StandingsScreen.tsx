@@ -1,12 +1,59 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import Panel from '../components/Panel';
 import DataTable, { type DataTableColumn } from '../components/DataTable';
 import TeamBadge from '../components/TeamBadge';
+import BkImage from '../components/BkImage';
 import { useGameState } from '../store/useGame';
 import { conferenceStandings } from '../selectors';
 import type { StandingRow } from '../../engine/season';
-import type { Series } from '../../engine/model';
+import type { GameState, SeasonRecord, Series } from '../../engine/model';
 import styles from './StandingsScreen.module.css';
+
+const playerName = (s: GameState, id: string | null) => {
+  const p = id ? s.players[id] : null;
+  return p ? `${p.firstName[0]}. ${p.lastName}` : '—';
+};
+
+function HistoryTable({ s, rows, selected, onSelect }: { s: GameState; rows: SeasonRecord[]; selected: string; onSelect: (season: string) => void }) {
+  const columns: DataTableColumn<SeasonRecord>[] = [
+    { key: 'season', header: 'Season', render: (r) => r.season },
+    { key: 'record', header: 'Record', align: 'right', render: (r) => `${r.w}-${r.l}` },
+    { key: 'rank', header: 'Conf', align: 'right', render: (r) => `#${r.confRank}` },
+    { key: 'result', header: 'Result', render: (r) => r.result },
+    { key: 'objective', header: 'Objective', render: (r) => `${r.objective}${r.objectiveMet ? ' ✓' : ' ✗'}` },
+    { key: 'champ', header: 'Champion', render: (r) => <TeamBadge logoPath={s.teams[r.champion]?.logo ?? null} name={s.teams[r.champion]?.abbr ?? '-'} /> },
+    { key: 'mvp', header: 'MVP', render: (r) => playerName(s, r.awards.mvp) },
+    { key: 'roy', header: 'ROY', render: (r) => playerName(s, r.awards.roy) },
+    { key: 'dpoy', header: 'DPOY', render: (r) => playerName(s, r.awards.dpoy) }
+  ];
+  return <DataTable columns={columns} rows={rows} rowKey={(r) => r.season} highlightedRowKey={selected} onRowClick={(r) => onSelect(r.season)} compact />;
+}
+
+function AllNbaTeams({ s, record }: { s: GameState; record?: SeasonRecord }) {
+  if (!record) return <div className={styles.empty}>No award data</div>;
+  const teams = [record.awards.allNba.slice(0, 5), record.awards.allNba.slice(5, 10), record.awards.allNba.slice(10, 15)];
+  const labels = ['All-NBA 1st Team', 'All-NBA 2nd Team', 'All-NBA 3rd Team'];
+  return (
+    <div className={styles.allNbaWrap}>
+      {teams.map((ids, i) => (
+        <div key={i} className={styles.allNbaTeam}>
+          <div className={styles.sectionTitle}>{labels[i]}</div>
+          <div className={styles.allNbaPlayers}>
+            {ids.map((id) => {
+              const p = s.players[id];
+              return (
+                <div key={id} className={styles.allNbaPlayer}>
+                  <BkImage path={p?.face ?? null} alt={p?.lastName ?? id} className={styles.allNbaFace} />
+                  <span>{p ? `${p.firstName[0]}. ${p.lastName}` : id}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 function StandingsTable({ rows, teams, userTeamId }: { rows: StandingRow[]; teams: Record<string, { abbr: string; logo: string }>; userTeamId: string }) {
   const columns: DataTableColumn<StandingRow & { rank: number }>[] = [
@@ -90,7 +137,14 @@ function Bracket({ series, teams }: { series: Series[]; teams: Record<string, { 
 
 export default function StandingsScreen() {
   const s = useGameState();
-  const [tab, setTab] = useState<'East' | 'West' | 'Bracket'>('East');
+  const [tab, setTab] = useState<'East' | 'West' | 'Bracket' | 'History'>('East');
+  const [selectedSeason, setSelectedSeason] = useState<string | null>(null);
+
+  const selectedRecord = useMemo(() => {
+    if (!s) return undefined;
+    return s.history.find((h) => h.season === selectedSeason) ?? s.history[s.history.length - 1];
+  }, [s, selectedSeason]);
+
   if (!s) return null;
 
   const showBracket = s.phase === 'playin' || s.phase === 'playoffs' || s.phase === 'offseason';
@@ -109,11 +163,28 @@ export default function StandingsScreen() {
             Bracket
           </button>
         )}
+        {s.history.length > 0 && (
+          <button type="button" className={tab === 'History' ? `${styles.tab} ${styles.tabActive}` : styles.tab} onClick={() => setTab('History')}>
+            Awards &amp; History
+          </button>
+        )}
       </div>
-      <Panel title={tab === 'Bracket' ? 'Postseason Bracket' : `${tab}ern Conference`} className={styles.panel} flush>
-        {tab !== 'Bracket' && <StandingsTable rows={conferenceStandings(s, tab)} teams={teams} userTeamId={s.userTeamId} />}
-        {tab === 'Bracket' && <Bracket series={s.series} teams={teams} />}
-      </Panel>
+      {tab !== 'History' && (
+        <Panel title={tab === 'Bracket' ? 'Postseason Bracket' : `${tab}ern Conference`} className={styles.panel} flush>
+          {tab !== 'Bracket' && <StandingsTable rows={conferenceStandings(s, tab)} teams={teams} userTeamId={s.userTeamId} />}
+          {tab === 'Bracket' && <Bracket series={s.series} teams={teams} />}
+        </Panel>
+      )}
+      {tab === 'History' && (
+        <div className={styles.historyGrid}>
+          <Panel title="Season History" className={styles.historyPanel} flush>
+            <HistoryTable s={s} rows={s.history} selected={selectedRecord?.season ?? ''} onSelect={setSelectedSeason} />
+          </Panel>
+          <Panel title={`All-NBA — ${selectedRecord?.season ?? ''}`} className={styles.allNbaPanel}>
+            <AllNbaTeams s={s} record={selectedRecord} />
+          </Panel>
+        </div>
+      )}
     </div>
   );
 }

@@ -263,6 +263,194 @@
   flex-shrink: 0;
 }
 
+.offseasonPanel {
+  display: flex;
+  flex-direction: column;
+}
+
+.stageTimeline {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 0.8rem;
+}
+
+.stageStep {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  position: relative;
+}
+
+.stageStep:last-child {
+  flex: 0;
+}
+
+.stageDot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: var(--panel-alt);
+  border: 2px solid var(--text-dim);
+  flex-shrink: 0;
+}
+
+.stageDotDone {
+  background: var(--cyan);
+  border-color: var(--cyan);
+}
+
+.stageDotActive {
+  background: var(--red);
+  border-color: var(--red);
+  box-shadow: 0 0 0 3px rgba(216, 39, 53, 0.25);
+}
+
+.stageLabel {
+  position: absolute;
+  top: 1rem;
+  left: -0.3rem;
+  font-size: 0.58rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.stageLabelActive {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.stageLine {
+  flex: 1;
+  height: 2px;
+  background: var(--panel-alt);
+  margin: 0 0.2rem;
+}
+
+.stageLineDone {
+  background: var(--cyan);
+}
+
+.stageCurrent {
+  margin-top: 1.6rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--cyan);
+}
+
+.stageHint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.3rem;
+  line-height: 1.4;
+}
+
+.stageJumpBtn {
+  margin-top: 0.8rem;
+  align-self: flex-start;
+  background: var(--red);
+  color: var(--text);
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.5rem 1rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.lastSeasonPanel {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.lastSeasonEmpty {
+  color: var(--text-dim);
+  font-size: 0.82rem;
+}
+
+.lastSeasonHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.lastSeasonRecord {
+  font-size: 1.3rem;
+  font-weight: 900;
+}
+
+.lastSeasonResult {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.lastSeasonObjective {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 0.4rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.objectiveMet {
+  color: var(--positive);
+  font-weight: 700;
+}
+
+.objectiveMissed {
+  color: var(--negative);
+  font-weight: 700;
+}
+
+.awardsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+  overflow-y: auto;
+}
+
+.awardRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.awardFace {
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--panel-alt);
+  flex-shrink: 0;
+}
+
+.awardInfo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.awardLabel {
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.awardName {
+  font-size: 0.78rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .injuryChip {
   flex-shrink: 0;
   font-size: 0.62rem;

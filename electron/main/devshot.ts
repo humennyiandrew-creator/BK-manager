@@ -17,7 +17,7 @@ export function runDevShots(win: BrowserWindow) {
       try {
         if (st.js) log.push(String(await win.webContents.executeJavaScript(st.js, true)));
         if (st.wait) await new Promise((r) => setTimeout(r, st.wait));
-        if (st.shot) writeFileSync(join(dir, st.shot), (await win.webContents.capturePage()).toPNG());
+        if (st.shot) writeFileSync(join(dir, st.shot), (await win.webContents.capturePage(undefined, { stayHidden: true, stayAwake: true })).toPNG());
       } catch (e) { log.push(`ERR ${String(e)}`); }
     }
     writeFileSync(join(dir, 'shot-log.txt'), log.join('\n'));

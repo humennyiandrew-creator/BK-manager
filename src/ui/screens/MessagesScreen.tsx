@@ -39,7 +39,7 @@ export default function MessagesScreen() {
   };
 
   const viewOffer = () => {
-    useTransfersNav.getState().requestOffers();
+    useTransfersNav.getState().requestTab('offers');
     setTab('transfers');
   };
 

@@ -325,10 +325,10 @@ export default function TransfersScreen() {
   const s = useGameState();
   const mutate = useGame((g) => g.mutate);
   const [subTab, setSubTab] = useState<SubTab>('trade');
-  const jump = useTransfersNav((st) => st.jumpToOffers);
+  const jump = useTransfersNav((st) => st.jumpTo);
 
   useEffect(() => {
-    if (jump) { setSubTab('offers'); useTransfersNav.getState().clear(); }
+    if (jump) { setSubTab(jump); useTransfersNav.getState().clear(); }
   }, [jump]);
 
   if (!s) return null;
