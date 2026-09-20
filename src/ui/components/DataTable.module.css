@@ -16,6 +16,33 @@
   position: sticky;
   top: 0;
   background: var(--panel);
+  z-index: 1;
+}
+
+.headInner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.sortable {
+  cursor: pointer;
+  user-select: none;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.sortable:hover {
+  color: var(--text);
+}
+
+.sortArrow {
+  font-size: 0.55rem;
+  opacity: 0.35;
+}
+
+.sortArrowActive {
+  opacity: 1;
+  color: var(--accent);
 }
 
 .table td {
@@ -37,6 +64,10 @@
   transition: background var(--dur-fast) var(--ease-out);
 }
 
+.zebra {
+  background: color-mix(in srgb, var(--panel-alt) 55%, transparent);
+}
+
 .row:hover {
   background: color-mix(in srgb, var(--accent) 8%, transparent);
 }
@@ -47,4 +78,37 @@
 
 .highlighted td:first-child {
   box-shadow: inset 3px 0 0 var(--cyan);
+}
+
+.chevronCol {
+  width: 1.8rem;
+  padding: 0.2rem 0.3rem !important;
+  text-align: center;
+}
+
+.chevronBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-dim);
+  font-size: 0.6rem;
+  transition: color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
+}
+
+.chevronBtn:hover {
+  color: var(--accent);
+  border-color: var(--panel-border);
+  background: var(--panel-alt);
+}
+
+.emptyRow td {
+  padding: 1.6rem 0.6rem;
+  text-align: center;
+  color: var(--text-dim);
+  font-style: italic;
 }

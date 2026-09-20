@@ -1,10 +1,24 @@
-.wrap {
+.screen {
   height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-3) 1.4rem 1rem;
+}
+
+.statsRow {
+  display: flex;
+  gap: var(--gap);
+  flex-shrink: 0;
+}
+
+.body {
+  flex: 1;
   min-height: 0;
   display: grid;
   grid-template-columns: 1.1fr 1fr;
   gap: var(--gap);
-  padding: 0 1.4rem 1rem;
 }
 
 .panel {
@@ -100,8 +114,7 @@
   border-color: var(--cyan);
 }
 
-.roleRow,
-.marketRow {
+.roleRow {
   display: grid;
   grid-template-columns: 10rem 5rem 1.6rem 4.5rem 2.6rem auto;
   align-items: center;
@@ -111,10 +124,16 @@
   font-size: 0.78rem;
 }
 
-.marketRow {
-  grid-template-columns: 10rem 5rem 1.6rem 4.5rem auto;
-  padding: 0.4rem 0.9rem;
-  border-bottom: 1px solid var(--panel-border);
+.ratingCell {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.ratingCell .ratingBar {
+  width: 4rem;
 }
 
 .roleInfo {

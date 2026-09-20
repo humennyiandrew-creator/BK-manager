@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import { useUI } from '../store/useUI';
 import { useGame } from '../store/useGame';
 import BkImage from '../components/BkImage';
 import Panel from '../components/Panel';
 import { loadLeagueData } from '../loadData';
 import { buildTeamPreviews, type TeamPreview } from '../teamPreview';
+import { computeAccent } from '../accent';
 import styles from './ChooseTeamScreen.module.css';
 
 function Stars({ n }: { n: number }) {
@@ -67,6 +68,12 @@ export default function ChooseTeamScreen() {
   const west = previews.filter((p) => p.team.conference === 'West').sort((a, b) => a.team.name.localeCompare(b.team.name));
   const detail = previews.find((p) => p.team.id === selected) ?? null;
   const slot = pendingSlot ?? 1;
+  const detailAccent = computeAccent(detail?.team.colors.primary, detail?.team.colors.secondary);
+  const detailStyle = {
+    '--accent': detailAccent.accent,
+    '--accent-2': detailAccent.accent2,
+    '--accent-contrast': detailAccent.accentContrast
+  } as CSSProperties;
 
   const start = async () => {
     if (!detail || starting) return;
@@ -80,7 +87,7 @@ export default function ChooseTeamScreen() {
       <button type="button" className={styles.back} onClick={() => setView('startMenu')}>
         &#8592; Back
       </button>
-      <div className={styles.title}>Choose Your Team</div>
+      <div className={styles.title}><span className={styles.slash}>// </span>CHOOSE YOUR TEAM</div>
       <div className={styles.layout}>
         <Panel title="Eastern Conference" className={styles.confPanel} flush>
           <div className={styles.list}>
@@ -96,32 +103,34 @@ export default function ChooseTeamScreen() {
             ))}
           </div>
         </Panel>
-        <Panel title="Team Detail" className={styles.detailPanel}>
-          {!detail && <div className={styles.empty}>Select a team</div>}
-          {detail && (
-            <div className={styles.detail}>
-              <div className={styles.detailHead}>
-                <BkImage path={detail.team.logo} alt={detail.team.name} className={styles.detailLogo} />
-                <div>
-                  <div className={styles.detailName}>{detail.team.city} {detail.team.name}</div>
-                  <div className={styles.detailMeta}>{detail.team.conference} &middot; {detail.team.division}</div>
-                  <Stars n={detail.stars} />
-                </div>
-              </div>
-              <div className={styles.detailPlayers}>
-                {detail.topPlayers.map((p) => (
-                  <div key={p.id} className={styles.detailPlayer}>
-                    <span>{p.firstName} {p.lastName}</span>
-                    <span className={styles.detailOvr}>{p.ovr}</span>
+        <div className={styles.detailPanel} style={detailStyle}>
+          <Panel title="Team Detail" className={styles.detailPanelInner}>
+            {!detail && <div className={styles.empty}>Select a team</div>}
+            {detail && (
+              <div className={styles.detail}>
+                <div className={`${styles.detailHead} diagonal-accent`}>
+                  <BkImage path={detail.team.logo} alt={detail.team.name} className={styles.detailLogo} />
+                  <div>
+                    <div className={styles.detailName}>{detail.team.city} {detail.team.name}</div>
+                    <div className={styles.detailMeta}>{detail.team.conference} &middot; {detail.team.division}</div>
+                    <Stars n={detail.stars} />
                   </div>
-                ))}
+                </div>
+                <div className={styles.detailPlayers}>
+                  {detail.topPlayers.map((p) => (
+                    <div key={p.id} className={styles.detailPlayer}>
+                      <span>{p.firstName} {p.lastName}</span>
+                      <span className={styles.detailOvr}>{p.ovr}</span>
+                    </div>
+                  ))}
+                </div>
+                <button type="button" className={`${styles.startBtn} chevron-stripe`} onClick={start} disabled={starting}>
+                  {starting ? 'Starting…' : 'Start Career'}
+                </button>
               </div>
-              <button type="button" className={styles.startBtn} onClick={start} disabled={starting}>
-                {starting ? 'Starting…' : 'Start Career'}
-              </button>
-            </div>
-          )}
-        </Panel>
+            )}
+          </Panel>
+        </div>
       </div>
     </div>
   );

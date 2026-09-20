@@ -50,9 +50,9 @@ export default function StartMenuScreen() {
 
   return (
     <div className={styles.wrap}>
-      <div className={styles.panel}>
+      <div className={`${styles.panel} diagonal-accent`}>
         <div className={styles.title}>
-          BK <span>MANAGER</span>
+          <span className={styles.slash}>// </span>BK <span>MANAGER</span>
         </div>
 
         {mode === 'menu' && (

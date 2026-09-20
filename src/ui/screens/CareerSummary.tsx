@@ -1,6 +1,7 @@
 import Panel from '../components/Panel';
 import DataTable, { type DataTableColumn } from '../components/DataTable';
 import BkImage from '../components/BkImage';
+import StatTile from '../components/StatTile';
 import type { GameState, SeasonRecord } from '../../engine/model';
 import styles from './CareerSummary.module.css';
 
@@ -34,31 +35,19 @@ export default function CareerSummary({ s, onBack }: { s: GameState; onBack: () 
 
   return (
     <div className={styles.wrap}>
-      <div className={styles.header}>
+      <div className={`${styles.header} diagonal-accent`}>
         <BkImage path={team.logo} alt={team.name} className={styles.logo} />
         <div>
-          <div className={styles.title}>{team.city} {team.name}</div>
+          <div className={styles.title}><span className={styles.slash}>// </span>{team.city} {team.name}</div>
           <div className={styles.subtitle}>{s.startYear}–{s.startYear + s.maxSeasons} Career Summary</div>
         </div>
       </div>
 
       <div className={styles.stats}>
-        <div className={styles.stat}>
-          <span className={styles.statValue}>{titles}</span>
-          <span className={styles.statLabel}>Titles</span>
-        </div>
-        <div className={styles.stat}>
-          <span className={styles.statValue}>{playoffApps}/{history.length}</span>
-          <span className={styles.statLabel}>Playoff Appearances</span>
-        </div>
-        <div className={styles.stat}>
-          <span className={styles.statValue}>{objectivesMet}/{history.length}</span>
-          <span className={styles.statLabel}>Objectives Met</span>
-        </div>
-        <div className={styles.stat}>
-          <span className={styles.statValue}>{totalW}-{totalL}</span>
-          <span className={styles.statLabel}>Total Record</span>
-        </div>
+        <StatTile label="Titles" value={titles} />
+        <StatTile label="Playoff Appearances" value={playoffApps} formatter={() => `${playoffApps}/${history.length}`} />
+        <StatTile label="Objectives Met" value={objectivesMet} formatter={() => `${objectivesMet}/${history.length}`} />
+        <StatTile label="Total Record" value={totalW} formatter={() => `${totalW}-${totalL}`} />
         {bestSeason && (
           <div className={styles.stat}>
             <span className={styles.statValue}>{playerName(s, bestSeason.topScorer.id)}</span>

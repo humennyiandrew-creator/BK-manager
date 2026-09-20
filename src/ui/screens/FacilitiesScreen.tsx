@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import HeroHeader from '../components/HeroHeader';
 import Panel from '../components/Panel';
 import ProgressBar from '../components/ProgressBar';
+import StatTile from '../components/StatTile';
 import { useGameState, useGame } from '../store/useGame';
 import {
   FACILITY_IDS, FACILITY_LABEL, FACILITY_EFFECT, NODES_BY_FACILITY, facilityLevel, upgradeCost, startUpgrade, startNode,
@@ -28,7 +30,18 @@ export default function FacilitiesScreen() {
   const monthlyMaint = builtLevels * 0.25 + totalNodes * 0.1;
 
   return (
-    <div className={styles.wrap}>
+    <div className={styles.screen}>
+      <HeroHeader
+        title="Facilities"
+        subtitle="Arena and training center"
+        right={
+          <div className={styles.heroStats}>
+            <StatTile label="Facility Levels" value={builtLevels} formatter={(v) => `${v}/25`} />
+            <StatTile label="Nodes Built" value={totalNodes} />
+            <StatTile label="Monthly Upkeep" value={monthlyMaint} formatter={(v) => `$${v.toFixed(2)}M`} />
+          </div>
+        }
+      />
       <Panel title="Facilities" className={styles.panel} flush>
         <div className={styles.grid}>
           {FACILITY_IDS.map((id) => {

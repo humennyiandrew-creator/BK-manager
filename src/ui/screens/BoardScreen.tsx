@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
+import HeroHeader from '../components/HeroHeader';
+import SideRail, { type SideRailItem } from '../components/SideRail';
 import Panel from '../components/Panel';
 import StatRow from '../components/StatRow';
 import DataTable, { type DataTableColumn } from '../components/DataTable';
+import { IconBoard, IconMessages } from '../components/tabIcons';
 import { useGameState, useGame } from '../store/useGame';
 import { useBoardNav, type BoardSubTab } from '../store/useBoardNav';
 import {
@@ -65,16 +68,16 @@ export default function BoardScreen() {
   const b = s.board;
 
   const historyColumns: DataTableColumn<HistoryRow>[] = [
-    { key: 'season', header: 'Season', render: (h) => h.season },
+    { key: 'season', header: 'Season', render: (h) => h.season, sortValue: (h) => h.season },
     { key: 'objective', header: 'Objective', render: (h) => objectiveLabel(h.objective) },
     { key: 'result', header: 'Result', render: (h) => h.result },
     { key: 'met', header: 'Met', align: 'right', render: (h) => (h.met ? <span className={styles.met}>Yes</span> : <span className={styles.notMet}>No</span>) },
   ];
 
   const promiseColumns: DataTableColumn<BoardPromise>[] = [
-    { key: 'date', header: 'Made', render: (p) => formatDate(p.date) },
+    { key: 'date', header: 'Made', render: (p) => formatDate(p.date), sortValue: (p) => p.date },
     { key: 'label', header: 'Promise', render: (p) => p.label },
-    { key: 'deadline', header: 'Deadline', render: (p) => formatDate(p.deadline) },
+    { key: 'deadline', header: 'Deadline', render: (p) => formatDate(p.deadline), sortValue: (p) => p.deadline },
     {
       key: 'status', header: 'Status', align: 'right',
       render: (p) => <span className={p.status === 'kept' ? styles.met : p.status === 'broken' ? styles.notMet : undefined}>{STATUS_LABEL[p.status]}</span>,
@@ -90,16 +93,19 @@ export default function BoardScreen() {
   const pending = s.press?.pending;
   const pressHistory = s.messages.filter((m) => m.kind === 'other' && m.subject.startsWith('Press conference recap')).slice(0, 10);
 
+  const railItems: SideRailItem<BoardSubTab>[] = [
+    { id: 'overview', label: 'Overview', icon: IconBoard },
+    { id: 'meeting', label: 'Meeting', icon: IconBoard },
+    { id: 'promises', label: 'Promises', icon: IconBoard },
+    { id: 'media', label: 'Media', icon: IconMessages, badge: pending ? 1 : undefined }
+  ];
+
   return (
-    <div className={styles.wrap}>
-      <div className={styles.subTabs}>
-        {(['overview', 'meeting', 'promises', 'media'] as BoardSubTab[]).map((t) => (
-          <button key={t} type="button" className={tab === t ? `${styles.subTab} ${styles.subTabActive}` : styles.subTab} onClick={() => { setTab(t); setNote(null); }}>
-            {t === 'overview' ? 'Overview' : t === 'meeting' ? 'Meeting' : t === 'promises' ? 'Promises' : 'Media'}
-            {t === 'media' && pending && <span className={styles.dot} />}
-          </button>
-        ))}
-      </div>
+    <div className={styles.screen}>
+      <HeroHeader title="Board" subtitle="Ownership expectations" />
+      <div className={styles.body}>
+      <SideRail items={railItems} active={tab} onSelect={(t) => { setTab(t); setNote(null); }} />
+      <div className={styles.content}>
 
       {tab === 'overview' && (
         <div className={styles.tabBody}>
@@ -207,6 +213,8 @@ export default function BoardScreen() {
           </Panel>
         </div>
       )}
+      </div>
+      </div>
     </div>
   );
 }

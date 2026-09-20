@@ -1,6 +1,8 @@
 import { useState } from 'react';
+import HeroHeader from '../components/HeroHeader';
 import Panel from '../components/Panel';
-import StatRow from '../components/StatRow';
+import SectionCard from '../components/SectionCard';
+import StatTile from '../components/StatTile';
 import ProgressBar from '../components/ProgressBar';
 import { useGameState, useGame } from '../store/useGame';
 import { capNumbers, luxuryTax, payroll } from '../../engine/cba';
@@ -95,14 +97,20 @@ export default function FinancesScreen() {
   const doSign = (offerId: number) => mutate((st) => { setNote(signSponsor(st, offerId)); });
   const doTheme = () => mutate((st) => { setNote(bookThemeNight(st)); });
 
+  const cashDelta = f.monthly.length >= 2 ? f.monthly[f.monthly.length - 1].cash - f.monthly[f.monthly.length - 2].cash : undefined;
+
   return (
-    <div className={styles.wrap}>
+    <div className={styles.screen}>
+      <HeroHeader title="Finances" subtitle="Budget and payroll" />
+      <div className={styles.wrap}>
       <div className={styles.col}>
-        <Panel title="Overview" className={styles.panel}>
-          <StatRow label="Cash on Hand" value={formatMoney(f.cash)} variant={f.cash >= 0 ? 'positive' : 'negative'} />
-          <StatRow label="Season Revenue" value={formatMoney(revTotal)} />
-          <StatRow label="Season Expense" value={formatMoney(expTotal)} />
-          <StatRow label="Net" value={formatMoney(revTotal - expTotal)} variant={revTotal - expTotal >= 0 ? 'positive' : 'negative'} />
+        <SectionCard title="Overview" accent className={styles.panel}>
+          <div className={styles.statGrid}>
+            <StatTile label="Cash on Hand" value={f.cash} formatter={formatMoney} delta={cashDelta} deltaFormatter={formatMoneyShort} />
+            <StatTile label="Season Revenue" value={revTotal} formatter={formatMoney} />
+            <StatTile label="Season Expense" value={expTotal} formatter={formatMoney} />
+            <StatTile label="Net" value={revTotal - expTotal} formatter={formatMoney} />
+          </div>
           <div className={styles.ticketRow}>
             <div className={styles.ticketHead}>
               <span>Ticket Price</span>
@@ -111,7 +119,7 @@ export default function FinancesScreen() {
             <input type="range" min={40} max={300} step={5} value={ticketPrice} onChange={(e) => commit(Number(e.target.value))} className={styles.slider} />
             <span className={styles.ticketProjection}>Projected attendance ≈ {attendPct}% of capacity</span>
           </div>
-        </Panel>
+        </SectionCard>
 
         <Panel title="Revenue" className={styles.panel}>
           {(Object.keys(f.revenue) as RevenueCat[]).map((k) => (
@@ -197,6 +205,7 @@ export default function FinancesScreen() {
           </div>
           {note && <div className={styles.sponsorNote}>{note}</div>}
         </Panel>
+      </div>
       </div>
     </div>
   );

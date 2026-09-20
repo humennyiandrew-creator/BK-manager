@@ -1,15 +1,30 @@
-.wrap {
+.screen {
   height: 100%;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
-  padding: 0 1.4rem 1rem;
+  gap: var(--sp-3);
+  padding: var(--sp-3) 1.4rem 1rem;
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.boardBody {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
 }
 
 .subTabs {
   display: flex;
-  gap: 0.4rem;
+  gap: var(--sp-2);
   flex-shrink: 0;
 }
 
@@ -17,9 +32,9 @@
   background: var(--panel);
   border: 1px solid var(--panel-border);
   color: var(--text-muted);
-  border-radius: var(--radius);
-  padding: 0.4rem 0.9rem;
-  font-size: 0.72rem;
+  border-radius: var(--radius-sm);
+  padding: var(--sp-2) var(--sp-3);
+  font-size: var(--fs-label);
   text-transform: uppercase;
   letter-spacing: 0.04em;
   font-weight: 700;
@@ -29,6 +44,17 @@
   background: var(--red);
   border-color: var(--red);
   color: var(--text);
+}
+
+.statsRow {
+  display: flex;
+  align-items: center;
+  gap: var(--gap);
+  flex-shrink: 0;
+}
+
+.statTile {
+  min-width: 8rem;
 }
 
 .eyeIcon {
@@ -52,6 +78,8 @@
 }
 
 .clockBanner {
+  position: relative;
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -63,7 +91,16 @@
   padding: 0.7rem 1.1rem;
 }
 
+.clockBanner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.08) 0 0.4rem, transparent 0.4rem 1.1rem);
+  pointer-events: none;
+}
+
 .clockText {
+  position: relative;
   font-size: 0.95rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -71,6 +108,7 @@
 }
 
 .clockDraftBtn {
+  position: relative;
   background: var(--text);
   color: var(--bg);
   border: none;
@@ -204,9 +242,14 @@
 }
 
 .detailHead {
+  position: relative;
+  overflow: hidden;
   display: flex;
   gap: 0.8rem;
   align-items: center;
+  padding: 0.5rem;
+  margin: -0.5rem -0.5rem 0.3rem;
+  border-radius: var(--radius-sm);
 }
 
 .detailFace {

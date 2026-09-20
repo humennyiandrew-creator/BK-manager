@@ -6,25 +6,33 @@
 }
 
 .panel {
+  position: relative;
   width: 26rem;
   background: var(--panel);
   border: 1px solid var(--panel-border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-lg);
   padding: 2rem;
   display: flex;
   flex-direction: column;
   gap: 1.2rem;
+  overflow: hidden;
 }
 
 .title {
+  position: relative;
   text-align: center;
-  font-size: 2rem;
+  font-size: var(--fs-display);
   font-weight: 900;
-  letter-spacing: 0.03em;
+  font-style: italic;
+  letter-spacing: 0.01em;
 }
 
 .title span {
-  color: var(--cyan);
+  color: var(--accent);
+}
+
+.slash {
+  color: var(--accent);
 }
 
 .menu {
@@ -36,7 +44,8 @@
 .item {
   background: var(--panel-alt);
   border: 1px solid var(--panel-border);
-  border-radius: var(--radius);
+  border-left: 3px solid transparent;
+  border-radius: var(--radius-sm);
   color: var(--text);
   padding: 0.8rem 1rem;
   font-size: 0.9rem;
@@ -44,11 +53,13 @@
   text-transform: uppercase;
   letter-spacing: 0.03em;
   text-align: left;
+  transition: border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
 }
 
 .item:hover {
-  border-color: var(--cyan);
-  color: var(--cyan);
+  border-color: var(--panel-border);
+  border-left-color: var(--accent);
+  color: var(--accent);
 }
 
 .saveRow {

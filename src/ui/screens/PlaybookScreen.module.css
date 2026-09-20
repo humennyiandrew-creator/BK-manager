@@ -1,37 +1,24 @@
-.wrap {
-  height: 100%;
+.screen {
   display: flex;
   flex-direction: column;
-  gap: 0.7rem;
+  gap: var(--sp-3);
+  height: 100%;
   min-height: 0;
+  padding: var(--sp-3) 1.4rem 1rem;
 }
 
-.subTabs {
-  flex-shrink: 0;
+.body {
+  flex: 1;
+  min-height: 0;
   display: flex;
-  gap: 0.4rem;
+  gap: var(--gap);
 }
 
-.subTab {
-  background: var(--panel);
-  border: 1px solid var(--panel-border);
-  color: var(--text-muted);
-  border-radius: var(--radius);
-  padding: 0.45rem 1rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
-.subTab:hover {
-  color: var(--text);
-}
-
-.subTabActive {
-  color: var(--bg);
-  background: var(--cyan);
-  border-color: var(--cyan);
+.content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .fullPanel {

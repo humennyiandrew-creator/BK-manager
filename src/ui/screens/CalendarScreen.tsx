@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import HeroHeader from '../components/HeroHeader';
 import Panel from '../components/Panel';
 import BkImage from '../components/BkImage';
 import { useGameState } from '../store/useGame';
@@ -42,18 +43,23 @@ export default function CalendarScreen() {
   const modalGame = modalGameId != null ? s.games.find((g) => g.id === modalGameId) : null;
 
   return (
-    <div className={styles.wrap}>
-      <Panel
-        title={`${MONTH_NAMES[m]} ${y}`}
-        className={styles.panel}
-        flush
-        headerRight={
+    <div className={styles.screen}>
+      <HeroHeader
+        title="Calendar"
+        subtitle="Season schedule"
+        right={
           <div className={styles.nav}>
+            <span className={styles.navMonth}>{MONTH_NAMES[m]} {y}</span>
             <button type="button" onClick={() => shiftMonth(-1)}>&#8592;</button>
             <button type="button" onClick={() => setYm({ y: todayDate.getUTCFullYear(), m: todayDate.getUTCMonth() })}>Today</button>
             <button type="button" onClick={() => shiftMonth(1)}>&#8594;</button>
           </div>
         }
+      />
+      <Panel
+        title={`${MONTH_NAMES[m]} ${y}`}
+        className={styles.panel}
+        flush
       >
         <div className={styles.dowRow}>
           {DOW.map((d) => <div key={d} className={styles.dow}>{d}</div>)}

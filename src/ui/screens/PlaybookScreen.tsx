@@ -1,8 +1,11 @@
 import { useState } from 'react';
+import HeroHeader from '../components/HeroHeader';
+import SideRail, { type SideRailItem } from '../components/SideRail';
 import Panel from '../components/Panel';
 import ProgressBar from '../components/ProgressBar';
 import PlayDiagram from '../components/PlayDiagram';
 import TacticFitPanel from '../components/TacticFitPanel';
+import { IconPlaybook, IconTraining } from '../components/tabIcons';
 import { useGame, useGameState } from '../store/useGame';
 import { SYSTEMS, SCHEMES } from '../../engine/playbook/systems';
 import { PLAYS } from '../../engine/playbook/plays';
@@ -12,6 +15,13 @@ import type { OffSystem, DefScheme, Play, PlayCategory, SchemeDef } from '../../
 import styles from './PlaybookScreen.module.css';
 
 type SubTab = 'offense' | 'defense' | 'style' | 'rotation';
+
+const RAIL_ITEMS: SideRailItem<SubTab>[] = [
+  { id: 'offense', label: 'Offense', icon: IconPlaybook },
+  { id: 'defense', label: 'Defense', icon: IconPlaybook },
+  { id: 'style', label: 'Team Style', icon: IconPlaybook },
+  { id: 'rotation', label: 'Rotation', icon: IconTraining }
+];
 
 const CATEGORIES: (PlayCategory | 'all')[] = ['all', 'pnr', 'horns', 'off-ball', 'post', 'iso', 'motion', 'transition', 'zone-buster'];
 
@@ -95,15 +105,11 @@ export default function PlaybookScreen() {
   }
 
   return (
-    <div className={styles.wrap}>
-      <div className={styles.subTabs}>
-        {(['offense', 'defense', 'style', 'rotation'] as SubTab[]).map((t) => (
-          <button key={t} className={t === subTab ? `${styles.subTab} ${styles.subTabActive}` : styles.subTab} onClick={() => setSubTab(t)}>
-            {t === 'offense' ? 'Offense' : t === 'defense' ? 'Defense' : t === 'style' ? 'Team Style' : 'Rotation'}
-          </button>
-        ))}
-      </div>
-
+    <div className={styles.screen}>
+      <HeroHeader title="Playbook" subtitle="Tactics and set plays" />
+      <div className={styles.body}>
+      <SideRail items={RAIL_ITEMS} active={subTab} onSelect={setSubTab} />
+      <div className={styles.content}>
       <div className={styles.mainRow}>
       <div className={styles.mainCol}>
       {subTab === 'offense' && (
@@ -273,6 +279,8 @@ export default function PlaybookScreen() {
       )}
       </div>
       <TacticFitPanel />
+      </div>
+      </div>
       </div>
     </div>
   );

@@ -1,8 +1,11 @@
 import { useMemo, useState } from 'react';
+import HeroHeader from '../components/HeroHeader';
+import SideRail, { type SideRailItem } from '../components/SideRail';
 import Panel from '../components/Panel';
 import DataTable, { type DataTableColumn } from '../components/DataTable';
 import TeamBadge from '../components/TeamBadge';
 import BkImage from '../components/BkImage';
+import { IconStandings } from '../components/tabIcons';
 import { useGameState } from '../store/useGame';
 import { conferenceStandings } from '../selectors';
 import type { StandingRow } from '../../engine/season';
@@ -57,20 +60,20 @@ function AllNbaTeams({ s, record }: { s: GameState; record?: SeasonRecord }) {
 
 function StandingsTable({ rows, teams, userTeamId }: { rows: StandingRow[]; teams: Record<string, { abbr: string; logo: string }>; userTeamId: string }) {
   const columns: DataTableColumn<StandingRow & { rank: number }>[] = [
-    { key: 'rank', header: '#', render: (r) => r.rank },
+    { key: 'rank', header: '#', render: (r) => r.rank, sortValue: (r) => r.rank },
     { key: 'team', header: 'Team', render: (r) => <TeamBadge logoPath={teams[r.teamId].logo} name={teams[r.teamId].abbr} /> },
-    { key: 'w', header: 'W', align: 'right', render: (r) => r.w },
-    { key: 'l', header: 'L', align: 'right', render: (r) => r.l },
-    { key: 'pct', header: 'PCT', align: 'right', render: (r) => r.pct.toFixed(3) },
-    { key: 'gb', header: 'GB', align: 'right', render: (r) => (r.gb ? r.gb.toFixed(1) : '-') },
+    { key: 'w', header: 'W', align: 'right', render: (r) => r.w, sortValue: (r) => r.w },
+    { key: 'l', header: 'L', align: 'right', render: (r) => r.l, sortValue: (r) => r.l },
+    { key: 'pct', header: 'PCT', align: 'right', render: (r) => r.pct.toFixed(3), sortValue: (r) => r.pct },
+    { key: 'gb', header: 'GB', align: 'right', render: (r) => (r.gb ? r.gb.toFixed(1) : '-'), sortValue: (r) => r.gb ?? 0 },
     { key: 'home', header: 'Home', align: 'right', render: (r) => `${r.home[0]}-${r.home[1]}` },
     { key: 'away', header: 'Away', align: 'right', render: (r) => `${r.away[0]}-${r.away[1]}` },
     { key: 'conf', header: 'Conf', align: 'right', render: (r) => `${r.conf[0]}-${r.conf[1]}` },
     { key: 'l10', header: 'L10', align: 'right', render: (r) => `${r.last10[0]}-${r.last10[1]}` },
     { key: 'strk', header: 'Strk', align: 'right', render: (r) => (r.streak === 0 ? '-' : `${r.streak > 0 ? 'W' : 'L'}${Math.abs(r.streak)}`) },
-    { key: 'pfg', header: 'PF/G', align: 'right', render: (r) => (r.pf / Math.max(1, r.w + r.l)).toFixed(1) },
-    { key: 'pag', header: 'PA/G', align: 'right', render: (r) => (r.pa / Math.max(1, r.w + r.l)).toFixed(1) },
-    { key: 'diff', header: 'Diff', align: 'right', render: (r) => ((r.pf - r.pa) / Math.max(1, r.w + r.l)).toFixed(1) }
+    { key: 'pfg', header: 'PF/G', align: 'right', render: (r) => (r.pf / Math.max(1, r.w + r.l)).toFixed(1), sortValue: (r) => r.pf / Math.max(1, r.w + r.l) },
+    { key: 'pag', header: 'PA/G', align: 'right', render: (r) => (r.pa / Math.max(1, r.w + r.l)).toFixed(1), sortValue: (r) => r.pa / Math.max(1, r.w + r.l) },
+    { key: 'diff', header: 'Diff', align: 'right', render: (r) => ((r.pf - r.pa) / Math.max(1, r.w + r.l)).toFixed(1), sortValue: (r) => (r.pf - r.pa) / Math.max(1, r.w + r.l) }
   ];
   const withRank = rows.map((r, i) => ({ ...r, rank: i + 1 }));
   return (
@@ -151,41 +154,37 @@ export default function StandingsScreen() {
   const showBracket = s.phase === 'playin' || s.phase === 'playoffs' || s.phase === 'offseason';
   const teams = s.teams;
 
+  const railItems: SideRailItem<typeof tab>[] = [
+    { id: 'East', label: 'Eastern Conference', icon: IconStandings },
+    { id: 'West', label: 'Western Conference', icon: IconStandings },
+    ...(showBracket ? [{ id: 'Bracket' as const, label: 'Bracket', icon: IconStandings }] : []),
+    ...(s.history.length > 0 ? [{ id: 'History' as const, label: 'Awards & History', icon: IconStandings }] : [])
+  ];
+
   return (
-    <div className={styles.wrap}>
-      <div className={styles.tabs}>
-        {(['East', 'West'] as const).map((c) => (
-          <button key={c} type="button" className={tab === c ? `${styles.tab} ${styles.tabActive}` : styles.tab} onClick={() => setTab(c)}>
-            {c}ern Conference
-          </button>
-        ))}
-        {showBracket && (
-          <button type="button" className={tab === 'Bracket' ? `${styles.tab} ${styles.tabActive}` : styles.tab} onClick={() => setTab('Bracket')}>
-            Bracket
-          </button>
-        )}
-        {s.history.length > 0 && (
-          <button type="button" className={tab === 'History' ? `${styles.tab} ${styles.tabActive}` : styles.tab} onClick={() => setTab('History')}>
-            Awards &amp; History
-          </button>
-        )}
-      </div>
-      {tab !== 'History' && (
-        <Panel title={tab === 'Bracket' ? 'Postseason Bracket' : `${tab}ern Conference`} className={styles.panel} flush>
-          {tab !== 'Bracket' && <StandingsTable rows={conferenceStandings(s, tab)} teams={teams} userTeamId={s.userTeamId} />}
-          {tab === 'Bracket' && <Bracket series={s.series} teams={teams} />}
-        </Panel>
-      )}
-      {tab === 'History' && (
-        <div className={styles.historyGrid}>
-          <Panel title="Season History" className={styles.historyPanel} flush>
-            <HistoryTable s={s} rows={s.history} selected={selectedRecord?.season ?? ''} onSelect={setSelectedSeason} />
-          </Panel>
-          <Panel title={`All-NBA — ${selectedRecord?.season ?? ''}`} className={styles.allNbaPanel}>
-            <AllNbaTeams s={s} record={selectedRecord} />
-          </Panel>
+    <div className={styles.screen}>
+      <HeroHeader title="Standings" subtitle="League table" />
+      <div className={styles.body}>
+        <SideRail items={railItems} active={tab} onSelect={setTab} />
+        <div className={styles.content}>
+          {tab !== 'History' && (
+            <Panel title={tab === 'Bracket' ? 'Postseason Bracket' : `${tab}ern Conference`} className={styles.panel} flush>
+              {tab !== 'Bracket' && <StandingsTable rows={conferenceStandings(s, tab)} teams={teams} userTeamId={s.userTeamId} />}
+              {tab === 'Bracket' && <Bracket series={s.series} teams={teams} />}
+            </Panel>
+          )}
+          {tab === 'History' && (
+            <div className={styles.historyGrid}>
+              <Panel title="Season History" className={styles.historyPanel} flush>
+                <HistoryTable s={s} rows={s.history} selected={selectedRecord?.season ?? ''} onSelect={setSelectedSeason} />
+              </Panel>
+              <Panel title={`All-NBA — ${selectedRecord?.season ?? ''}`} className={styles.allNbaPanel}>
+                <AllNbaTeams s={s} record={selectedRecord} />
+              </Panel>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }

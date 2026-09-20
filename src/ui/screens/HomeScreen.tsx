@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import HeroHeader from '../components/HeroHeader';
 import Panel from '../components/Panel';
 import PlayerCard from '../components/PlayerCard';
 import DataTable, { type DataTableColumn } from '../components/DataTable';
@@ -145,7 +146,9 @@ export default function HomeScreen() {
   ];
 
   return (
-    <div className={styles.grid}>
+    <div className={styles.screen}>
+      <HeroHeader title={`${team.city} ${team.name}`} subtitle="Team overview" />
+      <div className={styles.grid}>
       <div className={`${styles.col} stagger`}>
         <Panel title="Board">
           <div className={styles.boardTeam}>
@@ -290,6 +293,7 @@ export default function HomeScreen() {
             </div>
           ))}
         </Panel>
+      </div>
       </div>
     </div>
   );

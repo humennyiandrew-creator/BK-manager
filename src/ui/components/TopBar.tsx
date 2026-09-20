@@ -1,38 +1,18 @@
+import type { ReactNode } from 'react';
 import styles from './TopBar.module.css';
 
 interface Props {
-  title: string;
-  subtitle?: string;
-  onContinue?: () => void;
-  continueLabel?: string;
-  busy?: boolean;
+  continueSlot?: ReactNode;
 }
 
-export default function TopBar({ title, subtitle, onContinue, continueLabel = 'Continue', busy }: Props) {
+/** Slim shell chrome strip: help chip + the ContinueWidget. Per-screen titles live in HeroHeader. */
+export default function TopBar({ continueSlot }: Props) {
   return (
     <div className={styles.bar}>
-      <div className={styles.left}>
-        <div className={styles.titleRow}>
-          <span className={styles.title}>{title}</span>
-          <span className={styles.help}>
-            <span className={styles.helpKey}>H</span> Help
-          </span>
-        </div>
-        {subtitle && <span className={styles.subtitle}>{subtitle}</span>}
-      </div>
-      {onContinue && (
-        <button
-          type="button"
-          className={busy ? `${styles.continue} ${styles.busy}` : styles.continue}
-          onClick={onContinue}
-          disabled={busy}
-          data-sound="confirm"
-        >
-          {busy && <span className={styles.spinner} />}
-          <span>{busy ? 'Simulating…' : continueLabel}</span>
-          {!busy && <span className={styles.chevron}>&#10148;</span>}
-        </button>
-      )}
+      <span className={styles.help}>
+        <span className={styles.helpKey}>H</span> Help
+      </span>
+      {continueSlot}
     </div>
   );
 }

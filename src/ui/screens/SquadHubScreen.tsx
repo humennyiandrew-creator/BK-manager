@@ -1,8 +1,12 @@
 import { useState } from 'react';
+import HeroHeader from '../components/HeroHeader';
+import SideRail, { type SideRailItem } from '../components/SideRail';
+import StatTile from '../components/StatTile';
 import Panel from '../components/Panel';
 import DataTable, { type DataTableColumn } from '../components/DataTable';
 import ConfirmDialog from '../components/ConfirmDialog';
 import BkImage from '../components/BkImage';
+import { IconFinances, IconTransfers, IconSquadHub } from '../components/tabIcons';
 import { useGame, useGameState } from '../store/useGame';
 import { teamRoster } from '../selectors';
 import { ageOf } from '../../engine/ratings';
@@ -17,6 +21,7 @@ import NegotiationModal from '../components/NegotiationModal';
 import styles from './SquadHubScreen.module.css';
 
 type Mutate = (fn: (s: GameState) => void) => void;
+type Tab = 'cap' | 'resign' | 'ext';
 
 function salaryFor(p: Player, season: string) {
   return p.contract?.salaries.find((s) => s.season === season);
@@ -35,8 +40,8 @@ function CapSheetTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
   const columns: DataTableColumn<Player>[] = [
     { key: 'name', header: 'Player', render: (p) => `${p.firstName} ${p.lastName}` },
     { key: 'type', header: 'Type', render: (p) => p.contract?.type ?? '-' },
-    { key: 'age', header: 'Age', align: 'right', render: (p) => Math.floor(ageOf(p.birthDate)) },
-    { key: 'ovr', header: 'OVR', align: 'right', render: (p) => p.ratings.ovr },
+    { key: 'age', header: 'Age', align: 'right', render: (p) => Math.floor(ageOf(p.birthDate)), sortValue: (p) => Math.floor(ageOf(p.birthDate)) },
+    { key: 'ovr', header: 'OVR', align: 'right', render: (p) => p.ratings.ovr, sortValue: (p) => p.ratings.ovr },
     ...SALARY_SEASONS.map((season): DataTableColumn<Player> => ({
       key: season,
       header: season,
@@ -48,7 +53,8 @@ function CapSheetTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
         const optKind = p.contract?.option?.kind;
         const cls = isOption ? (optKind === 'player' ? styles.optionPlayer : styles.optionTeam) : undefined;
         return <span className={cls}>{formatMoneyShort(line.amount)}</span>;
-      }
+      },
+      sortValue: (p) => salaryFor(p, season)?.amount ?? 0
     })),
     {
       key: 'release', header: '', align: 'right', render: (p) => (
@@ -59,35 +65,43 @@ function CapSheetTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
 
   const totals = SALARY_SEASONS.map((season) => roster.reduce((sum, p) => sum + (salaryFor(p, season)?.amount ?? 0), 0));
   const payroll2627 = totals[0];
+  const capLine = CAP_LINES[0].value;
   const barMax = CAP_LINES[CAP_LINES.length - 1].value * 1.15;
 
   return (
     <div className={styles.capGrid}>
-      <Panel title="Cap Sheet" className={styles.tablePanel} flush>
-        <DataTable columns={columns} rows={roster} rowKey={(p) => p.id} compact />
-        <div className={styles.totalsRow}>
-          <span className={styles.totalsLabel}>Total Payroll</span>
-          {totals.map((t, i) => <span key={i} className={styles.totalsValue}>{formatMoneyShort(t)}</span>)}
-        </div>
-      </Panel>
-      <Panel title="2026-27 Payroll vs Cap" className={styles.barPanel}>
-        <div className={styles.barTrack}>
-          <div className={styles.barFill} style={{ width: `${Math.min(100, (payroll2627 / barMax) * 100)}%` }} />
-          {CAP_LINES.map((line) => (
-            <div key={line.label} className={styles.barLine} style={{ left: `${Math.min(100, (line.value / barMax) * 100)}%` }}>
-              <span className={styles.barLineLabel}>{line.label}</span>
-            </div>
-          ))}
-        </div>
-        <div className={styles.barLegend}>
-          <span>Payroll: {formatMoneyShort(payroll2627)}</span>
-          {CAP_LINES.map((l) => <span key={l.label}>{l.label}: {formatMoneyShort(l.value)}</span>)}
-        </div>
-        <div className={styles.legendKeys}>
-          <span className={styles.optionPlayer}>■</span> Player option
-          <span className={styles.optionTeam}>■</span> Team option
-        </div>
-      </Panel>
+      <div className={styles.capStats}>
+        <StatTile label="Payroll 2026-27" value={payroll2627} formatter={formatMoneyShort} />
+        <StatTile label="Cap Room" value={capLine - payroll2627} formatter={formatMoneyShort} />
+        <StatTile label="Roster Size" value={roster.length} />
+      </div>
+      <div className={styles.capBody}>
+        <Panel title="Cap Sheet" className={styles.tablePanel} flush>
+          <DataTable columns={columns} rows={roster} rowKey={(p) => p.id} compact />
+          <div className={styles.totalsRow}>
+            <span className={styles.totalsLabel}>Total Payroll</span>
+            {totals.map((t, i) => <span key={i} className={styles.totalsValue}>{formatMoneyShort(t)}</span>)}
+          </div>
+        </Panel>
+        <Panel title="2026-27 Payroll vs Cap" className={styles.barPanel}>
+          <div className={styles.barTrack}>
+            <div className={styles.barFill} style={{ width: `${Math.min(100, (payroll2627 / barMax) * 100)}%` }} />
+            {CAP_LINES.map((line) => (
+              <div key={line.label} className={styles.barLine} style={{ left: `${Math.min(100, (line.value / barMax) * 100)}%` }}>
+                <span className={styles.barLineLabel}>{line.label}</span>
+              </div>
+            ))}
+          </div>
+          <div className={styles.barLegend}>
+            <span>Payroll: {formatMoneyShort(payroll2627)}</span>
+            {CAP_LINES.map((l) => <span key={l.label}>{l.label}: {formatMoneyShort(l.value)}</span>)}
+          </div>
+          <div className={styles.legendKeys}>
+            <span className={styles.optionPlayer}>■</span> Player option
+            <span className={styles.optionTeam}>■</span> Team option
+          </div>
+        </Panel>
+      </div>
       {releaseTarget && (
         <ConfirmDialog
           title={`Release ${releaseTarget.firstName} ${releaseTarget.lastName}?`}
@@ -121,16 +135,16 @@ function ResignTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
     { key: 'face', header: '', render: (p) => <BkImage path={p.face} alt={p.lastName} className={styles.faceThumb} /> },
     { key: 'name', header: 'Player', render: (p) => `${p.firstName} ${p.lastName}` },
     { key: 'pos', header: 'Pos', render: (p) => p.positions.join('/') },
-    { key: 'age', header: 'Age', align: 'right', render: (p) => Math.floor(ageOf(p.birthDate)) },
-    { key: 'ovrpot', header: 'OVR/POT', align: 'right', render: (p) => `${p.ratings.ovr}/${p.ratings.pot}` },
+    { key: 'age', header: 'Age', align: 'right', render: (p) => Math.floor(ageOf(p.birthDate)), sortValue: (p) => Math.floor(ageOf(p.birthDate)) },
+    { key: 'ovrpot', header: 'OVR/POT', align: 'right', render: (p) => `${p.ratings.ovr}/${p.ratings.pot}`, sortValue: (p) => p.ratings.ovr },
     {
       key: 'last', header: 'Last Season', render: (p) => {
         const h = p.history[0];
         return h ? `${(h.pts / Math.max(1, h.gp)).toFixed(1)} PPG, ${h.gp} GP` : '—';
       }
     },
-    { key: 'salary', header: 'Current Salary', align: 'right', render: (p) => (p.contract ? formatMoneyShort(salaryFor(p, s.season)?.amount ?? 0) : '—') },
-    { key: 'ask', header: 'Asking', align: 'right', render: (p) => { const a = resignAsk(s, p); return `${formatMoneyShort(a.amount)} / ${a.years}y`; } },
+    { key: 'salary', header: 'Current Salary', align: 'right', render: (p) => (p.contract ? formatMoneyShort(salaryFor(p, s.season)?.amount ?? 0) : '—'), sortValue: (p) => salaryFor(p, s.season)?.amount ?? 0 },
+    { key: 'ask', header: 'Asking', align: 'right', render: (p) => { const a = resignAsk(s, p); return `${formatMoneyShort(a.amount)} / ${a.years}y`; }, sortValue: (p) => resignAsk(s, p).amount },
     {
       key: 'actions', header: '', align: 'right', render: (p) => letGo.has(p.id) ? (
         <span className={styles.letGoTag}>
@@ -147,11 +161,11 @@ function ResignTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
 
   return (
     <div className={styles.resignWrap}>
-      <div className={styles.resignHeader}>
-        <span>Payroll {next}: {formatMoneyShort(pay)}</span>
-        <span>Cap: {formatMoneyShort(cap.cap)}</span>
-        <span>Room: {formatMoneyShort(cap.cap - pay)}</span>
-        <span>Expiring: {list.length}</span>
+      <div className={styles.resignStats}>
+        <StatTile label={`Payroll ${next}`} value={pay} formatter={formatMoneyShort} />
+        <StatTile label="Cap" value={cap.cap} formatter={formatMoneyShort} />
+        <StatTile label="Room" value={cap.cap - pay} formatter={formatMoneyShort} />
+        <StatTile label="Expiring" value={list.length} />
       </div>
       <Panel title="Expiring Contracts" className={styles.tablePanel} flush>
         {list.length === 0 && <div className={styles.empty}>No expiring contracts this summer.</div>}
@@ -172,11 +186,11 @@ function ExtensionsTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
     { key: 'face', header: '', render: (p) => <BkImage path={p.face} alt={p.lastName} className={styles.faceThumb} /> },
     { key: 'name', header: 'Player', render: (p) => `${p.firstName} ${p.lastName}` },
     { key: 'pos', header: 'Pos', render: (p) => p.positions.join('/') },
-    { key: 'age', header: 'Age', align: 'right', render: (p) => Math.floor(ageOf(p.birthDate)) },
-    { key: 'ovrpot', header: 'OVR/POT', align: 'right', render: (p) => `${p.ratings.ovr}/${p.ratings.pot}` },
-    { key: 'form', header: 'Form', align: 'right', render: (p) => `${(p.form ?? 0) > 0 ? '+' : ''}${(p.form ?? 0).toFixed(1)}` },
-    { key: 'salary', header: 'Current Salary', align: 'right', render: (p) => (p.contract ? formatMoneyShort(salaryFor(p, s.season)?.amount ?? 0) : '—') },
-    { key: 'mv', header: 'Market Value', align: 'right', render: (p) => formatMoneyShort(marketValue(p, s.seasonYear + 1)) },
+    { key: 'age', header: 'Age', align: 'right', render: (p) => Math.floor(ageOf(p.birthDate)), sortValue: (p) => Math.floor(ageOf(p.birthDate)) },
+    { key: 'ovrpot', header: 'OVR/POT', align: 'right', render: (p) => `${p.ratings.ovr}/${p.ratings.pot}`, sortValue: (p) => p.ratings.ovr },
+    { key: 'form', header: 'Form', align: 'right', render: (p) => `${(p.form ?? 0) > 0 ? '+' : ''}${(p.form ?? 0).toFixed(1)}`, sortValue: (p) => p.form ?? 0 },
+    { key: 'salary', header: 'Current Salary', align: 'right', render: (p) => (p.contract ? formatMoneyShort(salaryFor(p, s.season)?.amount ?? 0) : '—'), sortValue: (p) => salaryFor(p, s.season)?.amount ?? 0 },
+    { key: 'mv', header: 'Market Value', align: 'right', render: (p) => formatMoneyShort(marketValue(p, s.seasonYear + 1)), sortValue: (p) => marketValue(p, s.seasonYear + 1) },
     {
       key: 'actions', header: '', align: 'right', render: (p) => (
         <button type="button" className={styles.offerBtn} onClick={() => setOfferId(p.id)}>Negotiate</button>
@@ -199,27 +213,28 @@ function ExtensionsTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
 export default function SquadHubScreen() {
   const s = useGameState();
   const mutate = useGame((g) => g.mutate);
-  const [tab, setTab] = useState<'cap' | 'resign' | 'ext'>(() => (s?.offseason?.stage === 'resign' ? 'resign' : 'cap'));
+  const [tab, setTab] = useState<Tab>(() => (s?.offseason?.stage === 'resign' ? 'resign' : 'cap'));
   if (!s) return null;
   const showResign = s.offseason?.stage === 'resign';
   const activeTab = showResign ? tab : tab === 'resign' ? 'cap' : tab;
 
+  const railItems: SideRailItem<Tab>[] = [
+    { id: 'cap', label: 'Cap Sheet', icon: IconFinances },
+    ...(showResign ? [{ id: 'resign' as const, label: 'Re-sign', icon: IconTransfers, badge: expiring(s, s.userTeamId).length }] : []),
+    { id: 'ext', label: 'Extensions', icon: IconSquadHub, badge: extensionEligible(s).length }
+  ];
+
   return (
-    <div className={styles.screenWrap}>
-      <div className={styles.subTabs}>
-        <button type="button" className={activeTab === 'cap' ? `${styles.subTab} ${styles.subTabActive}` : styles.subTab} onClick={() => setTab('cap')}>Cap Sheet</button>
-        {showResign && (
-          <button type="button" className={activeTab === 'resign' ? `${styles.subTab} ${styles.subTabActive}` : styles.subTab} onClick={() => setTab('resign')}>
-            Re-sign{expiring(s, s.userTeamId).length ? ` (${expiring(s, s.userTeamId).length})` : ''}
-          </button>
-        )}
-        <button type="button" className={activeTab === 'ext' ? `${styles.subTab} ${styles.subTabActive}` : styles.subTab} onClick={() => setTab('ext')}>
-          Extensions{extensionEligible(s).length ? ` (${extensionEligible(s).length})` : ''}
-        </button>
+    <div className={styles.screen}>
+      <HeroHeader title="Squad Hub" subtitle="Contracts and cap sheet" />
+      <div className={styles.body}>
+        <SideRail items={railItems} active={activeTab} onSelect={setTab} />
+        <div className={styles.content}>
+          {activeTab === 'cap' && <CapSheetTab s={s} mutate={mutate} />}
+          {activeTab === 'resign' && <ResignTab s={s} mutate={mutate} />}
+          {activeTab === 'ext' && <ExtensionsTab s={s} mutate={mutate} />}
+        </div>
       </div>
-      {activeTab === 'cap' && <CapSheetTab s={s} mutate={mutate} />}
-      {activeTab === 'resign' && <ResignTab s={s} mutate={mutate} />}
-      {activeTab === 'ext' && <ExtensionsTab s={s} mutate={mutate} />}
     </div>
   );
 }

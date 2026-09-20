@@ -1,6 +1,9 @@
 import { useMemo, useState } from 'react';
+import HeroHeader from '../components/HeroHeader';
 import Panel from '../components/Panel';
+import StatTile from '../components/StatTile';
 import ProgressBar from '../components/ProgressBar';
+import DataTable, { type DataTableColumn } from '../components/DataTable';
 import { useGameState, useGame } from '../store/useGame';
 import { ROLES, ROLE_LABEL, STAFF_BUDGET, hireStaff, fireStaff, staffCourses, enrollStaff, type StaffCourse } from '../../engine/mgmt/staff';
 import type { Staff, StaffRole } from '../../engine/model';
@@ -31,6 +34,7 @@ export default function StaffScreen() {
 
   const spend = ROLES.reduce((sum, r) => sum + (current[r]?.salary ?? 0), 0);
   const cap = STAFF_BUDGET * s.board.budgetMul;
+  const filled = ROLES.filter((r) => current[r]).length;
 
   const doHire = (id: string) => {
     let err: string | null = null;
@@ -48,84 +52,101 @@ export default function StaffScreen() {
     setCourseFor(null);
   };
 
-  return (
-    <div className={styles.wrap}>
-      <Panel
-        title="Current Staff"
-        className={styles.panel}
-        headerRight={<span className={spend > cap ? styles.overBudget : styles.budgetLabel}>{formatMoneyShort(spend)} / {formatMoneyShort(cap)}</span>}
-      >
-        <div className={styles.budgetBar}><ProgressBar value={spend} max={cap} variant={spend > cap ? 'negative' : 'cyan'} /></div>
-        <div className={styles.roleList}>
-          {ROLES.map((r) => {
-            const st = current[r];
-            const options = st && courseFor === st.id ? staffCourses(s, st.id) : null;
-            return (
-              <div key={r} className={styles.roleGroup}>
-                <div className={styles.roleRow}>
-                  <div className={styles.roleInfo}>
-                    <span className={styles.roleName}>{ROLE_LABEL[r]}</span>
-                    <span className={styles.staffName}>{st ? st.name : 'Vacant'}</span>
-                  </div>
-                  <ProgressBar value={st?.rating ?? 40} variant={attrVariant(st?.rating ?? 40)} className={styles.ratingBar} />
-                  <span className={styles.ratingValue}>{st?.rating ?? 40}</span>
-                  <span className={styles.salary}>{st ? formatMoneyShort(st.salary) : '-'}</span>
-                  <span className={styles.years}>{st ? `${st.years}yr` : '-'}</span>
-                  <button type="button" className={styles.fireBtn} disabled={!st} onClick={() => st && doFire(st.id)}>Fire</button>
-                </div>
-                {st && (
-                  <div className={styles.devRow}>
-                    <span className={styles.xpLabel}>XP</span>
-                    <ProgressBar value={st.xp ?? 0} max={100} variant="cyan" className={styles.xpBar} />
-                    {st.course ? (
-                      <span className={styles.courseStatus}>{st.course.name}: {st.course.weeksLeft}wk left (+{st.course.gain})</span>
-                    ) : (
-                      <button type="button" className={styles.courseBtn} onClick={() => setCourseFor(courseFor === st.id ? null : st.id)}>
-                        {courseFor === st.id ? 'Close' : 'Courses'}
-                      </button>
-                    )}
-                  </div>
-                )}
-                {options && (
-                  <div className={styles.courseOptions}>
-                    {options.map((c, i) => (
-                      <button key={i} type="button" className={styles.courseOption} onClick={() => st && doEnroll(st.id, c)}>
-                        {c.name} · {c.weeks}wk · {formatMoneyShort(c.cost)} · +{c.gain} rating
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </Panel>
+  const marketColumns: DataTableColumn<Staff>[] = [
+    { key: 'name', header: 'Name', render: (st) => st.name },
+    { key: 'age', header: 'Age', align: 'right', render: (st) => st.age, sortValue: (st) => st.age },
+    {
+      key: 'rating', header: 'Rating', align: 'right', sortValue: (st) => st.rating, render: (st) => (
+        <span className={styles.ratingCell}>
+          <ProgressBar value={st.rating} variant={attrVariant(st.rating)} className={styles.ratingBar} />
+          <span className={styles.ratingValue}>{st.rating}</span>
+        </span>
+      )
+    },
+    { key: 'salary', header: 'Salary', align: 'right', render: (st) => formatMoneyShort(st.salary), sortValue: (st) => st.salary },
+    {
+      key: 'hire', header: '', align: 'right', render: (st) => (
+        <button type="button" className={styles.hireBtn} onClick={() => doHire(st.id)}>Hire</button>
+      )
+    }
+  ];
 
-      <Panel title="Staff Market" className={styles.panel} flush>
-        <div className={styles.tabs}>
-          {ROLES.map((r) => (
-            <button key={r} type="button" className={filter === r ? styles.tabActive : styles.tab} onClick={() => setFilter(r)}>
-              {ROLE_LABEL[r]}
-            </button>
-          ))}
-        </div>
-        {error && <div className={styles.error}>{error}</div>}
-        <div className={styles.marketList}>
-          {market.map((st) => (
-            <div key={st.id} className={styles.marketRow}>
-              <div className={styles.roleInfo}>
-                <span className={styles.staffName}>{st.name}</span>
-                <span className={styles.staffMeta}>Age {st.age}</span>
-              </div>
-              <ProgressBar value={st.rating} variant={attrVariant(st.rating)} className={styles.ratingBar} />
-              <span className={styles.ratingValue}>{st.rating}</span>
-              <span className={styles.salary}>{formatMoneyShort(st.salary)}</span>
-              <button type="button" className={styles.hireBtn} onClick={() => doHire(st.id)}>Hire</button>
-            </div>
-          ))}
-          {market.length === 0 && <div className={styles.empty}>No free agents available at this role.</div>}
-        </div>
-      </Panel>
+  return (
+    <div className={styles.screen}>
+      <HeroHeader title="Staff" subtitle="Coaching and front office" />
+      <div className={styles.statsRow}>
+        <StatTile label="Staff Spend" value={spend} formatter={formatMoneyShort} />
+        <StatTile label="Budget Cap" value={cap} formatter={formatMoneyShort} />
+        <StatTile label="Roles Filled" value={filled} formatter={(v) => `${v}/${ROLES.length}`} />
+      </div>
+      <div className={styles.body}>
+        <Panel title="Current Staff" className={styles.panel}>
+          <div className={styles.budgetBar}><ProgressBar value={spend} max={cap} variant={spend > cap ? 'negative' : 'cyan'} /></div>
+          <div className={styles.roleList}>
+            {ROLES.map((r) => {
+              const st = current[r];
+              const options = st && courseFor === st.id ? staffCourses(s, st.id) : null;
+              return (
+                <div key={r} className={styles.roleGroup}>
+                  <div className={styles.roleRow}>
+                    <div className={styles.roleInfo}>
+                      <span className={styles.roleName}>{ROLE_LABEL[r]}</span>
+                      <span className={styles.staffName}>{st ? st.name : 'Vacant'}</span>
+                    </div>
+                    <ProgressBar value={st?.rating ?? 40} variant={attrVariant(st?.rating ?? 40)} className={styles.ratingBar} />
+                    <span className={styles.ratingValue}>{st?.rating ?? 40}</span>
+                    <span className={styles.salary}>{st ? formatMoneyShort(st.salary) : '-'}</span>
+                    <span className={styles.years}>{st ? `${st.years}yr` : '-'}</span>
+                    <button type="button" className={styles.fireBtn} disabled={!st} onClick={() => st && doFire(st.id)}>Fire</button>
+                  </div>
+                  {st && (
+                    <div className={styles.devRow}>
+                      <span className={styles.xpLabel}>XP</span>
+                      <ProgressBar value={st.xp ?? 0} max={100} variant="cyan" className={styles.xpBar} />
+                      {st.course ? (
+                        <span className={styles.courseStatus}>{st.course.name}: {st.course.weeksLeft}wk left (+{st.course.gain})</span>
+                      ) : (
+                        <button type="button" className={styles.courseBtn} onClick={() => setCourseFor(courseFor === st.id ? null : st.id)}>
+                          {courseFor === st.id ? 'Close' : 'Courses'}
+                        </button>
+                      )}
+                    </div>
+                  )}
+                  {options && (
+                    <div className={styles.courseOptions}>
+                      {options.map((c, i) => (
+                        <button key={i} type="button" className={styles.courseOption} onClick={() => st && doEnroll(st.id, c)}>
+                          {c.name} · {c.weeks}wk · {formatMoneyShort(c.cost)} · +{c.gain} rating
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </Panel>
+
+        <Panel title="Staff Market" className={styles.panel} flush>
+          <div className={styles.tabs}>
+            {ROLES.map((r) => (
+              <button key={r} type="button" className={filter === r ? styles.tabActive : styles.tab} onClick={() => setFilter(r)}>
+                {ROLE_LABEL[r]}
+              </button>
+            ))}
+          </div>
+          {error && <div className={styles.error}>{error}</div>}
+          <div className={styles.marketList}>
+            <DataTable
+              columns={marketColumns}
+              rows={market}
+              rowKey={(st) => st.id}
+              compact
+              emptyLabel="No free agents available at this role."
+            />
+          </div>
+        </Panel>
+      </div>
     </div>
   );
 }

@@ -1,10 +1,14 @@
 import { useMemo, useState } from 'react';
+import HeroHeader from '../components/HeroHeader';
 import Panel from '../components/Panel';
+import SectionCard from '../components/SectionCard';
+import StatTile from '../components/StatTile';
 import DataTable, { type DataTableColumn } from '../components/DataTable';
 import BkImage from '../components/BkImage';
 import TeamBadge from '../components/TeamBadge';
 import ProgressBar from '../components/ProgressBar';
 import ScoutingTab from '../components/ScoutingTab';
+import { IconDraft } from '../components/tabIcons';
 import { useGame, useGameState } from '../store/useGame';
 import { ageOf, type Attr } from '../../engine/ratings';
 import type { GameState, Player } from '../../engine/model';
@@ -13,7 +17,7 @@ import { addToShortlist, removeFromShortlist } from '../../engine/scouting';
 import { standings } from '../../engine/season';
 import { hashString, mulberry32 } from '../../engine/rng';
 import { ATTR_GROUPS, ATTR_LABEL, attrVariant } from '../attrGroups';
-import { formatDate, heightFtIn } from '../format';
+import { heightFtIn } from '../format';
 import { play } from '../sound';
 import styles from './DraftScreen.module.css';
 
@@ -32,7 +36,7 @@ function ProspectDetail({ s, scouted }: { s: GameState; scouted: Scouted }) {
   const age = Math.floor(ageOf(p.birthDate, new Date(s.date)));
   return (
     <div className={styles.detail}>
-      <div className={styles.detailHead}>
+      <div className={`${styles.detailHead} diagonal-accent`}>
         <BkImage path={p.face} alt={p.lastName} className={styles.detailFace} />
         <div>
           <div className={styles.detailName}>{p.firstName} {p.lastName}</div>
@@ -138,6 +142,7 @@ export default function DraftScreen() {
   const liveMode = s.draftOrder.length > 0 && !!pending;
   const isUserTurn = liveMode && pending?.owner === s.userTeamId;
   const recentPicks = s.transactions.filter((t) => t.kind === 'draft').slice(0, 8);
+  const daysToDraft = Math.max(0, Math.ceil((new Date(s.keyDates.draft).getTime() - new Date(s.date).getTime()) / 86400000));
 
   const toggleShortlist = (pid: string) => mutate((st) => {
     st.scouting.shortlist.includes(pid) ? removeFromShortlist(st, pid) : addToShortlist(st, pid);
@@ -153,16 +158,17 @@ export default function DraftScreen() {
     },
     { key: 'name', header: 'Name', render: (r) => `${r.p.firstName} ${r.p.lastName}` },
     { key: 'pos', header: 'Pos', render: (r) => r.p.positions.join('/') },
-    { key: 'age', header: 'Age', align: 'right', render: (r) => Math.floor(ageOf(r.p.birthDate, new Date(s.date))) },
-    { key: 'ht', header: 'Ht', align: 'right', render: (r) => heightFtIn(r.p.heightCm) },
+    { key: 'age', header: 'Age', align: 'right', render: (r) => Math.floor(ageOf(r.p.birthDate, new Date(s.date))), sortValue: (r) => Math.floor(ageOf(r.p.birthDate, new Date(s.date))) },
+    { key: 'ht', header: 'Ht', align: 'right', render: (r) => heightFtIn(r.p.heightCm), sortValue: (r) => r.p.heightCm },
     { key: 'college', header: 'College/Club', render: (r) => r.p.college ?? '-' },
     { key: 'country', header: 'Country', render: (r) => r.p.country },
-    { key: 'ovr', header: 'Scout OVR', align: 'right', render: (r) => `${r.ovr}±${r.range}` },
+    { key: 'ovr', header: 'Scout OVR', align: 'right', render: (r) => `${r.ovr}±${r.range}`, sortValue: (r) => r.ovr },
     {
       key: 'pot', header: 'Scout POT', align: 'right', render: (r) => {
         const k = s.scouting.knowledge[r.p.id] ?? 0;
         return <span>{k > 0 && <span className={styles.eyeIcon} title={`Scouted ${Math.round(k * 100)}%`}>&#128065;</span>}{r.pot}±{r.range}</span>;
-      }
+      },
+      sortValue: (r) => r.pot
     },
   ];
 
@@ -181,90 +187,92 @@ export default function DraftScreen() {
   const onTheClock = s.offseason?.stage === 'draft' && pending?.owner === s.userTeamId;
 
   return (
-    <div className={styles.wrap}>
+    <div className={styles.screen}>
+      <HeroHeader title="Draft" subtitle="Prospect scouting" />
       <div className={styles.subTabs}>
         <button type="button" className={subTab === 'board' ? `${styles.subTab} ${styles.subTabActive}` : styles.subTab} onClick={() => setSubTab('board')}>Big Board</button>
         <button type="button" className={subTab === 'scouting' ? `${styles.subTab} ${styles.subTabActive}` : styles.subTab} onClick={() => setSubTab('scouting')}>Scouting</button>
       </div>
-      {subTab === 'scouting' && <ScoutingTab s={s} mutate={mutate} />}
-      {subTab === 'board' && <>
-      {onTheClock && (
-        <div className={styles.clockBanner}>
-          <span className={styles.clockText}>You&rsquo;re on the clock — Pick #{s.draftOrder.indexOf(pending!.id) + 1}</span>
-          <button type="button" className={styles.clockDraftBtn} disabled={!selected} onClick={draftSelected}>
-            Draft selected player{selected ? `: ${selected.p.firstName} ${selected.p.lastName}` : ''}
-          </button>
-        </div>
-      )}
-      <div className={styles.header}>
-        <div className={styles.headerBlock}>
-          <span className={styles.headerLabel}>Draft Date</span>
-          <span className={styles.headerValue}>{formatDate(s.keyDates.draft)}</span>
-        </div>
-        <div className={styles.headerBlock}>
-          <span className={styles.headerLabel}>Your Picks ({s.seasonYear + 1})</span>
-          <span className={styles.headerValue}>
-            {yourPicks.length ? yourPicks.map((p) => `R${p.round}`).join(', ') : 'None'}
-          </span>
-        </div>
-        {import.meta.env.DEV && s.draftOrder.length === 0 && (
-          <button type="button" className={styles.devBtn} onClick={runLotteryTest}>Run lottery (test)</button>
-        )}
-      </div>
-
-      <div className={styles.grid}>
-        <Panel title="Big Board" className={styles.boardPanel} flush>
-          <DataTable columns={columns} rows={scoutedList} rowKey={(r) => r.p.id} highlightedRowKey={selected?.p.id} onRowClick={(r) => setSelectedId(r.p.id)} compact />
-        </Panel>
-
-        <Panel title="Prospect" className={styles.detailPanel}>
-          {selected ? <ProspectDetail s={s} scouted={selected} /> : <div className={styles.empty}>No prospects</div>}
-        </Panel>
-
-        <div className={styles.rightCol}>
-          <DraftOrderPanel s={s} />
-          {liveMode && (
-            <Panel title="Live Draft" className={styles.livePanel}>
-              <div className={styles.liveStatus}>
-                On the clock: <TeamBadge logoPath={s.teams[pending!.owner]?.logo ?? null} name={s.teams[pending!.owner]?.abbr ?? '?'} className={styles.liveTeam} /> (R{pending!.round})
+      <div className={styles.body}>
+        {subTab === 'scouting' && <ScoutingTab s={s} mutate={mutate} />}
+        {subTab === 'board' && (
+          <div className={styles.boardBody}>
+            {onTheClock && (
+              <div className={styles.clockBanner}>
+                <span className={styles.clockText}>You&rsquo;re on the clock — Pick #{s.draftOrder.indexOf(pending!.id) + 1}</span>
+                <button type="button" className={styles.clockDraftBtn} disabled={!selected} onClick={draftSelected}>
+                  Draft selected player{selected ? `: ${selected.p.firstName} ${selected.p.lastName}` : ''}
+                </button>
               </div>
-              <div className={styles.liveBtns}>
-                {!isUserTurn && <button type="button" className={styles.simBtn} onClick={simToPick}>Sim to my pick</button>}
-                {isUserTurn && (
-                  <>
-                    <button type="button" className={styles.draftBtn} disabled={!selected} onClick={draftSelected}>Draft {selected ? `${selected.p.firstName} ${selected.p.lastName}` : 'selected player'}</button>
-                    <button type="button" className={styles.autoBtn} onClick={autoPick}>Auto-pick</button>
-                  </>
+            )}
+            <div className={styles.statsRow}>
+              <StatTile label="Draft In" value={daysToDraft} formatter={(v) => (v <= 0 ? 'Today' : `${v}d`)} className={styles.statTile} />
+              <div className={styles.headerBlock}>
+                <span className={styles.headerLabel}>Your Picks ({s.seasonYear + 1})</span>
+                <span className={styles.headerValue}>
+                  {yourPicks.length ? yourPicks.map((p) => `R${p.round}`).join(', ') : 'None'}
+                </span>
+              </div>
+              {import.meta.env.DEV && s.draftOrder.length === 0 && (
+                <button type="button" className={styles.devBtn} onClick={runLotteryTest}>Run lottery (test)</button>
+              )}
+            </div>
+
+            <div className={styles.grid}>
+              <Panel title="Big Board" className={styles.boardPanel} flush>
+                <DataTable columns={columns} rows={scoutedList} rowKey={(r) => r.p.id} highlightedRowKey={selected?.p.id} onRowClick={(r) => setSelectedId(r.p.id)} compact />
+              </Panel>
+
+              <SectionCard title="Prospect" icon={IconDraft} accent glow className={styles.detailPanel}>
+                {selected ? <ProspectDetail s={s} scouted={selected} /> : <div className={styles.empty}>No prospects</div>}
+              </SectionCard>
+
+              <div className={styles.rightCol}>
+                <DraftOrderPanel s={s} />
+                {liveMode && (
+                  <Panel title="Live Draft" className={styles.livePanel}>
+                    <div className={styles.liveStatus}>
+                      On the clock: <TeamBadge logoPath={s.teams[pending!.owner]?.logo ?? null} name={s.teams[pending!.owner]?.abbr ?? '?'} className={styles.liveTeam} /> (R{pending!.round})
+                    </div>
+                    <div className={styles.liveBtns}>
+                      {!isUserTurn && <button type="button" className={styles.simBtn} onClick={simToPick}>Sim to my pick</button>}
+                      {isUserTurn && (
+                        <>
+                          <button type="button" className={styles.draftBtn} disabled={!selected} onClick={draftSelected}>Draft {selected ? `${selected.p.firstName} ${selected.p.lastName}` : 'selected player'}</button>
+                          <button type="button" className={styles.autoBtn} onClick={autoPick}>Auto-pick</button>
+                        </>
+                      )}
+                    </div>
+                    <div className={styles.sectionTitle}>Recent Picks</div>
+                    <div className={styles.feed}>
+                      {recentPicks.length === 0 && <div className={styles.empty}>No picks yet</div>}
+                      {recentPicks.map((t, i) => <div key={i} className={styles.feedRow}>{t.text}</div>)}
+                    </div>
+                  </Panel>
+                )}
+                {!liveMode && s.draftOrder.length > 0 && (
+                  <Panel title="Draft Complete" className={styles.livePanel}>
+                    <div className={styles.sectionTitle}>Recent Picks</div>
+                    <div className={styles.feed}>
+                      {recentPicks.map((t, i) => <div key={i} className={styles.feedRow}>{t.text}</div>)}
+                    </div>
+                  </Panel>
                 )}
               </div>
-              <div className={styles.sectionTitle}>Recent Picks</div>
-              <div className={styles.feed}>
-                {recentPicks.length === 0 && <div className={styles.empty}>No picks yet</div>}
-                {recentPicks.map((t, i) => <div key={i} className={styles.feedRow}>{t.text}</div>)}
+            </div>
+            {pickReveal && (
+              <div className={`${styles.pickReveal} slide-in-right`}>
+                <BkImage path={pickReveal.p.face} alt={pickReveal.p.lastName} className={styles.pickRevealFace} />
+                <div>
+                  <div className={styles.pickRevealLabel}>Pick is in</div>
+                  <div className={styles.pickRevealName}>{pickReveal.p.firstName} {pickReveal.p.lastName}</div>
+                  <div className={styles.pickRevealMeta}>{pickReveal.p.positions.join('/')} · {pickReveal.p.college ?? 'International'}</div>
+                </div>
               </div>
-            </Panel>
-          )}
-          {!liveMode && s.draftOrder.length > 0 && (
-            <Panel title="Draft Complete" className={styles.livePanel}>
-              <div className={styles.sectionTitle}>Recent Picks</div>
-              <div className={styles.feed}>
-                {recentPicks.map((t, i) => <div key={i} className={styles.feedRow}>{t.text}</div>)}
-              </div>
-            </Panel>
-          )}
-        </div>
-      </div>
-      {pickReveal && (
-        <div className={`${styles.pickReveal} slide-in-right`}>
-          <BkImage path={pickReveal.p.face} alt={pickReveal.p.lastName} className={styles.pickRevealFace} />
-          <div>
-            <div className={styles.pickRevealLabel}>Pick is in</div>
-            <div className={styles.pickRevealName}>{pickReveal.p.firstName} {pickReveal.p.lastName}</div>
-            <div className={styles.pickRevealMeta}>{pickReveal.p.positions.join('/')} · {pickReveal.p.college ?? 'International'}</div>
+            )}
           </div>
-        </div>
-      )}
-      </>}
+        )}
+      </div>
     </div>
   );
 }

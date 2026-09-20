@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, type CSSProperties } from 'react';
-import { useUI, type TabId } from './store/useUI';
+import { useUI } from './store/useUI';
 import { useGame, useGameState } from './store/useGame';
 import TopBar from './components/TopBar';
 import TabBar from './components/TabBar';
 import InfoStrip from './components/InfoStrip';
+import ContinueWidget from './components/ContinueWidget';
 import EventModal from './components/EventModal';
 import ScreenTransition from './components/ScreenTransition';
 import Toasts from './components/Toasts';
@@ -14,11 +15,8 @@ import CareerSummary from './screens/CareerSummary';
 import { SCREENS } from './screens';
 import { userGameToday, nextUserGame, opponentOf, daysUntil, userTeam } from './selectors';
 import { formatDate } from './format';
-import type { GameState } from '../engine/model';
-import { nextPick } from '../engine/draft';
 import { offseasonStageLabel } from '../engine/offseason';
 import { pendingUserEvent } from '../engine/events';
-import { seasonLabel } from '../engine/cba';
 import { computeAccent } from './accent';
 import { play } from './sound';
 import styles from './App.module.css';
@@ -50,38 +48,6 @@ function useButtonSounds() {
     };
   }, []);
 }
-
-/** Continue button label while s.phase === 'offseason'. */
-function offseasonContinueLabel(s: GameState): string {
-  const o = s.offseason;
-  if (!o) return 'Season Review';
-  if (o.stage === 'draft') {
-    const pending = nextPick(s);
-    if (pending?.owner === s.userTeamId && o.waitingPick === pending.id) return 'Auto-Pick';
-    return 'Sim to My Pick';
-  }
-  if (o.stage === 'resign') return 'Open Free Agency';
-  if (o.stage === 'fa') return `Next FA Day (${o.faDay + 1}/10)`;
-  return `Start ${seasonLabel(s.seasonYear + 1)}`;
-}
-
-const TAB_TITLES: Record<TabId, { title: string; subtitle: string }> = {
-  home: { title: 'Home', subtitle: 'Team overview' },
-  messages: { title: 'Messages', subtitle: 'Inbox and notifications' },
-  calendar: { title: 'Calendar', subtitle: 'Season schedule' },
-  roster: { title: 'Roster', subtitle: 'Player list and depth chart' },
-  squadHub: { title: 'Squad Hub', subtitle: 'Contracts and cap sheet' },
-  training: { title: 'Training', subtitle: 'Practice plans' },
-  playbook: { title: 'Playbook', subtitle: 'Tactics and set plays' },
-  transfers: { title: 'Transfers', subtitle: 'Trade and free agency' },
-  draft: { title: 'Draft', subtitle: 'Prospect scouting' },
-  staff: { title: 'Staff', subtitle: 'Coaching and front office' },
-  facilities: { title: 'Facilities', subtitle: 'Arena and training center' },
-  board: { title: 'Board', subtitle: 'Ownership expectations' },
-  finances: { title: 'Finances', subtitle: 'Budget and payroll' },
-  standings: { title: 'Standings', subtitle: 'League table' },
-  settings: { title: 'Settings', subtitle: 'Preferences' }
-};
 
 function Shell() {
   const tab = useUI((s) => s.tab);
@@ -118,8 +84,6 @@ function Shell() {
     return <CareerSummary s={s} onBack={() => { reset(); setView('startMenu'); }} />;
   }
 
-  const { title, subtitle } = TAB_TITLES[tab];
-  const homeTitle = tab === 'home' ? `${userTeam(s).city} ${userTeam(s).name}` : title;
   const today = userGameToday(s);
   const next = today ?? nextUserGame(s);
   const nextLabel = s.phase === 'offseason'
@@ -132,7 +96,6 @@ function Shell() {
         return d <= 0 ? `${side} ${opp.abbr} today` : `${side} ${opp.abbr} in ${d} day${d === 1 ? '' : 's'}`;
       })()
     : 'Season complete';
-  const continueLabel = today ? 'Play Match' : s.phase === 'offseason' ? offseasonContinueLabel(s) : 'Continue';
   const unread = s.messages.filter((m) => !m.read).length;
 
   const accentStyle = {
@@ -143,13 +106,7 @@ function Shell() {
 
   return (
     <div className={styles.shell} style={accentStyle}>
-      <TopBar
-        title={homeTitle}
-        subtitle={subtitle}
-        onContinue={doContinue}
-        continueLabel={continueLabel}
-        busy={busy}
-      />
+      <TopBar continueSlot={<ContinueWidget s={s} busy={busy} onContinue={doContinue} />} />
       <div className={styles.content}>
         <ScreenTransition tabKey={tab}>
           <Screen />

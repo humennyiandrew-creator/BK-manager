@@ -8,8 +8,13 @@
 }
 
 .title {
-  font-size: 1.6rem;
+  font-size: var(--fs-h1);
   font-weight: 900;
+  font-style: italic;
+}
+
+.slash {
+  color: var(--accent);
 }
 
 .loading {
@@ -43,6 +48,13 @@
 }
 
 .detailPanel {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.detailPanelInner {
+  flex: 1;
   min-height: 0;
 }
 
@@ -121,9 +133,17 @@
 }
 
 .detailHead {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 0.8rem;
+  padding: 0.6rem;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.detailHead > * {
+  position: relative;
 }
 
 .detailLogo {
@@ -165,9 +185,10 @@
 }
 
 .startBtn {
+  position: relative;
   margin-top: auto;
-  background: var(--red);
-  color: var(--text);
+  background: var(--accent);
+  color: var(--accent-contrast);
   border: none;
   border-radius: var(--radius);
   padding: 0.8rem;
@@ -175,6 +196,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  overflow: hidden;
 }
 
 .startBtn:hover {

@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import Panel from '../components/Panel';
+import HeroHeader from '../components/HeroHeader';
+import SectionCard from '../components/SectionCard';
 import { useGame, useGameState } from '../store/useGame';
 import { useUI } from '../store/useUI';
 import { useAudioSettings, play, type SoundName } from '../sound';
@@ -36,8 +37,10 @@ export default function SettingsScreen() {
   };
 
   return (
-    <div className={styles.wrap}>
-      <Panel title="Save" className={styles.panel}>
+    <div className={styles.screen}>
+      <HeroHeader title="Settings" subtitle="Preferences" />
+      <div className={styles.wrap}>
+      <SectionCard title="Save" accent className={styles.panel}>
         <div className={styles.info}>
           <div><span className={styles.label}>Slot</span><span>{slot ?? '-'}</span></div>
           <div><span className={styles.label}>Team</span><span>{team.city} {team.name}</span></div>
@@ -49,9 +52,9 @@ export default function SettingsScreen() {
           <button type="button" className={`${styles.btn} ${styles.btnDanger}`} onClick={saveAndQuit}>Save &amp; Quit to Menu</button>
         </div>
         {status && <div className={styles.status}>{status}</div>}
-      </Panel>
+      </SectionCard>
 
-      <Panel title="Audio" className={styles.panel}>
+      <SectionCard title="Audio" className={styles.panel}>
         <label className={styles.sliderRow}>
           <span className={styles.label}>Master</span>
           <input
@@ -97,9 +100,9 @@ export default function SettingsScreen() {
             </button>
           ))}
         </div>
-      </Panel>
+      </SectionCard>
 
-      <Panel title="Display" className={styles.panel}>
+      <SectionCard title="Display" className={styles.panel}>
         <label className={styles.toggleRow}>
           <span className={styles.label}>Reduce animations</span>
           <input
@@ -108,7 +111,8 @@ export default function SettingsScreen() {
             onChange={(e) => display.setReduceMotion(e.target.checked)}
           />
         </label>
-      </Panel>
+      </SectionCard>
+      </div>
     </div>
   );
 }

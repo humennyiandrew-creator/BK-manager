@@ -67,8 +67,8 @@
   position: absolute;
   top: 0.35rem;
   right: 22%;
-  background: var(--accent-2);
-  color: var(--bg);
+  background: var(--bad, #e2384a);
+  color: #fff;
   font-size: 0.6rem;
   font-weight: 700;
   border-radius: 999px;

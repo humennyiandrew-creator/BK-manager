@@ -11,9 +11,15 @@
 }
 
 .header {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 1rem;
+  padding: 1.2rem;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  overflow: hidden;
 }
 
 .logo {
@@ -23,8 +29,14 @@
 }
 
 .title {
-  font-size: 1.5rem;
+  position: relative;
+  font-size: var(--fs-h1);
   font-weight: 900;
+  font-style: italic;
+}
+
+.slash {
+  color: var(--accent);
 }
 
 .subtitle {

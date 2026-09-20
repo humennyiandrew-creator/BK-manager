@@ -1,10 +1,16 @@
-.wrap {
+.screen {
   height: 100%;
   min-height: 0;
-  padding: 0 1.4rem 1rem;
+  padding: var(--sp-3) 1.4rem 1rem;
   display: flex;
   flex-direction: column;
-  gap: var(--gap);
+  gap: var(--sp-3);
+}
+
+.heroStats {
+  display: flex;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
 }
 
 .panel {

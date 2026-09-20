@@ -2,6 +2,7 @@
   display: flex;
   align-items: stretch;
   height: 2.2rem;
+  background-color: var(--bg-alt);
 }
 
 .cell {
@@ -24,4 +25,8 @@
   font-size: 0.65rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+.cellValue {
+  font-weight: 600;
 }

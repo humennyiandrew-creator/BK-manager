@@ -1,8 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
+import HeroHeader from '../components/HeroHeader';
+import SideRail, { type SideRailItem } from '../components/SideRail';
 import Panel from '../components/Panel';
 import DataTable, { type DataTableColumn } from '../components/DataTable';
 import BkImage from '../components/BkImage';
 import TeamBadge from '../components/TeamBadge';
+import { IconTransfers, IconMessages, IconRoster, IconFinances } from '../components/tabIcons';
 import { useGame, useGameState } from '../store/useGame';
 import { useTransfersNav } from '../store/useTransfersNav';
 import { ageOf } from '../../engine/ratings';
@@ -79,12 +82,13 @@ function AssetTable({ s, teamId, selected, onToggle }: { s: GameState; teamId: s
         : `${a.pick.year} R${a.pick.round}${a.pick.original !== a.pick.owner ? ` (${s.teams[a.pick.original]?.abbr})` : ''}`
     },
     { key: 'pos', header: 'Pos', render: (a) => (a.kind === 'player' ? a.player.positions.join('/') : '-') },
-    { key: 'age', header: 'Age', align: 'right', render: (a) => (a.kind === 'player' ? Math.floor(ageOf(a.player.birthDate)) : '-') },
-    { key: 'ovr', header: 'OVR/POT', align: 'right', render: (a) => (a.kind === 'player' ? `${a.player.ratings.ovr}/${a.player.ratings.pot}` : '-') },
+    { key: 'age', header: 'Age', align: 'right', render: (a) => (a.kind === 'player' ? Math.floor(ageOf(a.player.birthDate)) : '-'), sortValue: (a) => (a.kind === 'player' ? ageOf(a.player.birthDate) : 0) },
+    { key: 'ovr', header: 'OVR/POT', align: 'right', render: (a) => (a.kind === 'player' ? `${a.player.ratings.ovr}/${a.player.ratings.pot}` : '-'), sortValue: (a) => (a.kind === 'player' ? a.player.ratings.ovr : 0) },
     {
       key: 'sal', header: 'Salary', align: 'right', render: (a) => a.kind === 'player'
         ? (a.player.contract ? `${formatMoneyShort(salaryIn(a.player, s.season))} · ${yearsLeft(a.player, s.season)}y` : '-')
-        : '-'
+        : '-',
+      sortValue: (a) => (a.kind === 'player' ? salaryIn(a.player, s.season) : 0)
     },
   ];
   return (
@@ -292,19 +296,25 @@ export default function TransfersScreen() {
 
   if (!s) return null;
 
+  const railItems: SideRailItem<SubTab>[] = [
+    { id: 'trade', label: 'Trade Center', icon: IconTransfers },
+    { id: 'offers', label: 'Offers', icon: IconMessages, badge: s.tradeOffers.length },
+    { id: 'fa', label: 'Free Agents', icon: IconRoster },
+    { id: 'tx', label: 'Transactions', icon: IconFinances }
+  ];
+
   return (
-    <div className={styles.wrap}>
-      <div className={styles.subTabs}>
-        {(['trade', 'offers', 'fa', 'tx'] as SubTab[]).map((t) => (
-          <button key={t} type="button" className={t === subTab ? `${styles.subTab} ${styles.subTabActive}` : styles.subTab} onClick={() => setSubTab(t)}>
-            {t === 'trade' ? 'Trade Center' : t === 'offers' ? `Offers${s.tradeOffers.length ? ` (${s.tradeOffers.length})` : ''}` : t === 'fa' ? 'Free Agents' : 'Transactions'}
-          </button>
-        ))}
+    <div className={styles.screen}>
+      <HeroHeader title="Transfers" subtitle="Trade and free agency" />
+      <div className={styles.body}>
+        <SideRail items={railItems} active={subTab} onSelect={setSubTab} />
+        <div className={styles.content}>
+          {subTab === 'trade' && <TradeCenter s={s} mutate={mutate} />}
+          {subTab === 'offers' && <OffersTab s={s} mutate={mutate} />}
+          {subTab === 'fa' && <FreeAgentsTab s={s} mutate={mutate} />}
+          {subTab === 'tx' && <TransactionsTab s={s} />}
+        </div>
       </div>
-      {subTab === 'trade' && <TradeCenter s={s} mutate={mutate} />}
-      {subTab === 'offers' && <OffersTab s={s} mutate={mutate} />}
-      {subTab === 'fa' && <FreeAgentsTab s={s} mutate={mutate} />}
-      {subTab === 'tx' && <TransactionsTab s={s} />}
     </div>
   );
 }

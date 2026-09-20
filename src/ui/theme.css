@@ -23,6 +23,26 @@
   --positive: #3ddc97;
   --negative: #ff4d5e;
   --gap: 0.75rem;
+
+  /* ---- Typography scale ---- */
+  --fs-display: 2.5rem;
+  --fs-h1: 1.65rem;
+  --fs-h2: 1.02rem;
+  --fs-label: 0.68rem;
+  --fs-body: 0.85rem;
+  --fs-small: 0.72rem;
+
+  /* ---- Spacing scale (4/8px base) ---- */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-6: 1.5rem;
+  --sp-8: 2rem;
+
+  /* ---- Panel radius/border ---- */
+  --radius-sm: 3px;
+  --radius-lg: 8px;
 }
 
 * {
@@ -59,6 +79,23 @@ body {
   font-weight: 400;
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
+  position: relative;
+}
+
+/* Subtle grain overlay so dark slabs don't look flat. */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.025;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+html.reduce-motion body::after {
+  display: none;
 }
 
 #root {
@@ -108,4 +145,69 @@ button {
 
 ::-webkit-scrollbar-track {
   background: transparent;
+}
+
+/* ---- Shared gradient / motif utilities (F1-Manager style) ---- */
+
+.mono-num {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+/* Repeating diagonal chevron stripe, used on hero headers / continue widgets / accent bars. */
+.chevron-stripe {
+  background-image: repeating-linear-gradient(
+    115deg,
+    rgba(255, 255, 255, 0.1) 0 0.4rem,
+    transparent 0.4rem 1.1rem
+  );
+}
+
+/* Diagonal accent wash for hero/detail panels. */
+.diagonal-accent {
+  background:
+    linear-gradient(115deg, color-mix(in srgb, var(--accent) 16%, transparent) 0%, transparent 42%),
+    linear-gradient(295deg, color-mix(in srgb, var(--accent-2) 12%, transparent) 0%, transparent 38%);
+}
+
+.text-display {
+  font-size: var(--fs-display);
+  font-weight: 900;
+  font-style: italic;
+  letter-spacing: 0.01em;
+  line-height: 1.05;
+}
+
+.text-h1 {
+  font-size: var(--fs-h1);
+  font-weight: 800;
+  letter-spacing: 0.01em;
+}
+
+.text-h2 {
+  font-size: var(--fs-h2);
+  font-weight: 700;
+}
+
+.text-label {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: var(--fs-label);
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+/* Thin accent underline, reused under panel/section headers. */
+.accent-edge {
+  position: relative;
+}
+
+.accent-edge::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 2.4rem;
+  height: 2px;
+  background: var(--accent);
 }

@@ -1,17 +1,31 @@
-.wrap {
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
   height: 100%;
   min-height: 0;
-  padding: 0 1.4rem 1rem;
+  padding: var(--sp-3) 1.4rem 1rem;
 }
 
 .panel {
-  height: 100%;
+  flex: 1;
   min-height: 0;
 }
 
 .nav {
   display: flex;
-  gap: 0.3rem;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.navMonth {
+  font-size: var(--fs-label);
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-right: 0.2rem;
+  white-space: nowrap;
 }
 
 .nav button {

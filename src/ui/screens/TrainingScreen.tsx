@@ -1,3 +1,4 @@
+import HeroHeader from '../components/HeroHeader';
 import Panel from '../components/Panel';
 import DataTable, { type DataTableColumn } from '../components/DataTable';
 import ProgressBar from '../components/ProgressBar';
@@ -111,14 +112,14 @@ export default function TrainingScreen() {
   const familiarity = team.familiarity ?? 60;
 
   const columns: DataTableColumn<Player>[] = [
-    { key: 'name', header: 'Player', render: (p) => `${p.firstName} ${p.lastName}` },
-    { key: 'age', header: 'Age', align: 'right', render: (p) => Math.floor(ageOf(p.birthDate)) },
-    { key: 'ovr', header: 'OVR', align: 'right', render: (p) => p.ratings.ovr },
-    { key: 'pot', header: 'POT', align: 'right', render: (p) => p.ratings.pot },
-    { key: 'change', header: 'Last', align: 'right', render: (p) => <ChangeArrow v={p.lastChange} /> },
+    { key: 'name', header: 'Player', render: (p) => `${p.firstName} ${p.lastName}`, sortValue: (p) => `${p.lastName} ${p.firstName}` },
+    { key: 'age', header: 'Age', align: 'right', render: (p) => Math.floor(ageOf(p.birthDate)), sortValue: (p) => ageOf(p.birthDate) },
+    { key: 'ovr', header: 'OVR', align: 'right', render: (p) => p.ratings.ovr, sortValue: (p) => p.ratings.ovr },
+    { key: 'pot', header: 'POT', align: 'right', render: (p) => p.ratings.pot, sortValue: (p) => p.ratings.pot },
+    { key: 'change', header: 'Last', align: 'right', render: (p) => <ChangeArrow v={p.lastChange} />, sortValue: (p) => p.lastChange ?? 0 },
     { key: 'spark', header: 'Trend', render: (p) => <Sparkline history={p.ovrHistory} /> },
     {
-      key: 'fatigue', header: 'Fatigue', render: (p) => {
+      key: 'fatigue', header: 'Fatigue', sortValue: (p) => p.fatigue ?? 0, render: (p) => {
         const f = p.fatigue ?? 0;
         return (
           <div className={styles.fatigueCell}>
@@ -157,7 +158,9 @@ export default function TrainingScreen() {
   ];
 
   return (
-    <div className={styles.wrap}>
+    <div className={styles.screen}>
+      <HeroHeader title="Training" subtitle="Practice plans" />
+      <div className={styles.wrap}>
       <div className={styles.left}>
         <PrepPanel s={s} mutate={mutate} />
         <Panel title="Weekly Schedule" className={styles.weekPanel}>
@@ -220,6 +223,7 @@ export default function TrainingScreen() {
       <Panel title="Roster Development" className={styles.rosterPanel} flush>
         <DataTable columns={columns} rows={roster} rowKey={(p) => p.id} compact />
       </Panel>
+      </div>
     </div>
   );
 }

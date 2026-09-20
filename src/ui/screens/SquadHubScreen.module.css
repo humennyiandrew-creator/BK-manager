@@ -1,37 +1,41 @@
-.screenWrap {
+.screen {
   height: 100%;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
-  padding: 0 1.4rem 1rem;
+  gap: var(--sp-3);
+  padding: var(--sp-3) 1.4rem 1rem;
 }
 
-.subTabs {
+.body {
+  flex: 1;
+  min-height: 0;
   display: flex;
-  gap: 0.4rem;
-  flex-shrink: 0;
+  gap: var(--gap);
 }
 
-.subTab {
-  background: var(--panel);
-  border: 1px solid var(--panel-border);
-  color: var(--text-muted);
-  border-radius: var(--radius);
-  padding: 0.4rem 0.9rem;
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  font-weight: 700;
-}
-
-.subTabActive {
-  background: var(--red);
-  border-color: var(--red);
-  color: var(--text);
+.content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .capGrid {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
+
+.capStats {
+  display: flex;
+  gap: var(--gap);
+  flex-shrink: 0;
+}
+
+.capBody {
   flex: 1;
   min-height: 0;
   display: grid;
@@ -47,16 +51,10 @@
   gap: 0.6rem;
 }
 
-.resignHeader {
+.resignStats {
   display: flex;
-  gap: 1.4rem;
+  gap: var(--gap);
   flex-shrink: 0;
-  background: var(--panel);
-  border: 1px solid var(--panel-border);
-  border-radius: var(--radius);
-  padding: 0.5rem 0.9rem;
-  font-size: 0.75rem;
-  color: var(--text-muted);
 }
 
 .empty {
