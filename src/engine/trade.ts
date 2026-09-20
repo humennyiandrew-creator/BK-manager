@@ -59,6 +59,7 @@ export function tradeWindowOpen(s: GameState): boolean {
 /** Legality for both sides. a gives aGives, receives bGives. */
 export function tradeLegal(s: GameState, a: string, b: string, aGives: TradeSide, bGives: TradeSide): string | null {
   if (!tradeWindowOpen(s)) return 'Trade deadline has passed';
+  if ((s.teams[a].league ?? 'NBA') !== (s.teams[b].league ?? 'NBA')) return 'Clubs in different leagues cannot trade — sign the player instead';
   if (!aGives.players.length && !aGives.picks.length) return 'Nothing offered';
   for (const [team, side] of [[a, aGives], [b, bGives]] as const) {
     for (const id of side.players) if (s.players[id]?.teamId !== team) return 'Player no longer on that team';

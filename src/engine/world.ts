@@ -15,6 +15,8 @@ import { initPicks } from './draft';
 import { LEAGUES, leagueOf, type LeagueId } from './leagues';
 import { buildRoundRobin } from './schedule';
 import { euroSalary } from './euro';
+import { genPlayer } from './gen';
+import { hashString, mulberry32 } from './rng';
 
 export const MAX_STANDARD = 15;
 export const MAX_TWO_WAY = 3;
@@ -51,7 +53,10 @@ export function newGame(teams: Team[], raw: RawPlayer[], userTeamId: string, see
   for (const t of teams) {
     teamStates[t.id] = { ...t, rotation: [], minutes: {}, tactics: defaultTactics() };
     if ((t.league ?? 'NBA') === 'NBA') trimRoster(t.id, players);
-    else euroContracts(t.id, players, seasonYear);
+    else {
+      fillRoster(t, players, seasonYear, seed, ratings);
+      euroContracts(t.id, players, seasonYear);
+    }
     refreshRotation(teamStates[t.id], players);
     autoTactics(teamStates[t.id].tactics, Object.values(players).filter((p) => p.teamId === t.id));
   }
@@ -113,5 +118,25 @@ function euroContracts(teamId: string, players: Record<string, Player>, seasonYe
   for (const p of Object.values(players)) {
     if (p.teamId !== teamId || p.contract) continue;
     p.contract = euroSalary(p, seasonYear);
+  }
+}
+
+
+/** Feeds sometimes publish a club's roster late: top it up with plausible locals so the league still plays. */
+function fillRoster(t: Team, players: Record<string, Player>, seasonYear: number, seed: number, ratings: Map<string, Player['ratings']>) {
+  const have = Object.values(players).filter((p) => p.teamId === t.id);
+  const need = 12 - have.length;
+  if (need <= 0) return;
+  const rng = mulberry32(hashString(`${seed}|fill|${t.id}`));
+  for (let i = 0; i < need; i++) {
+    const id = `fill-${t.abbr}-${i}`;
+    const ovr = Math.round(58 + rng() * 14);
+    const age = 20 + Math.floor(rng() * 14);
+    const p = genPlayer({ id, ovr, pot: Math.min(92, ovr + Math.round(Math.max(0, 26 - age) * 1.6)), age, asOf: `${seasonYear}-10-01`, rng });
+    p.teamId = t.id;
+    p.prospect = false;
+    p.country = t.country ?? p.country;
+    players[id] = p;
+    ratings.set(id, p.ratings);
   }
 }

@@ -1,6 +1,8 @@
 // CBA-lite: cap, tax, aprons, min/max, rookie scale, salary matching, contract asks.
 import type { GameState, Player } from './model';
 import { ageOf } from './ratings';
+import { leagueOf } from './leagues';
+import { euroBudget, euroWage } from './euro';
 
 export interface CapNumbers { cap: number; tax: number; apron1: number; apron2: number; minRookie: number; mle: number; taxMle: number }
 
@@ -104,6 +106,12 @@ export function rookieScale(pick: number, seasonYear: number): { salaries: { sea
 // ---------- market value ----------
 
 /** Fair annual salary for a player given current ratings and age. */
+/** What a club in `league` would pay this player per season. */
+export function marketValueIn(p: Player, seasonYear: number, league?: string): number {
+  if (leagueOf(league).economy === 'budget') return euroWage(p.ratings.ovr, ageOf(p.birthDate, new Date(`${seasonYear}-10-01`)));
+  return marketValue(p, seasonYear);
+}
+
 export function marketValue(p: Player, seasonYear: number): number {
   const age = ageOf(p.birthDate, new Date(`${seasonYear}-10-01`));
   const upside = age <= 24 ? (p.ratings.pot - p.ratings.ovr) * (0.45 - (age - 19) * 0.07) : 0;
@@ -127,6 +135,15 @@ export function contractRows(seasonYear: number, amount: number, years: number) 
 /** Can teamId sign a free agent at `amount` right now? Returns null if yes, else reason. Sets which exception is used. */
 export function signingCheck(s: GameState, teamId: string, p: Player, amount: number, twoWay = false): { reason: string | null; usesMle: boolean } {
   const roster = rosterOf(s, teamId);
+  const league = leagueOf(s.teams[teamId]?.league);
+  if (league.economy === 'budget') {
+    // European clubs have no cap: the board sets a wage budget and the roster limit is smaller.
+    if (roster.length >= league.maxRoster) return { reason: `Roster full (${league.maxRoster} players)`, usesMle: false };
+    const budget = euroBudget(s, teamId);
+    const wages = roster.reduce((x, q) => x + salaryIn(q, s.season), 0);
+    if (wages + amount > budget) return { reason: `Over the wage budget ($${((budget - wages) / 1e6).toFixed(2)}M left)`, usesMle: false };
+    return { reason: null, usesMle: false };
+  }
   if (twoWay) {
     return { reason: roster.filter(isTwoWay).length >= 3 ? 'Two-way slots full (3)' : null, usesMle: false };
   }

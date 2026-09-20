@@ -37,7 +37,7 @@ export const LEAGUES: Record<LeagueId, LeagueDef> = {
   EL: {
     id: 'EL', name: 'Turkish Airlines EuroLeague', short: 'EuroLeague',
     // FIBA: 40 minutes, foul out at 5, bonus from the 5th team foul. Slower: ~72 possessions.
-    rules: FIBA_RULES, possSec: 16.6, teams: 20, gamesPerTeam: 38,
+    rules: FIBA_RULES, possSec: 15.7, teams: 20, gamesPerTeam: 38,
     start: { month: 10, day: 1 }, end: { month: 4, day: 10 }, gameDays: [2, 4], // Tue + Thu
     playoff: 'el', economy: 'budget', importLimit: undefined, maxRoster: 14, strength: -7,
   },

@@ -23,10 +23,16 @@ function readJSON(rel) {
   return JSON.parse(fs.readFileSync(path.join(RAW, rel), 'utf8'));
 }
 
+const SUFFIX = { ii: 'II', iii: 'III', iv: 'IV', jr: 'Jr.', sr: 'Sr.' };
 function titleCase(s) {
   return String(s)
     .toLowerCase()
-    .replace(/(^|[\s\-'.])([a-z])/g, (_, sep, c) => sep + c.toUpperCase());
+    .replace(/(^|[\s\-'.])([a-z])/g, (_, sep, c) => sep + c.toUpperCase())
+    // Generational suffixes read as names otherwise ("Wright Iv" -> "Wright IV").
+    .split(/(\s+)/)
+    .map((w) => SUFFIX[w.toLowerCase().replace('.', '')] ?? w)
+    .join('')
+    .trim();
 }
 
 function slugify(s) {
