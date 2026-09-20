@@ -10,7 +10,7 @@ import type { Play, Role, ShotType } from '../playbook/types';
 import { defenseFit, lineupProfile, offenseFit, type DefFit, type OffFit, type Profile } from '../playbook/fit';
 
 export type { ShotType };
-export interface Rules { periods: number; periodSec: number; otSec: number; foulOut: number; bonusAt: number }
+export interface Rules { periods: number; periodSec: number; otSec: number; foulOut: number; bonusAt: number; possSec?: number }
 export const NBA_RULES: Rules = { periods: 4, periodSec: 720, otSec: 300, foulOut: 6, bonusAt: 5 };
 
 /** Tuning knobs — calibrated by src/engine/__tests__/calibration.test.ts. */
@@ -364,11 +364,11 @@ export function commitEvent(off: Side, def: Side, ev: Ev) {
 
 // ---------- game ----------
 
-export function possessionLength(off: Side, def: Side, prev: Outcome | null, rng: Rng): number {
+export function possessionLength(off: Side, def: Side, prev: Outcome | null, rng: Rng, rules?: Rules): number {
   if (prev?.keep && prev.event !== 'foul') return 4 + rng() * 9;
   if (prev?.transition) return 4 + rng() * 7;
   const pace = (off.team.tactics.pace + def.team.tactics.pace) / 2 + (def.team.tactics.defense === 'press' ? 8 : 0);
-  const mean = K.possSec * (1 - (pace - 50) / 250);
+  const mean = (rules?.possSec ?? K.possSec) * (1 - (pace - 50) / 250);
   return Math.min(24, Math.max(4, mean + gauss(rng) * 4.5));
 }
 
@@ -396,7 +396,7 @@ export function simGame(home: TeamState, away: TeamState, players: Record<string
         doSubs(H, elapsed, total, ctx, rules);
         doSubs(A, elapsed, total, { ...ctx, margin: -ctx.margin }, rules);
       }
-      const dur = Math.min(clock, possessionLength(off, def, prev, rng));
+      const dur = Math.min(clock, possessionLength(off, def, prev, rng, rules));
       tickEnergy(H, dur, drain); tickEnergy(A, dur, drain);
       clock -= dur; elapsed += dur;
       const clutch = period >= rules.periods && clock < 120 && Math.abs(H.pts - A.pts) <= 5;

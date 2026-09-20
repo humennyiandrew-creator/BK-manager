@@ -84,13 +84,15 @@ export interface Game {
   id: number;
   date: string;         // YYYY-MM-DD
   home: string; away: string;
+  comp?: string;        // competition id, default 'NBA'
   type: GameType;
   seriesId?: string;
   result?: GameResult;
 }
 
 export interface Series {
-  id: string;           // e.g. "R1-East-1v8", "PI-West-7v8", "Finals"
+  id: string;
+  comp?: string;        // competition id, default 'NBA'           // e.g. "R1-East-1v8", "PI-West-7v8", "Finals"
   kind: 'playin' | 'playoff';
   round: number;        // play-in: 0; playoffs 1–4
   conf: 'East' | 'West' | null;
@@ -132,6 +134,7 @@ export interface GameState {
   games: Game[];
   series: Series[];
   champion?: string;
+  elChampion?: string;            // EuroLeague winner (other competitions crown their own champions)
   messages: Message[];
   nextId: number;
   // ---- M6 management ----

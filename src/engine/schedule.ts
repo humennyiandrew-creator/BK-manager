@@ -122,3 +122,44 @@ export function buildSchedule(teams: TeamState[], seasonYear: number, seed: numb
   }
   return games;
 }
+
+/**
+ * Double round robin for a league that plays fixed match days each week (EuroLeague: Tue + Thu).
+ * Circle method: fixed first team, rotate the rest; second half mirrors home/away.
+ */
+export function buildRoundRobin(teams: TeamState[], comp: string, startDate: string, gameDays: number[], seed: number, firstId: number): Game[] {
+  const rng = mulberry32(seed ^ 0xe0e0);
+  const ids = shuffle(teams.map((t) => t.id), rng);
+  if (ids.length % 2) ids.push('BYE');
+  const n = ids.length;
+  const rounds: [string, string][][] = [];
+  const rot = ids.slice(1);
+  for (let r = 0; r < n - 1; r++) {
+    const pairs: [string, string][] = [];
+    const list = [ids[0], ...rot];
+    for (let i = 0; i < n / 2; i++) {
+      const a = list[i], b = list[n - 1 - i];
+      if (a === 'BYE' || b === 'BYE') continue;
+      // Alternate who hosts so every club gets an even split.
+      pairs.push((r + i) % 2 ? [a, b] : [b, a]);
+    }
+    rounds.push(pairs);
+    rot.unshift(rot.pop()!);
+  }
+  const all = [...rounds, ...rounds.map((rd) => rd.map(([h, a]) => [a, h] as [string, string]))];
+
+  const games: Game[] = [];
+  let id = firstId;
+  let day = 0;
+  let slot = 0;
+  for (const round of all) {
+    // Find the next weekday this competition plays on.
+    while (!gameDays.includes(new Date(addDays(startDate, day) + 'T00:00:00Z').getUTCDay())) day++;
+    const date = addDays(startDate, day);
+    for (const [home, away] of round) games.push({ id: id++, date, home, away, comp, type: 'regular' });
+    day++;
+    slot++;
+    if (slot % gameDays.length === 0) day += 1; // small gap between weeks
+  }
+  return games;
+}

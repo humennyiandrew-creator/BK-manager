@@ -1,0 +1,322 @@
+[
+  {
+    "id": "EL-ASV",
+    "abbr": "ASV",
+    "city": "Lyon",
+    "name": "LDLC ASVEL",
+    "league": "EL",
+    "country": "France",
+    "conference": "EL",
+    "division": "EL",
+    "colors": {
+      "primary": "#929292",
+      "secondary": "#1D1D1B"
+    },
+    "logo": "logos/EL-ASV.png",
+    "arenaCapacity": 12523
+  },
+  {
+    "id": "EL-BAR",
+    "abbr": "BAR",
+    "city": "Barcelona",
+    "name": "FC Barcelona",
+    "league": "EL",
+    "country": "Spain",
+    "conference": "EL",
+    "division": "EL",
+    "colors": {
+      "primary": "#023485",
+      "secondary": "#8C2445"
+    },
+    "logo": "logos/EL-BAR.png",
+    "arenaCapacity": 7585
+  },
+  {
+    "id": "EL-BAS",
+    "abbr": "BAS",
+    "city": "Vitoria-Gasteiz",
+    "name": "Baskonia",
+    "league": "EL",
+    "country": "Spain",
+    "conference": "EL",
+    "division": "EL",
+    "colors": {
+      "primary": "#0A2240",
+      "secondary": "#CE0E2D"
+    },
+    "logo": "logos/EL-BAS.png",
+    "arenaCapacity": 15431
+  },
+  {
+    "id": "EL-BES",
+    "abbr": "BES",
+    "city": "Istanbul",
+    "name": "Besiktas",
+    "league": "EL",
+    "country": "Turkiye",
+    "conference": "EL",
+    "division": "EL",
+    "colors": {
+      "primary": "#000000",
+      "secondary": "#FFFFFF"
+    },
+    "logo": "logos/EL-BES.png",
+    "arenaCapacity": 10000
+  },
+  {
+    "id": "EL-DUB",
+    "abbr": "DUB",
+    "city": "Dubai",
+    "name": "Dubai",
+    "league": "EL",
+    "country": "United Arab Emirates",
+    "conference": "EL",
+    "division": "EL",
+    "colors": {
+      "primary": "#F6881F",
+      "secondary": "#003E2E"
+    },
+    "logo": "logos/EL-DUB.png",
+    "arenaCapacity": 13221
+  },
+  {
+    "id": "EL-HTA",
+    "abbr": "HTA",
+    "city": "Tel Aviv",
+    "name": "Hapoel TLV",
+    "league": "EL",
+    "country": "Israel",
+    "conference": "EL",
+    "division": "EL",
+    "colors": {
+      "primary": "#D71920",
+      "secondary": "#FFFFFF"
+    },
+    "logo": "logos/EL-HTA.png",
+    "arenaCapacity": 12373
+  },
+  {
+    "id": "EL-IST",
+    "abbr": "IST",
+    "city": "Istanbul",
+    "name": "Anadolu Efes",
+    "league": "EL",
+    "country": "Turkiye",
+    "conference": "EL",
+    "division": "EL",
+    "colors": {
+      "primary": "#002D74",
+      "secondary": "#00A7E1"
+    },
+    "logo": "logos/EL-IST.png",
+    "arenaCapacity": 10000
+  },
+  {
+    "id": "EL-MAD",
+    "abbr": "MAD",
+    "city": "Madrid",
+    "name": "Real Madrid",
+    "league": "EL",
+    "country": "Spain",
+    "conference": "EL",
+    "division": "EL",
+    "colors": {
+      "primary": "#004996",
+      "secondary": "#004996"
+    },
+    "logo": "logos/EL-MAD.png",
+    "arenaCapacity": 13109
+  },
+  {
+    "id": "EL-MIL",
+    "abbr": "MIL",
+    "city": "Milan",
+    "name": "Milan",
+    "league": "EL",
+    "country": "Italy",
+    "conference": "EL",
+    "division": "EL",
+    "colors": {
+      "primary": "#E1261D",
+      "secondary": "#1D1D1B"
+    },
+    "logo": "logos/EL-MIL.png",
+    "arenaCapacity": 12657
+  },
+  {
+    "id": "EL-MUN",
+    "abbr": "MUN",
+    "city": "Munich",
+    "name": "Bayern Munich",
+    "league": "EL",
+    "country": "Germany",
+    "conference": "EL",
+    "division": "EL",
+    "colors": {
+      "primary": "#E11837",
+      "secondary": "#006FBA"
+    },
+    "logo": "logos/EL-MUN.png",
+    "arenaCapacity": 11500
+  },
+  {
+    "id": "EL-OLY",
+    "abbr": "OLY",
+    "city": "Piraeus",
+    "name": "Olympiacos",
+    "league": "EL",
+    "country": "Greece",
+    "conference": "EL",
+    "division": "EL",
+    "colors": {
+      "primary": "#D1061F",
+      "secondary": "#1D1D1B"
+    },
+    "logo": "logos/EL-OLY.png",
+    "arenaCapacity": 12700
+  },
+  {
+    "id": "EL-PAM",
+    "abbr": "PAM",
+    "city": "Valencia",
+    "name": "Valencia",
+    "league": "EL",
+    "country": "Spain",
+    "conference": "EL",
+    "division": "EL",
+    "colors": {
+      "primary": "#FF6C0E",
+      "secondary": "#0A3792"
+    },
+    "logo": "logos/EL-PAM.png",
+    "arenaCapacity": 15600
+  },
+  {
+    "id": "EL-PAN",
+    "abbr": "PAN",
+    "city": "Athens",
+    "name": "Panathinaikos",
+    "league": "EL",
+    "country": "Greece",
+    "conference": "EL",
+    "division": "EL",
+    "colors": {
+      "primary": "#007135",
+      "secondary": "#1D1D1B"
+    },
+    "logo": "logos/EL-PAN.png",
+    "arenaCapacity": 18500
+  },
+  {
+    "id": "EL-PAR",
+    "abbr": "PAR",
+    "city": "Belgrade",
+    "name": "Partizan",
+    "league": "EL",
+    "country": "Serbia",
+    "conference": "EL",
+    "division": "EL",
+    "colors": {
+      "primary": "#1D1D1B",
+      "secondary": "#1D1D1B"
+    },
+    "logo": "logos/EL-PAR.png",
+    "arenaCapacity": 21000
+  },
+  {
+    "id": "EL-PRS",
+    "abbr": "PRS",
+    "city": "Paris",
+    "name": "Paris",
+    "league": "EL",
+    "country": "France",
+    "conference": "EL",
+    "division": "EL",
+    "colors": {
+      "primary": "#000000",
+      "secondary": "#ffffff"
+    },
+    "logo": "logos/EL-PRS.png",
+    "arenaCapacity": 14500
+  },
+  {
+    "id": "EL-RED",
+    "abbr": "RED",
+    "city": "Belgrade",
+    "name": "Crvena Zvezda",
+    "league": "EL",
+    "country": "Serbia",
+    "conference": "EL",
+    "division": "EL",
+    "colors": {
+      "primary": "#E91D26",
+      "secondary": "#CEAC6D"
+    },
+    "logo": "logos/EL-RED.png",
+    "arenaCapacity": 21000
+  },
+  {
+    "id": "EL-TEL",
+    "abbr": "TEL",
+    "city": "Tel Aviv",
+    "name": "Maccabi",
+    "league": "EL",
+    "country": "Israel",
+    "conference": "EL",
+    "division": "EL",
+    "colors": {
+      "primary": "#FFF100",
+      "secondary": "#2371B5"
+    },
+    "logo": "logos/EL-TEL.png",
+    "arenaCapacity": 8000
+  },
+  {
+    "id": "EL-ULK",
+    "abbr": "ULK",
+    "city": "Istanbul",
+    "name": "Fenerbahce",
+    "league": "EL",
+    "country": "Turkiye",
+    "conference": "EL",
+    "division": "EL",
+    "colors": {
+      "primary": "#FFED00",
+      "secondary": "#004280"
+    },
+    "logo": "logos/EL-ULK.png",
+    "arenaCapacity": 13000
+  },
+  {
+    "id": "EL-VIR",
+    "abbr": "VIR",
+    "city": "Bologna",
+    "name": "Virtus Bologna",
+    "league": "EL",
+    "country": "Italy",
+    "conference": "EL",
+    "division": "EL",
+    "colors": {
+      "primary": "#1D1D1B",
+      "secondary": "#1D1D1B"
+    },
+    "logo": "logos/EL-VIR.png",
+    "arenaCapacity": 9800
+  },
+  {
+    "id": "EL-ZAL",
+    "abbr": "ZAL",
+    "city": "Kaunas",
+    "name": "Zalgiris",
+    "league": "EL",
+    "country": "Lithuania",
+    "conference": "EL",
+    "division": "EL",
+    "colors": {
+      "primary": "#0C6F3E",
+      "secondary": "#006B42"
+    },
+    "logo": "logos/EL-ZAL.png",
+    "arenaCapacity": 15415
+  }
+]

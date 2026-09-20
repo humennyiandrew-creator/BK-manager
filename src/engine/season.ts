@@ -4,6 +4,8 @@ import { addDays } from './schedule';
 import { hashString, mulberry32 } from './rng';
 import { refreshRotation } from './rotation';
 import { simGame } from './sim/fast';
+import { leagueOf } from './leagues';
+import { elRegularDone, elStartPostseason, elTick } from './postseason-el';
 import { dailyUpdate } from './daily';
 import { boardOnPhase } from './mgmt/board';
 import { fatigueInjuryMul, trainingEffects } from './progression';
@@ -20,15 +22,18 @@ export interface StandingRow {
   pf: number; pa: number; streak: number; last10: [number, number];
 }
 
-export function standings(s: GameState, conference?: 'East' | 'West'): StandingRow[] {
+/** Table for one competition (default the user's league) and optionally one conference. */
+export function standings(s: GameState, conference?: string, comp?: string): StandingRow[] {
+  const league = comp ?? s.teams[s.userTeamId]?.league ?? 'NBA';
   const rows = new Map<string, StandingRow & { log: boolean[] }>();
   for (const t of Object.values(s.teams)) {
+    if ((t.league ?? 'NBA') !== league) continue;
     if (conference && t.conference !== conference) continue;
     rows.set(t.id, { teamId: t.id, w: 0, l: 0, pct: 0, gb: 0, home: [0, 0], away: [0, 0], conf: [0, 0], pf: 0, pa: 0, streak: 0, last10: [0, 0], log: [] });
   }
   const h2h = new Map<string, number>();
   for (const g of s.games) {
-    if (g.type !== 'regular' || !g.result) continue;
+    if (g.type !== 'regular' || !g.result || (g.comp ?? 'NBA') !== league) continue;
     const homeWon = g.result.home > g.result.away;
     const sameConf = s.teams[g.home].conference === s.teams[g.away].conference;
     for (const [id, won, pf, pa, isHome] of [[g.home, homeWon, g.result.home, g.result.away, true], [g.away, !homeWon, g.result.away, g.result.home, false]] as const) {
@@ -117,7 +122,8 @@ export function applyResult(s: GameState, g: Game, res: GameResult) {
 
 export function playGame(s: GameState, g: Game) {
   const rng = mulberry32(hashString(`${s.seed}|game|${g.id}`));
-  applyResult(s, g, simGame(s.teams[g.home], s.teams[g.away], s.players, rng));
+  const league = leagueOf(g.comp ?? s.teams[g.home].league);
+  applyResult(s, g, simGame(s.teams[g.home], s.teams[g.away], s.players, rng, { ...league.rules, possSec: league.possSec }));
 }
 
 // ---------- postseason ----------
@@ -247,8 +253,20 @@ export function advanceDay(s: GameState, skipUserGame = false) {
   }
   healed.forEach((id) => refreshRotation(s.teams[id], s.players));
 
-  if (s.phase === 'regular' && s.games.every((g) => g.type !== 'regular' || g.result)) startPlayIn(s);
-  if (s.phase === 'playin' || s.phase === 'playoffs') postseasonTick(s);
+  const userLeague = s.teams[s.userTeamId].league ?? 'NBA';
+  if (userLeague === 'NBA') {
+    if (s.phase === 'regular' && s.games.every((g) => (g.comp ?? 'NBA') !== 'NBA' || g.type !== 'regular' || g.result)) startPlayIn(s);
+    if (s.phase === 'playin' || s.phase === 'playoffs') postseasonTick(s);
+  } else if (elRegularDone(s)) {
+    if (s.phase === 'regular') { s.phase = 'playin'; elStartPostseason(s); }
+    if (s.phase === 'playin' || s.phase === 'playoffs') {
+      elTick(s);
+      if (s.series.some((x) => x.comp === 'EL' && x.round === 1)) s.phase = 'playoffs';
+      if (s.elChampion) { s.champion = s.elChampion; s.phase = 'offseason'; }
+    }
+  }
+  // Competitions the user is not in still run their own postseason quietly.
+  if (userLeague !== 'EL' && elRegularDone(s)) { elStartPostseason(s); elTick(s); }
   dailyUpdate(s, played);
   if (s.phase !== phaseBefore) boardOnPhase(s);
   s.date = addDays(s.date, 1);

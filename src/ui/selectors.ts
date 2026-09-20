@@ -59,7 +59,7 @@ export function seasonObjective(rank: number): string {
   return 'Develop Youth';
 }
 
-export function conferenceStandings(s: GameState, conf: 'East' | 'West'): StandingRow[] {
+export function conferenceStandings(s: GameState, conf: string): StandingRow[] {
   return standings(s, conf);
 }
 

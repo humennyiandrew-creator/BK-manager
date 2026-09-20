@@ -1,5 +1,5 @@
 // New career: raw data → GameState.
-import type { GameState, Player, TeamState } from './model';
+import type { Game, GameState, Player, TeamState } from './model';
 import { emptyLine } from './model';
 import { buildRatings } from './ratings';
 import { refreshRotation } from './rotation';
@@ -12,13 +12,31 @@ import { initFinances } from './mgmt/finance';
 import { initBoard } from './mgmt/board';
 import { defaultTraining } from './progression';
 import { initPicks } from './draft';
+import { LEAGUES, leagueOf, type LeagueId } from './leagues';
+import { buildRoundRobin } from './schedule';
+import { euroSalary } from './euro';
 
 export const MAX_STANDARD = 15;
 export const MAX_TWO_WAY = 3;
 const VET_MIN = 2_300_000;
 
 export function newGame(teams: Team[], raw: RawPlayer[], userTeamId: string, seed: number, seasonYear = 2026): GameState {
-  const ratings = buildRatings(raw);
+  // Ratings are z-scored inside each league's own pool, then shifted onto the NBA scale.
+  const leagueIds = [...new Set(teams.map((t) => (t.league ?? 'NBA') as LeagueId))];
+  const ratings = new Map<string, ReturnType<typeof buildRatings> extends Map<string, infer V> ? V : never>();
+  for (const lg of leagueIds) {
+    const ids = new Set(teams.filter((t) => (t.league ?? 'NBA') === lg).map((t) => t.id));
+    const pool = raw.filter((r) => (r.teamId ? ids.has(r.teamId) : lg === 'NBA'));
+    if (!pool.length) continue;
+    const offset = LEAGUES[lg]?.strength ?? 0;
+    for (const [id, v] of buildRatings(pool)) {
+      if (offset) {
+        v.ovr = Math.max(35, Math.round(v.ovr + offset));
+        v.pot = Math.max(v.ovr, Math.round(v.pot + offset));
+      }
+      ratings.set(id, v);
+    }
+  }
   const players: Record<string, Player> = {};
   for (const r of raw) {
     players[r.id] = {
@@ -32,15 +50,25 @@ export function newGame(teams: Team[], raw: RawPlayer[], userTeamId: string, see
   const teamStates: Record<string, TeamState> = {};
   for (const t of teams) {
     teamStates[t.id] = { ...t, rotation: [], minutes: {}, tactics: defaultTactics() };
-    trimRoster(t.id, players);
+    if ((t.league ?? 'NBA') === 'NBA') trimRoster(t.id, players);
+    else euroContracts(t.id, players, seasonYear);
     refreshRotation(teamStates[t.id], players);
     autoTactics(teamStates[t.id].tactics, Object.values(players).filter((p) => p.teamId === t.id));
   }
 
   const season = `${seasonYear}-${String((seasonYear + 1) % 100).padStart(2, '0')}`;
-  const games = buildSchedule(Object.values(teamStates), seasonYear, seed, 1);
+  const all = Object.values(teamStates);
+  const games: Game[] = [];
+  for (const lg of leagueIds) {
+    const list = all.filter((t) => (t.league ?? 'NBA') === lg);
+    if (list.length < 4) continue;
+    const def = leagueOf(lg);
+    if (lg === 'NBA') games.push(...buildSchedule(list, seasonYear, seed, games.length + 1));
+    else games.push(...buildRoundRobin(list, lg, `${seasonYear}-${String(def.start.month).padStart(2, '0')}-${String(def.start.day).padStart(2, '0')}`, def.gameDays, seed, games.length + 10_001));
+  }
   const user = teamStates[userTeamId];
-  const regularEnd = games.reduce((m, g) => (g.date > m ? g.date : m), '');
+  const userComp = teamStates[userTeamId].league ?? 'NBA';
+  const regularEnd = games.filter((g) => (g.comp ?? 'NBA') === userComp).reduce((m, g) => (g.date > m ? g.date : m), '');
   const s: GameState = {
     version: 1, seed, season, seasonYear, date: `${seasonYear}-10-01`, phase: 'preseason', userTeamId,
     teams: teamStates, players, games, series: [],
@@ -76,5 +104,14 @@ function trimRoster(teamId: string, players: Record<string, Player>) {
   for (const p of roster) {
     if (!keep.has(p)) { p.teamId = null; continue; }
     if (!p.contract) p.contract = { salaries: [{ season: '2026-27', amount: VET_MIN }], type: 'min' };
+  }
+}
+
+
+/** EuroLeague clubs pay in a much smaller market: wages scale with rating, not the NBA cap. */
+function euroContracts(teamId: string, players: Record<string, Player>, seasonYear: number) {
+  for (const p of Object.values(players)) {
+    if (p.teamId !== teamId || p.contract) continue;
+    p.contract = euroSalary(p, seasonYear);
   }
 }

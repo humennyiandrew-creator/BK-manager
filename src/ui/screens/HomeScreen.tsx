@@ -123,7 +123,7 @@ function LastSeasonPanel({ s }: { s: GameState }) {
 export default function HomeScreen() {
   const s = useGameState();
   const openEvent = useUI((u) => u.openEvent);
-  const [conference, setConference] = useState<'East' | 'West'>(s ? userTeam(s).conference : 'East');
+  const [conference, setConference] = useState<string>(s ? userTeam(s).conference : 'East');
   if (!s) return null;
 
   const team = userTeam(s);

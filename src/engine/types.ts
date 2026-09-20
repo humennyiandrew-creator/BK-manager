@@ -3,11 +3,13 @@
 export type Position = 'PG' | 'SG' | 'SF' | 'PF' | 'C';
 
 export interface Team {
-  id: string;            // NBA team id, e.g. "1610612747"
+  id: string;            // league-unique id (NBA team id, or "EL-<code>")
   abbr: string;          // "LAL"
   city: string;
   name: string;          // "Lakers"
-  conference: 'East' | 'West';
+  league?: string;       // 'NBA' (default) | 'EL'
+  country?: string;      // for non-NBA clubs and import limits
+  conference: string;    // 'East' | 'West' for the NBA, league id elsewhere
   division: string;
   colors: { primary: string; secondary: string };
   logo: string;          // path relative to data/, e.g. "logos/LAL.svg"
