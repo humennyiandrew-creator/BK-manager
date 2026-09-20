@@ -172,15 +172,16 @@ export default function HomeScreen() {
 
         <div className={styles.playerRow}>
           {top2.map((p) => (
-            <PlayerCard
-              key={p.id}
-              rank={playerRankOnTeam(s, p)}
-              facePath={p.face}
-              firstName={p.firstName}
-              lastName={p.lastName}
-              subtitle={`${p.positions[0]} · ${p.ratings.ovr} OVR`}
-              className="glow-hover"
-            />
+            <button key={p.id} type="button" className={styles.playerCardBtn} onClick={() => useUI.getState().openPlayer(p.id)}>
+              <PlayerCard
+                rank={playerRankOnTeam(s, p)}
+                facePath={p.face}
+                firstName={p.firstName}
+                lastName={p.lastName}
+                subtitle={`${p.positions[0]} · ${p.ratings.ovr} OVR`}
+                className="glow-hover"
+              />
+            </button>
           ))}
         </div>
       </div>

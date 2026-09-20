@@ -8,6 +8,7 @@ import ConfirmDialog from '../components/ConfirmDialog';
 import BkImage from '../components/BkImage';
 import { IconFinances, IconTransfers, IconSquadHub } from '../components/tabIcons';
 import { useGame, useGameState } from '../store/useGame';
+import { useUI } from '../store/useUI';
 import { teamRoster } from '../selectors';
 import { ageOf } from '../../engine/ratings';
 import type { GameState, Player } from '../../engine/model';
@@ -33,6 +34,7 @@ function deadCapAmount(p: Player, season: string): number {
 }
 
 function CapSheetTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
+  const openPlayer = useUI((u) => u.openPlayer);
   const [releaseId, setReleaseId] = useState<string | null>(null);
   const roster = teamRoster(s, s.userTeamId).slice().sort((a, b) => b.ratings.ovr - a.ratings.ovr);
   const releaseTarget = releaseId ? s.players[releaseId] : null;
@@ -77,7 +79,7 @@ function CapSheetTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
       </div>
       <div className={styles.capBody}>
         <Panel title="Cap Sheet" className={styles.tablePanel} flush>
-          <DataTable columns={columns} rows={roster} rowKey={(p) => p.id} compact />
+          <DataTable columns={columns} rows={roster} rowKey={(p) => p.id} onRowOpen={(p) => openPlayer(p.id)} compact />
           <div className={styles.totalsRow}>
             <span className={styles.totalsLabel}>Total Payroll</span>
             {totals.map((t, i) => <span key={i} className={styles.totalsValue}>{formatMoneyShort(t)}</span>)}
@@ -117,6 +119,7 @@ function CapSheetTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
 }
 
 function ResignTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
+  const openPlayer = useUI((u) => u.openPlayer);
   const [letGo, setLetGo] = useState<Set<string>>(new Set());
   const [offerId, setOfferId] = useState<string | null>(null);
   const list = expiring(s, s.userTeamId);
@@ -169,7 +172,7 @@ function ResignTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
       </div>
       <Panel title="Expiring Contracts" className={styles.tablePanel} flush>
         {list.length === 0 && <div className={styles.empty}>No expiring contracts this summer.</div>}
-        {list.length > 0 && <DataTable columns={columns} rows={list} rowKey={(p) => p.id} compact />}
+        {list.length > 0 && <DataTable columns={columns} rows={list} rowKey={(p) => p.id} onRowOpen={(p) => openPlayer(p.id)} compact />}
       </Panel>
       {offering && <NegotiationModal s={s} mutate={mutate} playerId={offering.id} kind="resign" onClose={() => setOfferId(null)} />}
     </div>
@@ -177,6 +180,7 @@ function ResignTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
 }
 
 function ExtensionsTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
+  const openPlayer = useUI((u) => u.openPlayer);
   const [offerId, setOfferId] = useState<string | null>(null);
   const eligible = extensionEligible(s);
   const offering = offerId ? s.players[offerId] : null;
@@ -203,7 +207,7 @@ function ExtensionsTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
       <Panel title="Extension-Eligible" className={styles.tablePanel} flush>
         {closed && <div className={styles.empty}>Extensions are closed until next preseason (trade deadline has passed).</div>}
         {!closed && eligible.length === 0 && <div className={styles.empty}>No players with one season left on their deal.</div>}
-        {!closed && eligible.length > 0 && <DataTable columns={columns} rows={eligible} rowKey={(p) => p.id} compact />}
+        {!closed && eligible.length > 0 && <DataTable columns={columns} rows={eligible} rowKey={(p) => p.id} onRowOpen={(p) => openPlayer(p.id)} compact />}
       </Panel>
       {offering && <NegotiationModal s={s} mutate={mutate} playerId={offering.id} kind="extension" onClose={() => setOfferId(null)} />}
     </div>

@@ -107,6 +107,7 @@ export interface Message {
   id: number; date: string; from: string; subject: string; body: string; read: boolean;
   kind: 'result' | 'injury' | 'board' | 'league' | 'trade' | 'finance' | 'staff' | 'draft' | 'event' | 'other';
   action?: { type: 'trade-offer'; offerId: number } | { type: 'event'; eventId: string };
+  important?: boolean;    // UI-derived (Inbox v2); persisted once computed so it survives saves
 }
 
 export interface GameEvent {

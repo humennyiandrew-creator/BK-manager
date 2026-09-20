@@ -7,6 +7,7 @@ import BkImage from '../components/BkImage';
 import TeamBadge from '../components/TeamBadge';
 import { IconTransfers, IconMessages, IconRoster, IconFinances } from '../components/tabIcons';
 import { useGame, useGameState } from '../store/useGame';
+import { useUI } from '../store/useUI';
 import { useTransfersNav } from '../store/useTransfersNav';
 import { ageOf } from '../../engine/ratings';
 import type { DraftPick, GameState, Player, TradeSide } from '../../engine/model';
@@ -91,8 +92,17 @@ function AssetTable({ s, teamId, selected, onToggle }: { s: GameState; teamId: s
       sortValue: (a) => (a.kind === 'player' ? salaryIn(a.player, s.season) : 0)
     },
   ];
+  const openPlayer = useUI((u) => u.openPlayer);
   return (
-    <DataTable columns={columns} rows={assets} rowKey={(a) => a.id} onRowClick={onToggle} rowClass={(a) => (isSelected(a) ? styles.assetSelected : undefined)} compact />
+    <DataTable
+      columns={columns}
+      rows={assets}
+      rowKey={(a) => a.id}
+      onRowClick={onToggle}
+      onRowOpen={(a) => { if (a.kind === 'player') openPlayer(a.id); }}
+      rowClass={(a) => (isSelected(a) ? styles.assetSelected : undefined)}
+      compact
+    />
   );
 }
 
@@ -200,6 +210,7 @@ type FaSortKey = 'name' | 'pos' | 'age' | 'ovr' | 'pot' | 'ask' | 'mv';
 interface FaRow { p: Player; ask: { amount: number; years: number }; mv: number }
 
 function FreeAgentsTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
+  const openPlayer = useUI((u) => u.openPlayer);
   const [sortKey, setSortKey] = useState<FaSortKey>('ovr');
   const [sortDir, setSortDir] = useState<1 | -1>(-1);
   const [offerId, setOfferId] = useState<string | null>(null);
@@ -252,7 +263,7 @@ function FreeAgentsTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
         <span>Two-Way {twCount}/3</span>
       </div>
       <Panel title="Free Agents" className={styles.faPanel} flush>
-        <DataTable columns={columns} rows={rows} rowKey={(r) => r.p.id} onRowClick={(r) => setOfferId(r.p.id)} compact />
+        <DataTable columns={columns} rows={rows} rowKey={(r) => r.p.id} onRowClick={(r) => setOfferId(r.p.id)} onRowOpen={(r) => openPlayer(r.p.id)} compact />
       </Panel>
       {offering && <NegotiationModal s={s} mutate={mutate} playerId={offering.p.id} kind="fa" onClose={() => setOfferId(null)} />}
     </div>

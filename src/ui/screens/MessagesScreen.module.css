@@ -1,10 +1,22 @@
-.wrap {
+.screen {
   height: 100%;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-3) 1.4rem 1rem;
+}
+
+.wrap {
+  flex: 1;
+  min-height: 0;
   display: grid;
-  grid-template-columns: 22rem 1fr;
+  grid-template-columns: auto 20rem 1fr;
   gap: var(--gap);
-  padding: 0 1.4rem 1rem;
+}
+
+.rail {
+  padding-top: 0.2rem;
 }
 
 .listPanel,
@@ -12,9 +24,130 @@
   min-height: 0;
 }
 
+.toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.6rem 0.9rem;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.search {
+  background: var(--panel-alt);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 0.78rem;
+  padding: 0.4rem 0.6rem;
+}
+
+.search:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.bulkBar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.bulkBtn {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  color: var(--text);
+  border-radius: var(--radius);
+  padding: 0.25rem 0.6rem;
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.bulkBtn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .list {
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+}
+
+.rowSelected {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.rowChild {
+  padding-left: 2.2rem;
+  background: var(--panel-alt);
+}
+
+.digestGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.digestRow {
+  font-style: italic;
+}
+
+.pinnedWrap {
+  border-left: 3px solid #e2b93b;
+  background: color-mix(in srgb, #e2b93b 6%, transparent);
+}
+
+.pinnedRow {
+  border-bottom-color: var(--panel-border);
+}
+
+.pinnedActions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0 0.9rem 0.6rem 3.1rem;
+}
+
+.miniAccept,
+.miniDecline,
+.miniOpen,
+.miniDismiss {
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.25rem 0.6rem;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.miniAccept {
+  background: var(--positive);
+  color: var(--bg);
+}
+
+.miniDecline {
+  background: var(--panel-border);
+  color: var(--text-muted);
+}
+
+.miniOpen {
+  background: var(--panel);
+  border: 1px solid #e2b93b;
+  color: #e2b93b;
+}
+
+.miniDismiss {
+  margin-left: auto;
+  background: transparent;
+  color: var(--text-dim);
+  padding: 0.1rem 0.4rem;
+  font-size: 0.9rem;
+}
+
+.miniDismiss:hover {
+  color: var(--negative);
 }
 
 .row {

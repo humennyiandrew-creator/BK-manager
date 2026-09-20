@@ -157,6 +157,24 @@
   opacity: 0.4;
 }
 
+.faceBtn,
+.nameBtn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  display: block;
+  text-align: left;
+  cursor: pointer;
+}
+
+.faceBtn:hover .detailFace {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+
+.nameBtn:hover .detailName {
+  color: var(--accent);
+}
+
 .detailFace {
   width: 3.6rem;
   height: 3.6rem;

@@ -10,26 +10,21 @@ import ProgressBar from '../components/ProgressBar';
 import ScoutingTab from '../components/ScoutingTab';
 import { IconDraft } from '../components/tabIcons';
 import { useGame, useGameState } from '../store/useGame';
-import { ageOf, type Attr } from '../../engine/ratings';
+import { ageOf } from '../../engine/ratings';
 import type { GameState, Player } from '../../engine/model';
 import { aiPick, draftUntilUser, makePick, nextPick, runLottery, scoutView } from '../../engine/draft';
 import { addToShortlist, removeFromShortlist } from '../../engine/scouting';
 import { standings } from '../../engine/season';
-import { hashString, mulberry32 } from '../../engine/rng';
-import { ATTR_GROUPS, ATTR_LABEL, attrVariant } from '../attrGroups';
+import { ATTR_GROUPS, ATTR_LABEL, attrVariant, scoutAttrValue } from '../attrGroups';
 import { heightFtIn } from '../format';
 import { play } from '../sound';
+import { useUI } from '../store/useUI';
 import styles from './DraftScreen.module.css';
 
 type SubTab = 'board' | 'scouting';
 interface Scouted { p: Player; ovr: number; pot: number; range: number }
 
-function scoutAttr(s: GameState, pid: string, teamId: string, attr: Attr, range: number): number {
-  const rng = mulberry32(hashString(`${s.seed}|scoutattr|${teamId}|${pid}|${attr}`));
-  const noise = (rng() - 0.5) * 2 * range;
-  const p = s.players[pid];
-  return Math.max(25, Math.min(99, Math.round(p.ratings.attrs[attr] + noise)));
-}
+const scoutAttr = scoutAttrValue;
 
 function ProspectDetail({ s, scouted }: { s: GameState; scouted: Scouted }) {
   const { p, ovr, pot, range } = scouted;
@@ -123,6 +118,7 @@ function DraftOrderPanel({ s }: { s: GameState }) {
 export default function DraftScreen() {
   const s = useGameState();
   const mutate = useGame((g) => g.mutate);
+  const openPlayer = useUI((u) => u.openPlayer);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [pickReveal, setPickReveal] = useState<Scouted | null>(null);
   const [subTab, setSubTab] = useState<SubTab>('board');
@@ -220,7 +216,7 @@ export default function DraftScreen() {
 
             <div className={styles.grid}>
               <Panel title="Big Board" className={styles.boardPanel} flush>
-                <DataTable columns={columns} rows={scoutedList} rowKey={(r) => r.p.id} highlightedRowKey={selected?.p.id} onRowClick={(r) => setSelectedId(r.p.id)} compact />
+                <DataTable columns={columns} rows={scoutedList} rowKey={(r) => r.p.id} highlightedRowKey={selected?.p.id} onRowClick={(r) => setSelectedId(r.p.id)} onRowOpen={(r) => openPlayer(r.p.id)} compact />
               </Panel>
 
               <SectionCard title="Prospect" icon={IconDraft} accent glow className={styles.detailPanel}>

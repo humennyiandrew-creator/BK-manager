@@ -7,6 +7,7 @@ import ConfirmDialog from '../components/ConfirmDialog';
 import Sparkline from '../components/Sparkline';
 import MeetingDialog from '../components/MeetingDialog';
 import { useGame, useGameState } from '../store/useGame';
+import { useUI } from '../store/useUI';
 import { teamRoster } from '../selectors';
 import { ageOf } from '../../engine/ratings';
 import type { GameState, Player } from '../../engine/model';
@@ -17,7 +18,7 @@ import { ATTR_GROUPS, ATTR_LABEL, attrVariant } from '../attrGroups';
 import { formatMoney, heightFtIn, perGame } from '../format';
 import styles from './RosterScreen.module.css';
 
-function deadCapAmount(p: Player, season: string): number {
+export function deadCapAmount(p: Player, season: string): number {
   if (!p.contract || isTwoWay(p)) return 0;
   return p.contract.salaries.filter((x) => x.season >= season).reduce((sum, x) => sum + x.amount, 0);
 }
@@ -39,13 +40,13 @@ const SORTERS: Record<SortKey, (p: Player) => number | string> = {
   salary: (p) => p.contract?.salaries[0]?.amount ?? 0
 };
 
-function moraleLabel(m: number): { text: string; variant: 'positive' | 'muted' | 'negative' } {
+export function moraleLabel(m: number): { text: string; variant: 'positive' | 'muted' | 'negative' } {
   if (m >= 70) return { text: 'Happy', variant: 'positive' };
   if (m >= 40) return { text: 'Neutral', variant: 'muted' };
   return { text: 'Unhappy', variant: 'negative' };
 }
 
-function formChip(f: number | undefined): { icon: string; variant: 'positive' | 'muted' | 'negative' } {
+export function formChip(f: number | undefined): { icon: string; variant: 'positive' | 'muted' | 'negative' } {
   const v = f ?? 0;
   if (v >= 1.5) return { icon: '🔥', variant: 'positive' };
   if (v >= 0.5) return { icon: '▲', variant: 'positive' };
@@ -54,7 +55,7 @@ function formChip(f: number | undefined): { icon: string; variant: 'positive' | 
   return { icon: '—', variant: 'muted' };
 }
 
-function formExplanation(f: number | undefined): string {
+export function formExplanation(f: number | undefined): string {
   const v = f ?? 0;
   if (v >= 1.5) return 'Producing well above his rating — potential rising';
   if (v >= 0.5) return 'Playing above his rating recently';
@@ -66,6 +67,7 @@ function formExplanation(f: number | undefined): string {
 export default function RosterScreen() {
   const s = useGameState();
   const mutate = useGame((g) => g.mutate);
+  const openPlayer = useUI((u) => u.openPlayer);
   const [sortKey, setSortKey] = useState<SortKey>('ovr');
   const [sortDir, setSortDir] = useState<1 | -1>(-1);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -146,10 +148,10 @@ export default function RosterScreen() {
   return (
     <div className={styles.wrap}>
       <Panel title="Roster" className={styles.tablePanel} flush>
-        <DataTable columns={columns} rows={sorted} rowKey={(p) => p.id} highlightedRowKey={selected?.id} onRowClick={(p) => setSelectedId(p.id)} compact animateRows />
+        <DataTable columns={columns} rows={sorted} rowKey={(p) => p.id} highlightedRowKey={selected?.id} onRowClick={(p) => setSelectedId(p.id)} onRowOpen={(p) => openPlayer(p.id)} compact animateRows />
       </Panel>
       <Panel title="Player Detail" className={styles.detailPanel}>
-        {selected && <PlayerDetail player={selected} s={s} onRelease={() => setReleaseId(selected.id)} onMeet={() => setMeetingId(selected.id)} />}
+        {selected && <PlayerDetail player={selected} s={s} onRelease={() => setReleaseId(selected.id)} onMeet={() => setMeetingId(selected.id)} onOpenFull={() => openPlayer(selected.id)} />}
       </Panel>
       {meetingId && <MeetingDialog s={s} playerId={meetingId} mutate={mutate} onClose={() => setMeetingId(null)} />}
       {releaseTarget && (
@@ -166,15 +168,19 @@ export default function RosterScreen() {
   );
 }
 
-function PlayerDetail({ player: p, s, onRelease, onMeet }: { player: Player; s: GameState; onRelease: () => void; onMeet: () => void }) {
+function PlayerDetail({ player: p, s, onRelease, onMeet, onOpenFull }: { player: Player; s: GameState; onRelease: () => void; onMeet: () => void; onOpenFull: () => void }) {
   const age = Math.floor(ageOf(p.birthDate));
   const meetOk = canMeet(s, p.id);
   return (
     <div className={styles.detail}>
       <div className={styles.detailHead}>
-        <BkImage path={p.face} alt={p.lastName} className={styles.detailFace} />
+        <button type="button" className={styles.faceBtn} onClick={onOpenFull} title="Open full profile">
+          <BkImage path={p.face} alt={p.lastName} className={styles.detailFace} />
+        </button>
         <div>
-          <div className={styles.detailName}>{p.firstName} {p.lastName}</div>
+          <button type="button" className={styles.nameBtn} onClick={onOpenFull}>
+            <div className={styles.detailName}>{p.firstName} {p.lastName}</div>
+          </button>
           <div className={styles.detailMeta}>
             #{p.jersey} · {p.positions.join('/')} · {age}y · {heightFtIn(p.heightCm)} · {p.weightKg}kg · {p.country}
           </div>

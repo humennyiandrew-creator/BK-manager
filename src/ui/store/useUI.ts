@@ -27,11 +27,14 @@ interface UIState {
   tab: TabId;
   pendingSlot: number | null;
   activeEventId: string | null;
+  playerId: string | null;
   setView: (view: AppView) => void;
   setTab: (tab: TabId) => void;
   setPendingSlot: (slot: number | null) => void;
   openEvent: (id: string) => void;
   closeEvent: () => void;
+  openPlayer: (id: string) => void;
+  closePlayer: () => void;
 }
 
 export const useUI = create<UIState>((set) => ({
@@ -39,9 +42,12 @@ export const useUI = create<UIState>((set) => ({
   tab: 'home',
   pendingSlot: null,
   activeEventId: null,
+  playerId: null,
   setView: (view) => set({ view }),
   setTab: (tab) => set({ tab }),
   setPendingSlot: (pendingSlot) => set({ pendingSlot }),
   openEvent: (activeEventId) => set({ activeEventId }),
-  closeEvent: () => set({ activeEventId: null })
+  closeEvent: () => set({ activeEventId: null }),
+  openPlayer: (playerId) => set({ playerId }),
+  closePlayer: () => set({ playerId: null })
 }));

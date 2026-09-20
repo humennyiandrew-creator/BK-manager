@@ -6,6 +6,7 @@ import TabBar from './components/TabBar';
 import InfoStrip from './components/InfoStrip';
 import ContinueWidget from './components/ContinueWidget';
 import EventModal from './components/EventModal';
+import PlayerPage from './components/PlayerPage';
 import ScreenTransition from './components/ScreenTransition';
 import Toasts from './components/Toasts';
 import StartMenuScreen from './screens/StartMenuScreen';
@@ -60,6 +61,8 @@ function Shell() {
   const activeEventId = useUI((s) => s.activeEventId);
   const openEvent = useUI((s) => s.openEvent);
   const closeEvent = useUI((s) => s.closeEvent);
+  const playerId = useUI((s) => s.playerId);
+  const closePlayer = useUI((s) => s.closePlayer);
   const Screen = SCREENS[tab];
   const pending = s ? pendingUserEvent(s) : undefined;
   const seenPendingId = useRef<string | null>(null);
@@ -117,6 +120,7 @@ function Shell() {
       </div>
       <TabBar active={tab} onSelect={setTab} badges={{ messages: unread }} />
       {activeEventId && <EventModal s={s} eventId={activeEventId} onClose={closeEvent} />}
+      {playerId && <PlayerPage s={s} playerId={playerId} onClose={closePlayer} />}
     </div>
   );
 }

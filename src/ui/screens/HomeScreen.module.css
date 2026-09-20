@@ -75,6 +75,16 @@
   gap: var(--gap);
 }
 
+.playerCardBtn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  display: block;
+  width: 100%;
+}
+
 .tabsRight {
   display: flex;
   gap: 0.3rem;

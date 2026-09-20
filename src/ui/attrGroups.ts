@@ -1,4 +1,6 @@
 import type { Attr } from '../engine/ratings';
+import type { GameState } from '../engine/model';
+import { hashString, mulberry32 } from '../engine/rng';
 
 export const ATTR_GROUPS: { label: string; attrs: Attr[] }[] = [
   { label: 'Scoring', attrs: ['closeShot', 'layup', 'dunk', 'postScoring', 'midRange', 'threePoint', 'freeThrow', 'drawFoul'] },
@@ -24,4 +26,12 @@ export function attrVariant(v: number): 'positive' | 'cyan' | 'muted' | 'negativ
   if (v >= 65) return 'cyan';
   if (v >= 50) return 'muted';
   return 'negative';
+}
+
+/** Deterministic scouted attribute value (same noise formula used by the Draft big board). */
+export function scoutAttrValue(s: GameState, pid: string, teamId: string, attr: Attr, range: number): number {
+  const rng = mulberry32(hashString(`${s.seed}|scoutattr|${teamId}|${pid}|${attr}`));
+  const noise = (rng() - 0.5) * 2 * range;
+  const p = s.players[pid];
+  return Math.max(25, Math.min(99, Math.round(p.ratings.attrs[attr] + noise)));
 }
