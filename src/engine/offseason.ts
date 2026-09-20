@@ -249,6 +249,10 @@ export function offseasonStep(s: GameState) {
   const o = s.offseason;
   switch (o.stage) {
     case 'draft': {
+      // A European club takes no part in the NBA draft: run it in the background and move on.
+      if ((s.teams[s.userTeamId].league ?? 'NBA') !== 'NBA') {
+        for (let i = 0; i < 80; i++) { const p = nextPick(s); if (!p) break; aiPick(s, p.id); }
+      }
       const pending = nextPick(s);
       if (pending?.owner === s.userTeamId) {
         if (o.waitingPick === pending.id) aiPick(s, pending.id); // user skipped: auto-pick

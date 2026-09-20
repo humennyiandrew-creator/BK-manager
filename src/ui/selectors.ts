@@ -45,9 +45,11 @@ export function teamStars(teams: TeamState[], players: Record<string, Player>): 
   return out;
 }
 
-/** Rank (1 = best) of a team's rotation-top-8 average OVR across the whole league. */
+/** Rank (1 = best) of a team's rotation-top-8 average OVR within its own competition. */
 export function teamStrengthRank(s: GameState, teamId: string): number {
+  const league = s.teams[teamId].league ?? 'NBA';
   const avgs = Object.values(s.teams)
+    .filter((t) => (t.league ?? 'NBA') === league)
     .map((t) => ({ id: t.id, avg: rotationTop8Avg(t, s.players) }))
     .sort((a, b) => b.avg - a.avg);
   return avgs.findIndex((r) => r.id === teamId) + 1;

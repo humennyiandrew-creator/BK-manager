@@ -85,6 +85,7 @@ export default function CalendarScreen() {
                     disabled={!played}
                   >
                     <BkImage path={opp.logo} alt={opp.abbr} className={styles.gameLogo} />
+                    <span className={styles.gameComp}>{g.comp ?? 'NBA'}</span>
                     <span className={styles.gameSide}>{home ? 'vs' : '@'} {opp.abbr}</span>
                     {played && (
                       <span className={won ? styles.gameWin : styles.gameLoss}>

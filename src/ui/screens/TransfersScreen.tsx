@@ -12,14 +12,16 @@ import { useTransfersNav } from '../store/useTransfersNav';
 import { ageOf } from '../../engine/ratings';
 import type { DraftPick, GameState, Player, TradeSide } from '../../engine/model';
 import { evaluateTrade, playerValue, pickValue, proposeTrade, respondToOffer, tradeLegal, tradeWindowOpen } from '../../engine/trade';
-import { askingPrice, freeAgents } from '../../engine/freeagency';
+import { askingPrice, freeAgents, releasePlayer } from '../../engine/freeagency';
 import { capNumbers, isTwoWay, marketValue, payroll as cbaPayroll, rosterOf, salaryIn, yearsLeft } from '../../engine/cba';
-import { formatDate, formatMoneyShort } from '../format';
+import { buyoutCost } from '../../engine/euro';
+import { formatDate, formatMoney, formatMoneyShort } from '../format';
 import NegotiationModal from '../components/NegotiationModal';
+import ConfirmDialog from '../components/ConfirmDialog';
 import { toast } from '../components/Toasts';
 import styles from './TransfersScreen.module.css';
 
-type SubTab = 'trade' | 'offers' | 'fa' | 'tx';
+type SubTab = 'trade' | 'offers' | 'fa' | 'buyout' | 'tx';
 type Asset = { kind: 'player'; id: string; player: Player } | { kind: 'pick'; id: string; pick: DraftPick };
 type Mutate = (fn: (s: GameState) => void) => void;
 
@@ -107,7 +109,11 @@ function AssetTable({ s, teamId, selected, onToggle }: { s: GameState; teamId: s
 }
 
 function TradeCenter({ s, mutate }: { s: GameState; mutate: Mutate }) {
-  const aiTeams = useMemo(() => Object.values(s.teams).filter((t) => t.id !== s.userTeamId).sort((a, b) => a.city.localeCompare(b.city)), [s.teams, s.userTeamId]);
+  const userLeague = s.teams[s.userTeamId].league ?? 'NBA';
+  const aiTeams = useMemo(
+    () => Object.values(s.teams).filter((t) => t.id !== s.userTeamId && (t.league ?? 'NBA') === userLeague).sort((a, b) => a.city.localeCompare(b.city)),
+    [s.teams, s.userTeamId, userLeague]
+  );
   const [aiTeamId, setAiTeamId] = useState(aiTeams[0]?.id ?? '');
   const [youSend, setYouSend] = useState<TradeSide>({ players: [], picks: [] });
   const [theySend, setTheySend] = useState<TradeSide>({ players: [], picks: [] });
@@ -270,6 +276,73 @@ function FreeAgentsTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
   );
 }
 
+function BuyoutTargetsPanel({ s, mutate }: { s: GameState; mutate: Mutate }) {
+  const openPlayer = useUI((u) => u.openPlayer);
+  const [targetId, setTargetId] = useState<string | null>(null);
+  const [offerId, setOfferId] = useState<string | null>(null);
+  const userLeague = s.teams[s.userTeamId].league ?? 'NBA';
+
+  const targets = useMemo(
+    () => Object.values(s.players)
+      .filter((p) => p.teamId && !p.retired && !p.prospect && (s.teams[p.teamId!]?.league ?? 'NBA') !== userLeague)
+      .sort((a, b) => b.ratings.ovr - a.ratings.ovr)
+      .slice(0, 25),
+    [s.players, s.teams, userLeague]
+  );
+
+  const target = targetId ? s.players[targetId] : null;
+  const cost = target ? buyoutCost(s, target) : 0;
+  const canAfford = target ? s.finance.cash >= cost : false;
+
+  const columns: DataTableColumn<Player>[] = [
+    { key: 'face', header: '', render: (p) => <BkImage path={p.face} alt={p.lastName} className={styles.faceThumb} /> },
+    { key: 'name', header: 'Name', render: (p) => `${p.firstName} ${p.lastName}` },
+    { key: 'club', header: 'Club', render: (p) => <TeamBadge logoPath={s.teams[p.teamId!]?.logo ?? null} name={s.teams[p.teamId!]?.abbr ?? '?'} /> },
+    { key: 'pos', header: 'Pos', render: (p) => p.positions.join('/') },
+    { key: 'age', header: 'Age', align: 'right', render: (p) => Math.floor(ageOf(p.birthDate)), sortValue: (p) => ageOf(p.birthDate) },
+    { key: 'ovr', header: 'OVR', align: 'right', render: (p) => p.ratings.ovr, sortValue: (p) => p.ratings.ovr },
+    { key: 'buyout', header: 'Buyout', align: 'right', render: (p) => formatMoneyShort(buyoutCost(s, p)), sortValue: (p) => buyoutCost(s, p) },
+    {
+      key: 'action', header: '', align: 'right', render: (p) => (
+        <button type="button" className={styles.offerBtn} onClick={(e) => { e.stopPropagation(); setTargetId(p.id); }}>Buyout</button>
+      )
+    }
+  ];
+
+  const doBuyout = () => {
+    if (!target || !canAfford) { setTargetId(null); return; }
+    const pid = target.id;
+    mutate((st) => {
+      st.finance.cash -= cost;
+      releasePlayer(st, pid);
+    });
+    setTargetId(null);
+    setOfferId(pid);
+  };
+
+  return (
+    <div className={styles.faWrap}>
+      <Panel title="International Buyout Targets" className={styles.faPanel} flush>
+        {targets.length === 0 && <div className={styles.empty}>No contracted players from other leagues.</div>}
+        {targets.length > 0 && <DataTable columns={columns} rows={targets} rowKey={(p) => p.id} onRowOpen={(p) => openPlayer(p.id)} compact />}
+      </Panel>
+      {target && (
+        <ConfirmDialog
+          title={`Buy out ${target.firstName} ${target.lastName}?`}
+          message={canAfford
+            ? `Pay ${formatMoney(cost)} to release him from ${s.teams[target.teamId!]?.name}, then negotiate terms to sign him.`
+            : `Buyout costs ${formatMoney(cost)} — not enough cash on hand (${formatMoney(s.finance.cash)}).`}
+          confirmLabel="Pay Buyout"
+          danger={!canAfford}
+          onCancel={() => setTargetId(null)}
+          onConfirm={doBuyout}
+        />
+      )}
+      {offerId && <NegotiationModal s={s} mutate={mutate} playerId={offerId} kind="fa" onClose={() => setOfferId(null)} />}
+    </div>
+  );
+}
+
 function TransactionsTab({ s }: { s: GameState }) {
   const [filter, setFilter] = useState<'all' | 'mine'>('all');
   const rows = s.transactions.filter((t) => filter === 'all' || t.teams.includes(s.userTeamId));
@@ -311,6 +384,7 @@ export default function TransfersScreen() {
     { id: 'trade', label: 'Trade Center', icon: IconTransfers },
     { id: 'offers', label: 'Offers', icon: IconMessages, badge: s.tradeOffers.length },
     { id: 'fa', label: 'Free Agents', icon: IconRoster },
+    { id: 'buyout', label: 'Buyout Targets', icon: IconTransfers },
     { id: 'tx', label: 'Transactions', icon: IconFinances }
   ];
 
@@ -323,6 +397,7 @@ export default function TransfersScreen() {
           {subTab === 'trade' && <TradeCenter s={s} mutate={mutate} />}
           {subTab === 'offers' && <OffersTab s={s} mutate={mutate} />}
           {subTab === 'fa' && <FreeAgentsTab s={s} mutate={mutate} />}
+          {subTab === 'buyout' && <BuyoutTargetsPanel s={s} mutate={mutate} />}
           {subTab === 'tx' && <TransactionsTab s={s} />}
         </div>
       </div>

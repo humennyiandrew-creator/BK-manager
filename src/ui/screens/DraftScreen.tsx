@@ -15,6 +15,7 @@ import type { GameState, Player } from '../../engine/model';
 import { aiPick, draftUntilUser, makePick, nextPick, runLottery, scoutView } from '../../engine/draft';
 import { addToShortlist, removeFromShortlist } from '../../engine/scouting';
 import { standings } from '../../engine/season';
+import { leagueOf } from '../../engine/leagues';
 import { ATTR_GROUPS, ATTR_LABEL, attrVariant, scoutAttrValue } from '../attrGroups';
 import { heightFtIn } from '../format';
 import { play } from '../sound';
@@ -132,6 +133,7 @@ export default function DraftScreen() {
 
   if (!s) return null;
 
+  const isEuro = leagueOf(s.teams[s.userTeamId].league).economy === 'budget';
   const selected = scoutedList.find((x) => x.p.id === selectedId) ?? scoutedList[0] ?? null;
   const yourPicks = s.picks.filter((p) => p.owner === s.userTeamId && p.year === s.seasonYear + 1).sort((a, b) => a.round - b.round);
   const pending = nextPick(s);
@@ -191,7 +193,12 @@ export default function DraftScreen() {
       </div>
       <div className={styles.body}>
         {subTab === 'scouting' && <ScoutingTab s={s} mutate={mutate} />}
-        {subTab === 'board' && (
+        {subTab === 'board' && isEuro && (
+          <div className={styles.empty} style={{ margin: 'auto', textAlign: 'center' }}>
+            Your club does not take part in the NBA draft.<br />Use the Scouting tab to track prospects for future transfer targets.
+          </div>
+        )}
+        {subTab === 'board' && !isEuro && (
           <div className={styles.boardBody}>
             {onTheClock && (
               <div className={styles.clockBanner}>

@@ -8,7 +8,7 @@ import BkImage from '../components/BkImage';
 import { IconStandings } from '../components/tabIcons';
 import { useGameState } from '../store/useGame';
 import { conferenceStandings } from '../selectors';
-import type { StandingRow } from '../../engine/season';
+import { standings, type StandingRow } from '../../engine/season';
 import type { GameState, SeasonRecord, Series } from '../../engine/model';
 import styles from './StandingsScreen.module.css';
 
@@ -89,6 +89,34 @@ function StandingsTable({ rows, teams, userTeamId }: { rows: StandingRow[]; team
   );
 }
 
+/** Single 20-club EuroLeague table: rank, club, W, L, PCT, PF/G, PA/G, Diff, L10, Strk. Top-6 and play-in (7-10) separators. */
+function ElStandingsTable({ rows, teams, userTeamId }: { rows: StandingRow[]; teams: Record<string, { abbr: string; logo: string }>; userTeamId: string }) {
+  const columns: DataTableColumn<StandingRow & { rank: number }>[] = [
+    { key: 'rank', header: '#', render: (r) => r.rank, sortValue: (r) => r.rank },
+    { key: 'team', header: 'Club', render: (r) => <TeamBadge logoPath={teams[r.teamId].logo} name={teams[r.teamId].abbr} /> },
+    { key: 'w', header: 'W', align: 'right', render: (r) => r.w, sortValue: (r) => r.w },
+    { key: 'l', header: 'L', align: 'right', render: (r) => r.l, sortValue: (r) => r.l },
+    { key: 'pct', header: 'PCT', align: 'right', render: (r) => r.pct.toFixed(3), sortValue: (r) => r.pct },
+    { key: 'pfg', header: 'PF/G', align: 'right', render: (r) => (r.pf / Math.max(1, r.w + r.l)).toFixed(1), sortValue: (r) => r.pf / Math.max(1, r.w + r.l) },
+    { key: 'pag', header: 'PA/G', align: 'right', render: (r) => (r.pa / Math.max(1, r.w + r.l)).toFixed(1), sortValue: (r) => r.pa / Math.max(1, r.w + r.l) },
+    { key: 'diff', header: 'Diff', align: 'right', render: (r) => ((r.pf - r.pa) / Math.max(1, r.w + r.l)).toFixed(1), sortValue: (r) => (r.pf - r.pa) / Math.max(1, r.w + r.l) },
+    { key: 'l10', header: 'L10', align: 'right', render: (r) => `${r.last10[0]}-${r.last10[1]}` },
+    { key: 'strk', header: 'Strk', align: 'right', render: (r) => (r.streak === 0 ? '-' : `${r.streak > 0 ? 'W' : 'L'}${Math.abs(r.streak)}`) }
+  ];
+  const withRank = rows.map((r, i) => ({ ...r, rank: i + 1 }));
+  return (
+    <DataTable
+      columns={columns}
+      rows={withRank}
+      rowKey={(r) => r.teamId}
+      highlightedRowKey={userTeamId}
+      rowClass={(r) => (r.rank === 6 ? styles.playoffLine : r.rank === 10 ? styles.playinLine : undefined)}
+      compact
+      animateRows
+    />
+  );
+}
+
 function SeriesBox({ se, teams }: { se: Series; teams: Record<string, { abbr: string; logo: string }> }) {
   const high = teams[se.high]?.abbr ?? se.high;
   const low = teams[se.low]?.abbr ?? se.low;
@@ -139,10 +167,44 @@ function Bracket({ series, teams }: { series: Series[]; teams: Record<string, { 
   );
 }
 
+function BracketEL({ series, teams }: { series: Series[]; teams: Record<string, { abbr: string; logo: string }> }) {
+  const elSeries = series.filter((x) => (x.comp ?? 'NBA') === 'EL');
+  const playin = elSeries.filter((x) => x.kind === 'playin');
+  const qf = elSeries.filter((x) => x.round === 1).sort((a, b) => (a.slot ?? '').localeCompare(b.slot ?? ''));
+  const sf = elSeries.filter((x) => x.round === 2).sort((a, b) => (a.slot ?? '').localeCompare(b.slot ?? ''));
+  const final = elSeries.find((x) => x.round === 3);
+  const rounds: { title: string; list: Series[] }[] = [
+    { title: 'Play-In', list: playin },
+    { title: 'Quarter-Finals (Bo5)', list: qf },
+    { title: 'Final Four', list: sf },
+    { title: 'Final', list: final ? [final] : [] }
+  ];
+  return (
+    <div className={styles.bracket}>
+      {rounds.map((r) => (
+        <div key={r.title} className={styles.bracketConf}>
+          <div className={styles.bracketConfTitle}>{r.title}</div>
+          {r.list.length > 0 ? (
+            <div className={styles.bracketRound}>
+              {r.list.map((se) => <SeriesBox key={se.id} se={se} teams={teams} />)}
+            </div>
+          ) : (
+            <div className={styles.empty}>TBD</div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+type League = 'NBA' | 'EL';
+const LEAGUE_LABEL: Record<League, string> = { NBA: 'NBA', EL: 'EuroLeague' };
+
 export default function StandingsScreen() {
   const s = useGameState();
-  const [tab, setTab] = useState<'East' | 'West' | 'Bracket' | 'History'>('East');
+  const [tab, setTab] = useState<'East' | 'West' | 'Table' | 'Bracket' | 'History'>('East');
   const [selectedSeason, setSelectedSeason] = useState<string | null>(null);
+  const [viewLeague, setViewLeague] = useState<League>(() => (s ? ((s.teams[s.userTeamId].league ?? 'NBA') as League) : 'NBA'));
 
   const selectedRecord = useMemo(() => {
     if (!s) return undefined;
@@ -151,29 +213,69 @@ export default function StandingsScreen() {
 
   if (!s) return null;
 
-  const showBracket = s.phase === 'playin' || s.phase === 'playoffs' || s.phase === 'offseason';
+  const userLeague = (s.teams[s.userTeamId].league ?? 'NBA') as League;
+  const otherLeagueAvailable = Object.values(s.teams).some((t) => ((t.league ?? 'NBA') as League) !== userLeague);
   const teams = s.teams;
+  const showBracket = s.series.some((x) => (x.comp ?? 'NBA') === viewLeague);
+  const showHistory = viewLeague === userLeague && s.history.length > 0;
 
-  const railItems: SideRailItem<typeof tab>[] = [
-    { id: 'East', label: 'Eastern Conference', icon: IconStandings },
-    { id: 'West', label: 'Western Conference', icon: IconStandings },
-    ...(showBracket ? [{ id: 'Bracket' as const, label: 'Bracket', icon: IconStandings }] : []),
-    ...(s.history.length > 0 ? [{ id: 'History' as const, label: 'Awards & History', icon: IconStandings }] : [])
-  ];
+  const switchLeague = (lg: League) => {
+    setViewLeague(lg);
+    setTab(lg === 'EL' ? 'Table' : 'East');
+  };
+
+  const railItems: SideRailItem<typeof tab>[] = viewLeague === 'NBA'
+    ? [
+        { id: 'East', label: 'Eastern Conference', icon: IconStandings },
+        { id: 'West', label: 'Western Conference', icon: IconStandings },
+        ...(showBracket ? [{ id: 'Bracket' as const, label: 'Bracket', icon: IconStandings }] : []),
+        ...(showHistory ? [{ id: 'History' as const, label: 'Awards & History', icon: IconStandings }] : [])
+      ]
+    : [
+        { id: 'Table', label: 'EuroLeague Table', icon: IconStandings },
+        ...(showBracket ? [{ id: 'Bracket' as const, label: 'Bracket', icon: IconStandings }] : []),
+        ...(showHistory ? [{ id: 'History' as const, label: 'Awards & History', icon: IconStandings }] : [])
+      ];
+  const activeTab = railItems.some((r) => r.id === tab) ? tab : railItems[0].id;
+
+  const panelTitle = activeTab === 'Bracket'
+    ? 'Postseason Bracket'
+    : activeTab === 'Table'
+    ? 'EuroLeague Table'
+    : `${activeTab}ern Conference`;
 
   return (
     <div className={styles.screen}>
-      <HeroHeader title="Standings" subtitle="League table" />
+      <HeroHeader
+        title="Standings"
+        subtitle={`${LEAGUE_LABEL[viewLeague]} table`}
+        right={otherLeagueAvailable ? (
+          <div className={styles.leagueSwitch}>
+            {(['NBA', 'EL'] as League[]).map((lg) => (
+              <button
+                key={lg}
+                type="button"
+                className={lg === viewLeague ? `${styles.leagueBtn} ${styles.leagueBtnActive}` : styles.leagueBtn}
+                onClick={() => switchLeague(lg)}
+              >
+                {LEAGUE_LABEL[lg]}
+              </button>
+            ))}
+          </div>
+        ) : undefined}
+      />
       <div className={styles.body}>
-        <SideRail items={railItems} active={tab} onSelect={setTab} />
+        <SideRail items={railItems} active={activeTab} onSelect={setTab} />
         <div className={styles.content}>
-          {tab !== 'History' && (
-            <Panel title={tab === 'Bracket' ? 'Postseason Bracket' : `${tab}ern Conference`} className={styles.panel} flush>
-              {tab !== 'Bracket' && <StandingsTable rows={conferenceStandings(s, tab)} teams={teams} userTeamId={s.userTeamId} />}
-              {tab === 'Bracket' && <Bracket series={s.series} teams={teams} />}
+          {activeTab !== 'History' && (
+            <Panel title={panelTitle} className={styles.panel} flush>
+              {activeTab === 'East' && <StandingsTable rows={conferenceStandings(s, 'East')} teams={teams} userTeamId={s.userTeamId} />}
+              {activeTab === 'West' && <StandingsTable rows={conferenceStandings(s, 'West')} teams={teams} userTeamId={s.userTeamId} />}
+              {activeTab === 'Table' && <ElStandingsTable rows={standings(s, undefined, 'EL')} teams={teams} userTeamId={s.userTeamId} />}
+              {activeTab === 'Bracket' && (viewLeague === 'EL' ? <BracketEL series={s.series} teams={teams} /> : <Bracket series={s.series} teams={teams} />)}
             </Panel>
           )}
-          {tab === 'History' && (
+          {activeTab === 'History' && (
             <div className={styles.historyGrid}>
               <Panel title="Season History" className={styles.historyPanel} flush>
                 <HistoryTable s={s} rows={s.history} selected={selectedRecord?.season ?? ''} onSelect={setSelectedSeason} />

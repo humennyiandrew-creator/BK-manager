@@ -2,7 +2,7 @@
   {
     "id": "EL-ASV",
     "abbr": "ASV",
-    "city": "Lyon",
+    "city": "",
     "name": "LDLC ASVEL",
     "league": "EL",
     "country": "France",
@@ -18,7 +18,7 @@
   {
     "id": "EL-BAR",
     "abbr": "BAR",
-    "city": "Barcelona",
+    "city": "",
     "name": "FC Barcelona",
     "league": "EL",
     "country": "Spain",
@@ -34,7 +34,7 @@
   {
     "id": "EL-BAS",
     "abbr": "BAS",
-    "city": "Vitoria-Gasteiz",
+    "city": "",
     "name": "Baskonia",
     "league": "EL",
     "country": "Spain",
@@ -50,7 +50,7 @@
   {
     "id": "EL-BES",
     "abbr": "BES",
-    "city": "Istanbul",
+    "city": "",
     "name": "Besiktas",
     "league": "EL",
     "country": "Turkiye",
@@ -66,7 +66,7 @@
   {
     "id": "EL-DUB",
     "abbr": "DUB",
-    "city": "Dubai",
+    "city": "",
     "name": "Dubai",
     "league": "EL",
     "country": "United Arab Emirates",
@@ -82,7 +82,7 @@
   {
     "id": "EL-HTA",
     "abbr": "HTA",
-    "city": "Tel Aviv",
+    "city": "",
     "name": "Hapoel TLV",
     "league": "EL",
     "country": "Israel",
@@ -98,7 +98,7 @@
   {
     "id": "EL-IST",
     "abbr": "IST",
-    "city": "Istanbul",
+    "city": "",
     "name": "Anadolu Efes",
     "league": "EL",
     "country": "Turkiye",
@@ -114,7 +114,7 @@
   {
     "id": "EL-MAD",
     "abbr": "MAD",
-    "city": "Madrid",
+    "city": "",
     "name": "Real Madrid",
     "league": "EL",
     "country": "Spain",
@@ -130,7 +130,7 @@
   {
     "id": "EL-MIL",
     "abbr": "MIL",
-    "city": "Milan",
+    "city": "",
     "name": "Milan",
     "league": "EL",
     "country": "Italy",
@@ -146,7 +146,7 @@
   {
     "id": "EL-MUN",
     "abbr": "MUN",
-    "city": "Munich",
+    "city": "",
     "name": "Bayern Munich",
     "league": "EL",
     "country": "Germany",
@@ -162,7 +162,7 @@
   {
     "id": "EL-OLY",
     "abbr": "OLY",
-    "city": "Piraeus",
+    "city": "",
     "name": "Olympiacos",
     "league": "EL",
     "country": "Greece",
@@ -178,7 +178,7 @@
   {
     "id": "EL-PAM",
     "abbr": "PAM",
-    "city": "Valencia",
+    "city": "",
     "name": "Valencia",
     "league": "EL",
     "country": "Spain",
@@ -194,7 +194,7 @@
   {
     "id": "EL-PAN",
     "abbr": "PAN",
-    "city": "Athens",
+    "city": "",
     "name": "Panathinaikos",
     "league": "EL",
     "country": "Greece",
@@ -210,7 +210,7 @@
   {
     "id": "EL-PAR",
     "abbr": "PAR",
-    "city": "Belgrade",
+    "city": "",
     "name": "Partizan",
     "league": "EL",
     "country": "Serbia",
@@ -226,7 +226,7 @@
   {
     "id": "EL-PRS",
     "abbr": "PRS",
-    "city": "Paris",
+    "city": "",
     "name": "Paris",
     "league": "EL",
     "country": "France",
@@ -242,7 +242,7 @@
   {
     "id": "EL-RED",
     "abbr": "RED",
-    "city": "Belgrade",
+    "city": "",
     "name": "Crvena Zvezda",
     "league": "EL",
     "country": "Serbia",
@@ -258,7 +258,7 @@
   {
     "id": "EL-TEL",
     "abbr": "TEL",
-    "city": "Tel Aviv",
+    "city": "",
     "name": "Maccabi",
     "league": "EL",
     "country": "Israel",
@@ -274,7 +274,7 @@
   {
     "id": "EL-ULK",
     "abbr": "ULK",
-    "city": "Istanbul",
+    "city": "",
     "name": "Fenerbahce",
     "league": "EL",
     "country": "Turkiye",
@@ -290,7 +290,7 @@
   {
     "id": "EL-VIR",
     "abbr": "VIR",
-    "city": "Bologna",
+    "city": "",
     "name": "Virtus Bologna",
     "league": "EL",
     "country": "Italy",
@@ -306,7 +306,7 @@
   {
     "id": "EL-ZAL",
     "abbr": "ZAL",
-    "city": "Kaunas",
+    "city": "",
     "name": "Zalgiris",
     "league": "EL",
     "country": "Lithuania",

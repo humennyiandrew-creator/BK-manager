@@ -9,6 +9,8 @@ import { capNumbers, luxuryTax, payroll } from '../../engine/cba';
 import { standings } from '../../engine/season';
 import { facilityLevel } from '../../engine/mgmt/facilities';
 import { clamp, top3Ovr } from '../../engine/mgmt/market';
+import { euroBudget } from '../../engine/euro';
+import { leagueOf } from '../../engine/leagues';
 import type { ExpenseCat, GameState, RevenueCat } from '../../engine/model';
 import { bookThemeNight, signSponsor, sponsorOffers, THEME_NIGHT_CAP } from '../../engine/sponsors';
 import { formatMoney, formatMoneyShort } from '../format';
@@ -72,10 +74,12 @@ export default function FinancesScreen() {
   if (!s) return null;
 
   const f = s.finance;
+  const isEuro = leagueOf(s.teams[s.userTeamId].league).economy === 'budget';
   const cap = capNumbers(s.seasonYear);
   const pay = payroll(s, s.userTeamId);
   const projTax = luxuryTax(pay, s.seasonYear);
-  const barMax = cap.apron2 * 1.15;
+  const wageBudget = euroBudget(s, s.userTeamId);
+  const barMax = isEuro ? wageBudget * 1.15 : cap.apron2 * 1.15;
   const ticketPrice = price ?? f.ticketPrice;
   const attendPct = Math.round(projectedAttendance(s, ticketPrice) * 100);
 
@@ -128,25 +132,31 @@ export default function FinancesScreen() {
         </Panel>
 
         <Panel title="Expenses" className={styles.panel}>
-          {(Object.keys(f.expense) as ExpenseCat[]).map((k) => (
+          {(Object.keys(f.expense) as ExpenseCat[]).filter((k) => !isEuro || k !== 'tax').map((k) => (
             <BarRow key={k} label={EXPENSE_LABEL[k]} value={f.expense[k]} max={expMax} color="var(--negative)" />
           ))}
         </Panel>
       </div>
 
       <div className={styles.col}>
-        <Panel title="Payroll vs Cap" className={styles.panel}>
+        <Panel title={isEuro ? 'Wages vs Budget' : 'Payroll vs Cap'} className={styles.panel}>
           <div className={styles.capBarTrack}>
             <div className={styles.capBarFill} style={{ width: `${Math.min(100, (pay / barMax) * 100)}%` }} />
-            {[{ label: 'Cap', value: cap.cap }, { label: 'Tax', value: cap.tax }, { label: 'Apron 1', value: cap.apron1 }, { label: 'Apron 2', value: cap.apron2 }].map((l) => (
-              <div key={l.label} className={styles.capBarLine} style={{ left: `${Math.min(100, (l.value / barMax) * 100)}%` }}>
-                <span>{l.label}</span>
-              </div>
-            ))}
+            {isEuro
+              ? (
+                <div className={styles.capBarLine} style={{ left: `${Math.min(100, (wageBudget / barMax) * 100)}%` }}>
+                  <span>Budget</span>
+                </div>
+              )
+              : [{ label: 'Cap', value: cap.cap }, { label: 'Tax', value: cap.tax }, { label: 'Apron 1', value: cap.apron1 }, { label: 'Apron 2', value: cap.apron2 }].map((l) => (
+                <div key={l.label} className={styles.capBarLine} style={{ left: `${Math.min(100, (l.value / barMax) * 100)}%` }}>
+                  <span>{l.label}</span>
+                </div>
+              ))}
           </div>
           <div className={styles.capLegend}>
-            <span>Payroll: {formatMoneyShort(pay)}</span>
-            <span>Projected Tax: {formatMoneyShort(projTax)}</span>
+            <span>{isEuro ? 'Wages' : 'Payroll'}: {formatMoneyShort(pay)}</span>
+            {isEuro ? <span>Wage Budget: {formatMoneyShort(wageBudget)}</span> : <span>Projected Tax: {formatMoneyShort(projTax)}</span>}
           </div>
         </Panel>
 

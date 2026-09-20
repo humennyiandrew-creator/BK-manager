@@ -16,6 +16,8 @@ import { releasePlayer } from '../../engine/freeagency';
 import { expiring, resignAsk } from '../../engine/offseason';
 import { capNumbers, isTwoWay, marketValue, payroll as cbaPayroll, seasonLabel } from '../../engine/cba';
 import { extensionEligible } from '../../engine/negotiation';
+import { euroBudget } from '../../engine/euro';
+import { leagueOf } from '../../engine/leagues';
 import { formatMoney, formatMoneyShort } from '../format';
 import { CAP_LINES, SALARY_SEASONS } from '../cba';
 import NegotiationModal from '../components/NegotiationModal';
@@ -108,6 +110,74 @@ function CapSheetTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
         <ConfirmDialog
           title={`Release ${releaseTarget.firstName} ${releaseTarget.lastName}?`}
           message={`Remaining salary stays on the books as dead cap: ${formatMoney(deadCapAmount(releaseTarget, s.season))}.`}
+          confirmLabel="Release"
+          danger
+          onCancel={() => setReleaseId(null)}
+          onConfirm={() => { mutate((st) => releasePlayer(st, releaseTarget.id)); setReleaseId(null); }}
+        />
+      )}
+    </div>
+  );
+}
+
+function WageSheetTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
+  const openPlayer = useUI((u) => u.openPlayer);
+  const [releaseId, setReleaseId] = useState<string | null>(null);
+  const roster = teamRoster(s, s.userTeamId).slice().sort((a, b) => b.ratings.ovr - a.ratings.ovr);
+  const releaseTarget = releaseId ? s.players[releaseId] : null;
+  const maxRoster = leagueOf(s.teams[s.userTeamId].league).maxRoster;
+  const budget = euroBudget(s, s.userTeamId);
+  const deadCap = (s.teams[s.userTeamId].deadCap ?? []).filter((d) => d.season === s.season).reduce((sum, d) => sum + d.amount, 0);
+  const committed = deadCap + roster.reduce((sum, p) => sum + (salaryFor(p, s.season)?.amount ?? 0), 0);
+  const barMax = budget * 1.15;
+
+  const columns: DataTableColumn<Player>[] = [
+    { key: 'name', header: 'Player', render: (p) => `${p.firstName} ${p.lastName}` },
+    { key: 'pos', header: 'Pos', render: (p) => p.positions.join('/') },
+    { key: 'age', header: 'Age', align: 'right', render: (p) => Math.floor(ageOf(p.birthDate)), sortValue: (p) => Math.floor(ageOf(p.birthDate)) },
+    { key: 'ovr', header: 'OVR', align: 'right', render: (p) => p.ratings.ovr, sortValue: (p) => p.ratings.ovr },
+    { key: 'wage', header: 'Wage', align: 'right', render: (p) => { const line = salaryFor(p, s.season); return line ? formatMoneyShort(line.amount) : <span className={styles.noSalary}>—</span>; }, sortValue: (p) => salaryFor(p, s.season)?.amount ?? 0 },
+    { key: 'years', header: 'Years Left', align: 'right', render: (p) => p.contract?.salaries.filter((x) => x.season >= s.season).length ?? 0, sortValue: (p) => p.contract?.salaries.filter((x) => x.season >= s.season).length ?? 0 },
+    {
+      key: 'release', header: '', align: 'right', render: (p) => (
+        <button type="button" className={styles.releaseBtn} onClick={() => setReleaseId(p.id)}>Release</button>
+      )
+    }
+  ];
+
+  return (
+    <div className={styles.capGrid}>
+      <div className={styles.capStats}>
+        <StatTile label="Wage Budget" value={budget} formatter={formatMoneyShort} />
+        <StatTile label="Committed Wages" value={committed} formatter={formatMoneyShort} />
+        <StatTile label="Remaining Room" value={budget - committed} formatter={formatMoneyShort} />
+        <StatTile label="Roster" value={roster.length} formatter={(v) => `${v}/${maxRoster}`} />
+      </div>
+      <div className={styles.capBody}>
+        <Panel title="Wage Sheet" className={styles.tablePanel} flush>
+          <DataTable columns={columns} rows={roster} rowKey={(p) => p.id} onRowOpen={(p) => openPlayer(p.id)} compact />
+          <div className={styles.totalsRow}>
+            <span className={styles.totalsLabel}>Total Wages</span>
+            <span className={styles.totalsValue}>{formatMoneyShort(committed)}</span>
+          </div>
+        </Panel>
+        <Panel title="Wage Budget vs Committed" className={styles.barPanel}>
+          <div className={styles.barTrack}>
+            <div className={styles.barFill} style={{ width: `${Math.min(100, (committed / barMax) * 100)}%` }} />
+            <div className={styles.barLine} style={{ left: `${Math.min(100, (budget / barMax) * 100)}%` }}>
+              <span className={styles.barLineLabel}>Budget</span>
+            </div>
+          </div>
+          <div className={styles.barLegend}>
+            <span>Committed: {formatMoneyShort(committed)}</span>
+            <span>Budget: {formatMoneyShort(budget)}</span>
+          </div>
+        </Panel>
+      </div>
+      {releaseTarget && (
+        <ConfirmDialog
+          title={`Release ${releaseTarget.firstName} ${releaseTarget.lastName}?`}
+          message={`Remaining wages stay committed against the budget: ${formatMoney(deadCapAmount(releaseTarget, s.season))}.`}
           confirmLabel="Release"
           danger
           onCancel={() => setReleaseId(null)}
@@ -219,22 +289,23 @@ export default function SquadHubScreen() {
   const mutate = useGame((g) => g.mutate);
   const [tab, setTab] = useState<Tab>(() => (s?.offseason?.stage === 'resign' ? 'resign' : 'cap'));
   if (!s) return null;
+  const isEuro = leagueOf(s.teams[s.userTeamId].league).economy === 'budget';
   const showResign = s.offseason?.stage === 'resign';
   const activeTab = showResign ? tab : tab === 'resign' ? 'cap' : tab;
 
   const railItems: SideRailItem<Tab>[] = [
-    { id: 'cap', label: 'Cap Sheet', icon: IconFinances },
+    { id: 'cap', label: isEuro ? 'Wage Sheet' : 'Cap Sheet', icon: IconFinances },
     ...(showResign ? [{ id: 'resign' as const, label: 'Re-sign', icon: IconTransfers, badge: expiring(s, s.userTeamId).length }] : []),
     { id: 'ext', label: 'Extensions', icon: IconSquadHub, badge: extensionEligible(s).length }
   ];
 
   return (
     <div className={styles.screen}>
-      <HeroHeader title="Squad Hub" subtitle="Contracts and cap sheet" />
+      <HeroHeader title="Squad Hub" subtitle={isEuro ? 'Contracts and wage sheet' : 'Contracts and cap sheet'} />
       <div className={styles.body}>
         <SideRail items={railItems} active={activeTab} onSelect={setTab} />
         <div className={styles.content}>
-          {activeTab === 'cap' && <CapSheetTab s={s} mutate={mutate} />}
+          {activeTab === 'cap' && (isEuro ? <WageSheetTab s={s} mutate={mutate} /> : <CapSheetTab s={s} mutate={mutate} />)}
           {activeTab === 'resign' && <ResignTab s={s} mutate={mutate} />}
           {activeTab === 'ext' && <ExtensionsTab s={s} mutate={mutate} />}
         </div>

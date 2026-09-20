@@ -26,6 +26,36 @@
   min-height: 0;
 }
 
+.leagueSwitch {
+  display: flex;
+  gap: 0.3rem;
+  background: var(--panel-alt);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  padding: 0.2rem;
+}
+
+.leagueBtn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.35rem 0.7rem;
+  border-radius: var(--radius-sm);
+}
+
+.leagueBtn:hover {
+  color: var(--text);
+}
+
+.leagueBtnActive {
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
 .playoffLine td {
   border-bottom: 2px solid var(--cyan);
 }

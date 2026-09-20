@@ -20,6 +20,7 @@ import {
 import type { GameState, Player, SeasonRecord } from '../../engine/model';
 import type { StandingRow } from '../../engine/season';
 import { offseasonStageLabel } from '../../engine/offseason';
+import { leagueOf } from '../../engine/leagues';
 import styles from './HomeScreen.module.css';
 
 const eventIcon: Record<UpcomingEvent['icon'], typeof IconCalendar> = {
@@ -127,7 +128,9 @@ export default function HomeScreen() {
   if (!s) return null;
 
   const team = userTeam(s);
+  const isEuro = leagueOf(team.league).economy === 'budget';
   const rank = conferenceRank(s);
+  const totalInLeague = leagueOf(team.league).teams;
   const strengthRank = teamStrengthRank(s, s.userTeamId);
   const top2 = topPlayers(s, s.userTeamId, 2);
   const next = nextUserGame(s);
@@ -156,17 +159,17 @@ export default function HomeScreen() {
             <span className={styles.boardTeamName}>{team.city} {team.name}</span>
           </div>
           <div className={styles.confidenceLabel}>
-            <span>Conference Rank</span>
+            <span>{isEuro ? 'EuroLeague Rank' : 'Conference Rank'}</span>
             <span>#{rank ? <CountUp value={rank} /> : '-'}</span>
           </div>
-          <ProgressBar value={Math.max(0, 16 - rank)} max={15} variant="cyan" />
+          <ProgressBar value={Math.max(0, totalInLeague + 1 - rank)} max={totalInLeague} variant="cyan" />
           <div className={styles.objective}>
             <span className={styles.objectiveLabel}>Season Objective</span>
             <span className={styles.objectiveValue}>{seasonObjective(strengthRank)}</span>
           </div>
           <div className={styles.objective}>
             <span className={styles.objectiveLabel}>League Strength Rank</span>
-            <span className={styles.objectiveValue}>#<CountUp value={strengthRank} /> of 30</span>
+            <span className={styles.objectiveValue}>#<CountUp value={strengthRank} /> of {totalInLeague}</span>
           </div>
         </Panel>
 
@@ -188,10 +191,10 @@ export default function HomeScreen() {
 
       <div className={`${styles.col} stagger`}>
         <Panel
-          title="Standings"
+          title={isEuro ? 'EuroLeague Table' : 'Standings'}
           className={styles.standingsPanel}
           flush
-          headerRight={
+          headerRight={isEuro ? undefined : (
             <div className={styles.tabsRight}>
               {(['East', 'West'] as const).map((c) => (
                 <button
@@ -204,7 +207,7 @@ export default function HomeScreen() {
                 </button>
               ))}
             </div>
-          }
+          )}
         >
           <DataTable columns={columns} rows={rows} rowKey={(r) => r.teamId} highlightedRowKey={s.userTeamId} compact />
         </Panel>

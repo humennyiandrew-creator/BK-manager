@@ -46,9 +46,9 @@
     "contract": null
   },
   {
-    "id": "el-balcerowski-aleksander-roman",
-    "firstName": "Balcerowski",
-    "lastName": "Aleksander Roman",
+    "id": "el-olek-balcerowski",
+    "firstName": "Olek",
+    "lastName": "Balcerowski",
     "teamId": "EL-BAR",
     "jersey": "22",
     "positions": [
@@ -65,9 +65,9 @@
     "contract": null
   },
   {
-    "id": "el-dario-brizuela-arrieta",
+    "id": "el-dario-brizuela",
     "firstName": "Dario",
-    "lastName": "Brizuela Arrieta",
+    "lastName": "Brizuela",
     "teamId": "EL-BAR",
     "jersey": "8",
     "positions": [
@@ -137,8 +137,8 @@
     "contract": null
   },
   {
-    "id": "el-torisesan-nathan-evbuomwan",
-    "firstName": "Torisesan Nathan",
+    "id": "el-tosan-evbuomwan",
+    "firstName": "Tosan",
     "lastName": "Evbuomwan",
     "teamId": "EL-BAR",
     "jersey": "20",
@@ -156,8 +156,8 @@
     "contract": null
   },
   {
-    "id": "el-umoja-adeyemi-gibson",
-    "firstName": "Umoja Adeyemi",
+    "id": "el-umoja-gibson",
+    "firstName": "Umoja",
     "lastName": "Gibson",
     "teamId": "EL-BAR",
     "jersey": "1",
@@ -175,8 +175,8 @@
     "contract": null
   },
   {
-    "id": "el-yoan-maurice-junior-makoundou",
-    "firstName": "Yoan Maurice Junior",
+    "id": "el-yoan-makoundou",
+    "firstName": "Yoan",
     "lastName": "Makoundou",
     "teamId": "EL-BAR",
     "jersey": "55",
@@ -221,9 +221,28 @@
     "contract": null
   },
   {
-    "id": "el-justin-alexander-minaya-albright",
-    "firstName": "Justin Alexander",
-    "lastName": "Minaya Albright",
+    "id": "el-tyrese-martin",
+    "firstName": "Tyrese",
+    "lastName": "Martin",
+    "teamId": "EL-BAR",
+    "jersey": "2",
+    "positions": [
+      "SF"
+    ],
+    "heightCm": 198,
+    "weightKg": 100,
+    "birthDate": "1999-03-07",
+    "country": "United States of America",
+    "draft": null,
+    "yearsPro": 8,
+    "face": null,
+    "stats": [],
+    "contract": null
+  },
+  {
+    "id": "el-justin-minaya",
+    "firstName": "Justin",
+    "lastName": "Minaya",
     "teamId": "EL-BAR",
     "jersey": "24",
     "positions": [
@@ -240,8 +259,8 @@
     "contract": null
   },
   {
-    "id": "el-joshua-okechukwu-nebo",
-    "firstName": "Joshua Okechukwu",
+    "id": "el-josh-nebo",
+    "firstName": "Josh",
     "lastName": "Nebo",
     "teamId": "EL-BAR",
     "jersey": "32",
@@ -312,8 +331,8 @@
     "contract": null
   },
   {
-    "id": "el-olivier-robinson-nkamhoua",
-    "firstName": "Olivier Robinson",
+    "id": "el-olivier-nkamhoua",
+    "firstName": "Olivier",
     "lastName": "Nkamhoua",
     "teamId": "EL-BAR",
     "jersey": "13",
@@ -331,9 +350,9 @@
     "contract": null
   },
   {
-    "id": "el-juan-nunez-garcia",
+    "id": "el-juan-nunez",
     "firstName": "Juan",
-    "lastName": "Nunez Garcia",
+    "lastName": "Nunez",
     "teamId": "EL-BAR",
     "jersey": "17",
     "positions": [
@@ -403,9 +422,9 @@
     "contract": null
   },
   {
-    "id": "el-joel-parra-lopez",
+    "id": "el-joel-parra",
     "firstName": "Joel",
-    "lastName": "Parra Lopez",
+    "lastName": "Parra",
     "teamId": "EL-BAR",
     "jersey": "44",
     "positions": [
@@ -475,8 +494,8 @@
     "contract": null
   },
   {
-    "id": "el-kevin-xavier-punter",
-    "firstName": "Kevin Xavier",
+    "id": "el-kevin-punter",
+    "firstName": "Kevin",
     "lastName": "Punter",
     "teamId": "EL-BAR",
     "jersey": "0",
@@ -547,8 +566,8 @@
     "contract": null
   },
   {
-    "id": "el-justin-maurice-robinson",
-    "firstName": "Justin Maurice",
+    "id": "el-justin-robinson",
+    "firstName": "Justin",
     "lastName": "Robinson",
     "teamId": "EL-BAR",
     "jersey": "5",
@@ -593,28 +612,9 @@
     "contract": null
   },
   {
-    "id": "el-martin-tyrese-jeffrey",
-    "firstName": "Martin",
-    "lastName": "Tyrese Jeffrey",
-    "teamId": "EL-BAR",
-    "jersey": "2",
-    "positions": [
-      "SF"
-    ],
-    "heightCm": 198,
-    "weightKg": 100,
-    "birthDate": "1999-03-07",
-    "country": "United States of America",
-    "draft": null,
-    "yearsPro": 8,
-    "face": null,
-    "stats": [],
-    "contract": null
-  },
-  {
-    "id": "el-agustin-ubal-agostini",
+    "id": "el-agustin-ubal",
     "firstName": "Agustin",
-    "lastName": "Ubal Agostini",
+    "lastName": "Ubal",
     "teamId": "EL-BAR",
     "jersey": "10",
     "positions": [
@@ -631,8 +631,8 @@
     "contract": null
   },
   {
-    "id": "el-stanley-ayobami-umude",
-    "firstName": "Stanley Ayobami",
+    "id": "el-stanley-umude",
+    "firstName": "Stanley",
     "lastName": "Umude",
     "teamId": "EL-BAR",
     "jersey": "3",
@@ -650,9 +650,9 @@
     "contract": null
   },
   {
-    "id": "el-thierry-henry-alves-de-souza-silva",
+    "id": "el-thierry-henry-alves-de-souza",
     "firstName": "Thierry Henry",
-    "lastName": "Alves De Souza Silva",
+    "lastName": "Alves De Souza",
     "teamId": "EL-BAS",
     "jersey": "16",
     "positions": [
@@ -669,8 +669,8 @@
     "contract": null
   },
   {
-    "id": "el-damion-devon-baugh",
-    "firstName": "Damion Devon",
+    "id": "el-damion-baugh",
+    "firstName": "Damion",
     "lastName": "Baugh",
     "teamId": "EL-BAS",
     "jersey": "12",
@@ -688,9 +688,28 @@
     "contract": null
   },
   {
-    "id": "el-kenneth-bernard-faried-lewis-ii",
-    "firstName": "Kenneth Bernard",
-    "lastName": "Faried-Lewis II",
+    "id": "el-chris-duarte",
+    "firstName": "Chris",
+    "lastName": "Duarte",
+    "teamId": "EL-BAS",
+    "jersey": "5",
+    "positions": [
+      "SF"
+    ],
+    "heightCm": 196,
+    "weightKg": 86,
+    "birthDate": "1997-06-13",
+    "country": "Dominican Republic",
+    "draft": null,
+    "yearsPro": 10,
+    "face": null,
+    "stats": [],
+    "contract": null
+  },
+  {
+    "id": "el-kenneth-faried",
+    "firstName": "Kenneth",
+    "lastName": "Faried",
     "teamId": "EL-BAS",
     "jersey": "35",
     "positions": [
@@ -780,8 +799,8 @@
     "contract": null
   },
   {
-    "id": "el-markus-anthony-howard",
-    "firstName": "Markus Anthony",
+    "id": "el-markus-howard",
+    "firstName": "Markus",
     "lastName": "Howard",
     "teamId": "EL-BAS",
     "jersey": "0",
@@ -944,8 +963,8 @@
     "contract": null
   },
   {
-    "id": "el-anthony-lawson",
-    "firstName": "Anthony",
+    "id": "el-a-j-lawson",
+    "firstName": "A.J.",
     "lastName": "Lawson",
     "teamId": "EL-BAS",
     "jersey": "1",
@@ -963,8 +982,8 @@
     "contract": null
   },
   {
-    "id": "el-oleksii-len",
-    "firstName": "Oleksii",
+    "id": "el-alex-len",
+    "firstName": "Alex",
     "lastName": "Len",
     "teamId": "EL-BAS",
     "jersey": "21",
@@ -1127,9 +1146,9 @@
     "contract": null
   },
   {
-    "id": "el-pedro-lucas-souza-figueiredo",
-    "firstName": "Pedro Lucas",
-    "lastName": "Souza Figueiredo",
+    "id": "el-pedro-souza",
+    "firstName": "Pedro",
+    "lastName": "Souza",
     "teamId": "EL-BAS",
     "jersey": "11",
     "positions": [
@@ -1218,9 +1237,9 @@
     "contract": null
   },
   {
-    "id": "el-dewayne-stewart-jr",
-    "firstName": "Dewayne",
-    "lastName": "Stewart Jr.",
+    "id": "el-dj-stewart",
+    "firstName": "Dj",
+    "lastName": "Stewart",
     "teamId": "EL-BAS",
     "jersey": "3",
     "positions": [
@@ -1232,25 +1251,6 @@
     "country": "United States of America",
     "draft": null,
     "yearsPro": 8,
-    "face": null,
-    "stats": [],
-    "contract": null
-  },
-  {
-    "id": "el-christopher-theoret-duarte",
-    "firstName": "Christopher",
-    "lastName": "Theoret Duarte",
-    "teamId": "EL-BAS",
-    "jersey": "5",
-    "positions": [
-      "SF"
-    ],
-    "heightCm": 196,
-    "weightKg": 86,
-    "birthDate": "1997-06-13",
-    "country": "Dominican Republic",
-    "draft": null,
-    "yearsPro": 10,
     "face": null,
     "stats": [],
     "contract": null
@@ -1275,8 +1275,8 @@
     "contract": null
   },
   {
-    "id": "el-james-metecan-birsen",
-    "firstName": "James Metecan",
+    "id": "el-metecan-birsen",
+    "firstName": "Metecan",
     "lastName": "Birsen",
     "teamId": "EL-BES",
     "jersey": "11",
@@ -1347,8 +1347,8 @@
     "contract": null
   },
   {
-    "id": "el-anthony-lejohn-brown",
-    "firstName": "Anthony Lejohn",
+    "id": "el-anthony-brown",
+    "firstName": "Anthony",
     "lastName": "Brown",
     "teamId": "EL-BES",
     "jersey": "21",
@@ -1366,9 +1366,9 @@
     "contract": null
   },
   {
-    "id": "el-david-michael-de-julius",
-    "firstName": "David Michael",
-    "lastName": "De Julius",
+    "id": "el-david-dejulius",
+    "firstName": "David",
+    "lastName": "Dejulius",
     "teamId": "EL-BES",
     "jersey": "5",
     "positions": [
@@ -1412,8 +1412,8 @@
     "contract": null
   },
   {
-    "id": "el-devon-durrell-dotson",
-    "firstName": "Devon Durrell",
+    "id": "el-devon-dotson",
+    "firstName": "Devon",
     "lastName": "Dotson",
     "teamId": "EL-BES",
     "jersey": "1",
@@ -1431,8 +1431,8 @@
     "contract": null
   },
   {
-    "id": "el-wenyen-makuac-gabriel",
-    "firstName": "Wenyen Makuac",
+    "id": "el-wenyen-gabriel",
+    "firstName": "Wenyen",
     "lastName": "Gabriel",
     "teamId": "EL-BES",
     "jersey": "32",
@@ -1503,8 +1503,8 @@
     "contract": null
   },
   {
-    "id": "el-daquan-marquel-jeffries",
-    "firstName": "Daquan Marquel",
+    "id": "el-daquan-jeffries",
+    "firstName": "Daquan",
     "lastName": "Jeffries",
     "teamId": "EL-BES",
     "jersey": "2",
@@ -1568,8 +1568,8 @@
     "contract": null
   },
   {
-    "id": "el-conor-seamus-william-morgan",
-    "firstName": "Conor Seamus William",
+    "id": "el-conor-morgan",
+    "firstName": "Conor",
     "lastName": "Morgan",
     "teamId": "EL-BES",
     "jersey": "9",
@@ -1587,8 +1587,8 @@
     "contract": null
   },
   {
-    "id": "el-jaylen-clinton-andrew-nowell",
-    "firstName": "Jaylen Clinton Andrew",
+    "id": "el-jaylen-nowell",
+    "firstName": "Jaylen",
     "lastName": "Nowell",
     "teamId": "EL-BES",
     "jersey": "24",
@@ -1606,8 +1606,8 @@
     "contract": null
   },
   {
-    "id": "el-eugene-tanwa-omoruyi",
-    "firstName": "Eugene Tanwa",
+    "id": "el-eugene-omoruyi",
+    "firstName": "Eugene",
     "lastName": "Omoruyi",
     "teamId": "EL-BES",
     "jersey": "20",
@@ -1652,8 +1652,8 @@
     "contract": null
   },
   {
-    "id": "el-berk-ibrahim-ugurlu",
-    "firstName": "Berk Ibrahim",
+    "id": "el-berk-ugurlu",
+    "firstName": "Berk",
     "lastName": "Ugurlu",
     "teamId": "EL-BES",
     "jersey": "6",
@@ -1671,8 +1671,8 @@
     "contract": null
   },
   {
-    "id": "el-scott-jordan-wilbekin",
-    "firstName": "Scott Jordan",
+    "id": "el-scottie-wilbekin",
+    "firstName": "Scottie",
     "lastName": "Wilbekin",
     "teamId": "EL-BES",
     "jersey": "12",
@@ -1743,8 +1743,8 @@
     "contract": null
   },
   {
-    "id": "el-ante-toni-zizic",
-    "firstName": "Ante Toni",
+    "id": "el-ante-zizic",
+    "firstName": "Ante",
     "lastName": "Zizic",
     "teamId": "EL-BES",
     "jersey": "41",
@@ -1789,8 +1789,8 @@
     "contract": null
   },
   {
-    "id": "el-justin-lamar-anderson",
-    "firstName": "Justin Lamar",
+    "id": "el-justin-anderson",
+    "firstName": "Justin",
     "lastName": "Anderson",
     "teamId": "EL-DUB",
     "jersey": "1",
@@ -1861,9 +1861,9 @@
     "contract": null
   },
   {
-    "id": "el-dwayne-lee-bacon-jr",
-    "firstName": "Dwayne Lee",
-    "lastName": "Bacon Jr.",
+    "id": "el-dwayne-bacon",
+    "firstName": "Dwayne",
+    "lastName": "Bacon",
     "teamId": "EL-DUB",
     "jersey": "3",
     "positions": [
@@ -1953,8 +1953,8 @@
     "contract": null
   },
   {
-    "id": "el-jaron-samuel-blossomgame",
-    "firstName": "Jaron Samuel",
+    "id": "el-jaron-blossomgame",
+    "firstName": "Jaron",
     "lastName": "Blossomgame",
     "teamId": "EL-DUB",
     "jersey": "4",
@@ -2071,6 +2071,52 @@
     "contract": null
   },
   {
+    "id": "el-mfiondu-kabengele",
+    "firstName": "Mfiondu",
+    "lastName": "Kabengele",
+    "teamId": "EL-DUB",
+    "jersey": "17",
+    "positions": [
+      "C"
+    ],
+    "heightCm": 208,
+    "weightKg": 120,
+    "birthDate": "1997-08-14",
+    "country": "Canada",
+    "draft": null,
+    "yearsPro": 10,
+    "face": null,
+    "stats": [
+      {
+        "season": "2025-26",
+        "team": "DUB",
+        "gp": 36,
+        "gs": 35,
+        "min": 801,
+        "pts": 511,
+        "orb": 72,
+        "drb": 146,
+        "ast": 43,
+        "stl": 26,
+        "blk": 26,
+        "tov": 36,
+        "pf": 93,
+        "fgm": 197,
+        "fga": 350,
+        "tpm": 21,
+        "tpa": 65,
+        "ftm": 96,
+        "fta": 117,
+        "usg": null,
+        "per": null,
+        "bpm": null,
+        "obpm": null,
+        "dbpm": null
+      }
+    ],
+    "contract": null
+  },
+  {
     "id": "el-kosta-kondic",
     "firstName": "Kosta",
     "lastName": "Kondic",
@@ -2117,8 +2163,8 @@
     "contract": null
   },
   {
-    "id": "el-davion-dee-lee-oneal-mintz",
-    "firstName": "Davion Dee Lee Oneal",
+    "id": "el-davion-mintz",
+    "firstName": "Davion",
     "lastName": "Mintz",
     "teamId": "EL-DUB",
     "jersey": "6",
@@ -2208,8 +2254,8 @@
     "contract": null
   },
   {
-    "id": "el-elie-franck-rey-okobo",
-    "firstName": "Elie-Franck Rey",
+    "id": "el-elie-okobo",
+    "firstName": "Elie",
     "lastName": "Okobo",
     "teamId": "EL-DUB",
     "jersey": "0",
@@ -2470,54 +2516,8 @@
     "contract": null
   },
   {
-    "id": "el-mfiondu-tshimanga-kabengele",
-    "firstName": "Mfiondu",
-    "lastName": "Tshimanga Kabengele",
-    "teamId": "EL-DUB",
-    "jersey": "17",
-    "positions": [
-      "C"
-    ],
-    "heightCm": 208,
-    "weightKg": 120,
-    "birthDate": "1997-08-14",
-    "country": "Canada",
-    "draft": null,
-    "yearsPro": 10,
-    "face": null,
-    "stats": [
-      {
-        "season": "2025-26",
-        "team": "DUB",
-        "gp": 36,
-        "gs": 35,
-        "min": 801,
-        "pts": 511,
-        "orb": 72,
-        "drb": 146,
-        "ast": 43,
-        "stl": 26,
-        "blk": 26,
-        "tov": 36,
-        "pf": 93,
-        "fgm": 197,
-        "fga": 350,
-        "tpm": 21,
-        "tpa": 65,
-        "ftm": 96,
-        "fta": 117,
-        "usg": null,
-        "per": null,
-        "bpm": null,
-        "obpm": null,
-        "dbpm": null
-      }
-    ],
-    "contract": null
-  },
-  {
-    "id": "el-thomas-ryan-walkup",
-    "firstName": "Thomas Ryan",
+    "id": "el-thomas-walkup",
+    "firstName": "Thomas",
     "lastName": "Walkup",
     "teamId": "EL-DUB",
     "jersey": "44",
@@ -2634,8 +2634,8 @@
     "contract": null
   },
   {
-    "id": "el-antonio-davon-blakeney",
-    "firstName": "Antonio Davon",
+    "id": "el-antonio-blakeney",
+    "firstName": "Antonio",
     "lastName": "Blakeney",
     "teamId": "EL-HTA",
     "jersey": "2",
@@ -2680,8 +2680,8 @@
     "contract": null
   },
   {
-    "id": "el-elijah-brigham-bryant",
-    "firstName": "Elijah Brigham",
+    "id": "el-elijah-bryant",
+    "firstName": "Elijah",
     "lastName": "Bryant",
     "teamId": "EL-HTA",
     "jersey": "3",
@@ -2752,47 +2752,9 @@
     "contract": null
   },
   {
-    "id": "el-khadeen-akil-carrington",
-    "firstName": "Khadeen Akil",
-    "lastName": "Carrington",
-    "teamId": "EL-HTA",
-    "jersey": "5",
-    "positions": [
-      "PG"
-    ],
-    "heightCm": 187,
-    "weightKg": 82,
-    "birthDate": "1995-10-03",
-    "country": "Israel",
-    "draft": null,
-    "yearsPro": 11,
-    "face": null,
-    "stats": [],
-    "contract": null
-  },
-  {
-    "id": "el-amir-thomas-coffey",
-    "firstName": "Amir Thomas",
-    "lastName": "Coffey",
-    "teamId": "EL-HTA",
-    "jersey": "7",
-    "positions": [
-      "SG"
-    ],
-    "heightCm": 201,
-    "weightKg": 95,
-    "birthDate": "1997-06-17",
-    "country": "United States of America",
-    "draft": null,
-    "yearsPro": 10,
-    "face": null,
-    "stats": [],
-    "contract": null
-  },
-  {
-    "id": "el-bruno-correa-fernandes-caboclo",
+    "id": "el-bruno-caboclo",
     "firstName": "Bruno",
-    "lastName": "Correa Fernandes Caboclo",
+    "lastName": "Caboclo",
     "teamId": "EL-HTA",
     "jersey": "51",
     "positions": [
@@ -2836,8 +2798,46 @@
     "contract": null
   },
   {
-    "id": "el-eugene-anthony-german",
-    "firstName": "Eugene Anthony",
+    "id": "el-khadeen-carrington",
+    "firstName": "Khadeen",
+    "lastName": "Carrington",
+    "teamId": "EL-HTA",
+    "jersey": "5",
+    "positions": [
+      "PG"
+    ],
+    "heightCm": 187,
+    "weightKg": 82,
+    "birthDate": "1995-10-03",
+    "country": "Israel",
+    "draft": null,
+    "yearsPro": 11,
+    "face": null,
+    "stats": [],
+    "contract": null
+  },
+  {
+    "id": "el-amir-coffey",
+    "firstName": "Amir",
+    "lastName": "Coffey",
+    "teamId": "EL-HTA",
+    "jersey": "7",
+    "positions": [
+      "SG"
+    ],
+    "heightCm": 201,
+    "weightKg": 95,
+    "birthDate": "1997-06-17",
+    "country": "United States of America",
+    "draft": null,
+    "yearsPro": 10,
+    "face": null,
+    "stats": [],
+    "contract": null
+  },
+  {
+    "id": "el-eugene-german",
+    "firstName": "Eugene",
     "lastName": "German",
     "teamId": "EL-HTA",
     "jersey": "1",
@@ -2901,8 +2901,8 @@
     "contract": null
   },
   {
-    "id": "el-zachary-vincent-leday",
-    "firstName": "Zachary Vincent",
+    "id": "el-zach-leday",
+    "firstName": "Zach",
     "lastName": "Leday",
     "teamId": "EL-HTA",
     "jersey": "16",
@@ -3019,8 +3019,8 @@
     "contract": null
   },
   {
-    "id": "el-tai-osazeeonamen-odiase",
-    "firstName": "Tai Osazeeonamen",
+    "id": "el-tai-odiase",
+    "firstName": "Tai",
     "lastName": "Odiase",
     "teamId": "EL-HTA",
     "jersey": "21",
@@ -3065,8 +3065,8 @@
     "contract": null
   },
   {
-    "id": "el-daniel-akinfayoshe-oturu",
-    "firstName": "Daniel Akinfayoshe",
+    "id": "el-dan-oturu",
+    "firstName": "Dan",
     "lastName": "Oturu",
     "teamId": "EL-HTA",
     "jersey": "25",
@@ -3274,8 +3274,8 @@
     "contract": null
   },
   {
-    "id": "el-ishmail-carzell-wainright",
-    "firstName": "Ishmail Carzell",
+    "id": "el-ish-wainright",
+    "firstName": "Ish",
     "lastName": "Wainright",
     "teamId": "EL-HTA",
     "jersey": "24",
@@ -3392,9 +3392,9 @@
     "contract": null
   },
   {
-    "id": "el-perry-linnard-dozier-jr",
-    "firstName": "Perry Linnard",
-    "lastName": "Dozier Jr.",
+    "id": "el-pj-dozier",
+    "firstName": "Pj",
+    "lastName": "Dozier",
     "teamId": "EL-IST",
     "jersey": "15",
     "positions": [
@@ -3464,8 +3464,8 @@
     "contract": null
   },
   {
-    "id": "el-bruno-afonso-david-fernando",
-    "firstName": "Bruno Afonso David",
+    "id": "el-bruno-fernando",
+    "firstName": "Bruno",
     "lastName": "Fernando",
     "teamId": "EL-IST",
     "jersey": "20",
@@ -3536,8 +3536,8 @@
     "contract": null
   },
   {
-    "id": "el-michael-perry-james",
-    "firstName": "Michael Perry",
+    "id": "el-mike-james",
+    "firstName": "Mike",
     "lastName": "James",
     "teamId": "EL-IST",
     "jersey": "55",
@@ -3627,8 +3627,8 @@
     "contract": null
   },
   {
-    "id": "el-jordan-kenneth-loyd",
-    "firstName": "Jordan Kenneth",
+    "id": "el-jordan-loyd",
+    "firstName": "Jordan",
     "lastName": "Loyd",
     "teamId": "EL-IST",
     "jersey": "3",
@@ -3699,8 +3699,8 @@
     "contract": null
   },
   {
-    "id": "el-collin-anthony-malcolm",
-    "firstName": "Collin Anthony",
+    "id": "el-collin-malcolm",
+    "firstName": "Collin",
     "lastName": "Malcolm",
     "teamId": "EL-IST",
     "jersey": "17",
@@ -3771,8 +3771,8 @@
     "contract": null
   },
   {
-    "id": "el-sarper-david-mutaf",
-    "firstName": "Sarper David",
+    "id": "el-david-mutaf",
+    "firstName": "David",
     "lastName": "Mutaf",
     "teamId": "EL-IST",
     "jersey": "23",
@@ -3999,8 +3999,8 @@
     "contract": null
   },
   {
-    "id": "el-matthew-nelson-strazel",
-    "firstName": "Matthew Nelson",
+    "id": "el-matthew-strazel",
+    "firstName": "Matthew",
     "lastName": "Strazel",
     "teamId": "EL-IST",
     "jersey": "32",
@@ -4143,9 +4143,9 @@
     "contract": null
   },
   {
-    "id": "el-santiago-yusta-garcia",
-    "firstName": "Santiago",
-    "lastName": "Yusta Garcia",
+    "id": "el-santi-yusta",
+    "firstName": "Santi",
+    "lastName": "Yusta",
     "teamId": "EL-IST",
     "jersey": "4",
     "positions": [
@@ -4162,9 +4162,9 @@
     "contract": null
   },
   {
-    "id": "el-alberto-abalde-diaz",
+    "id": "el-alberto-abalde",
     "firstName": "Alberto",
-    "lastName": "Abalde Diaz",
+    "lastName": "Abalde",
     "teamId": "EL-MAD",
     "jersey": "6",
     "positions": [
@@ -4306,8 +4306,8 @@
     "contract": null
   },
   {
-    "id": "el-gabriel-alejandro-deck",
-    "firstName": "Gabriel Alejandro",
+    "id": "el-gabriel-deck",
+    "firstName": "Gabriel",
     "lastName": "Deck",
     "teamId": "EL-MAD",
     "jersey": "14",
@@ -4378,9 +4378,9 @@
     "contract": null
   },
   {
-    "id": "el-andres-rafael-feliz-sarita",
-    "firstName": "Andres Rafael",
-    "lastName": "Feliz Sarita",
+    "id": "el-andres-feliz",
+    "firstName": "Andres",
+    "lastName": "Feliz",
     "teamId": "EL-MAD",
     "jersey": "24",
     "positions": [
@@ -4450,9 +4450,9 @@
     "contract": null
   },
   {
-    "id": "el-usman-garuba-alari",
+    "id": "el-usman-garuba",
     "firstName": "Usman",
-    "lastName": "Garuba Alari",
+    "lastName": "Garuba",
     "teamId": "EL-MAD",
     "jersey": "16",
     "positions": [
@@ -4522,8 +4522,8 @@
     "contract": null
   },
   {
-    "id": "el-mikael-olli-axel-jantunen",
-    "firstName": "Mikael Olli Axel",
+    "id": "el-mikael-jantunen",
+    "firstName": "Mikael",
     "lastName": "Jantunen",
     "teamId": "EL-MAD",
     "jersey": "20",
@@ -4594,8 +4594,8 @@
     "contract": null
   },
   {
-    "id": "el-damian-william-jones",
-    "firstName": "Damian William",
+    "id": "el-damian-jones",
+    "firstName": "Damian",
     "lastName": "Jones",
     "teamId": "EL-MAD",
     "jersey": "30",
@@ -4613,9 +4613,9 @@
     "contract": null
   },
   {
-    "id": "el-sergio-llull-melia",
+    "id": "el-sergio-llull",
     "firstName": "Sergio",
-    "lastName": "Llull Melia",
+    "lastName": "Llull",
     "teamId": "EL-MAD",
     "jersey": "23",
     "positions": [
@@ -4685,9 +4685,9 @@
     "contract": null
   },
   {
-    "id": "el-timothe-baptiste-luwawu-kongbo-usage-cabarrot-luwawu-kongbo",
-    "firstName": "Timothe Baptiste",
-    "lastName": "Luwawu Kongbo Usage Cabarrot-Luwawu Kongbo",
+    "id": "el-timothe-luwawu-cabarrot",
+    "firstName": "Timothe",
+    "lastName": "Luwawu-Cabarrot",
     "teamId": "EL-MAD",
     "jersey": "3",
     "positions": [
@@ -4829,8 +4829,8 @@
     "contract": null
   },
   {
-    "id": "el-chukwuma-julian-okeke",
-    "firstName": "Chukwuma Julian",
+    "id": "el-chuma-okeke",
+    "firstName": "Chuma",
     "lastName": "Okeke",
     "teamId": "EL-MAD",
     "jersey": "8",
@@ -4875,9 +4875,9 @@
     "contract": null
   },
   {
-    "id": "el-jaime-pradilla-gayan",
+    "id": "el-jaime-pradilla",
     "firstName": "Jaime",
-    "lastName": "Pradilla Gayan",
+    "lastName": "Pradilla",
     "teamId": "EL-MAD",
     "jersey": "4",
     "positions": [
@@ -5031,9 +5031,9 @@
     "contract": null
   },
   {
-    "id": "el-walter-samuel-tavares-da-veiga",
-    "firstName": "Walter Samuel",
-    "lastName": "Tavares Da Veiga",
+    "id": "el-walter-tavares",
+    "firstName": "Walter",
+    "lastName": "Tavares",
     "teamId": "EL-MAD",
     "jersey": "22",
     "positions": [
@@ -5175,8 +5175,8 @@
     "contract": null
   },
   {
-    "id": "el-leandro-nicolas-bolmaro",
-    "firstName": "Leandro Nicolas",
+    "id": "el-leandro-bolmaro",
+    "firstName": "Leandro",
     "lastName": "Bolmaro",
     "teamId": "EL-MIL",
     "jersey": "10",
@@ -5247,8 +5247,8 @@
     "contract": null
   },
   {
-    "id": "el-devin-rydale-booker",
-    "firstName": "Devin Rydale",
+    "id": "el-devin-booker",
+    "firstName": "Devin",
     "lastName": "Booker",
     "teamId": "EL-MIL",
     "jersey": "31",
@@ -5319,8 +5319,8 @@
     "contract": null
   },
   {
-    "id": "el-jason-scott-burnell",
-    "firstName": "Jason Scott",
+    "id": "el-jason-burnell",
+    "firstName": "Jason",
     "lastName": "Burnell",
     "teamId": "EL-MIL",
     "jersey": "0",
@@ -5338,8 +5338,8 @@
     "contract": null
   },
   {
-    "id": "el-robert-jalen-cole",
-    "firstName": "Robert Jalen",
+    "id": "el-rj-cole",
+    "firstName": "Rj",
     "lastName": "Cole",
     "teamId": "EL-MIL",
     "jersey": "2",
@@ -5573,8 +5573,8 @@
     "contract": null
   },
   {
-    "id": "el-devon-howard-hall",
-    "firstName": "Devon Howard",
+    "id": "el-devon-hall",
+    "firstName": "Devon",
     "lastName": "Hall",
     "teamId": "EL-MIL",
     "jersey": "22",
@@ -5645,8 +5645,8 @@
     "contract": null
   },
   {
-    "id": "el-garrison-reid-mathews",
-    "firstName": "Garrison Reid",
+    "id": "el-garrison-mathews",
+    "firstName": "Garrison",
     "lastName": "Mathews",
     "teamId": "EL-MIL",
     "jersey": "24",
@@ -5664,8 +5664,8 @@
     "contract": null
   },
   {
-    "id": "el-alec-jeffrey-peters",
-    "firstName": "Alec Jeffrey",
+    "id": "el-alec-peters",
+    "firstName": "Alec",
     "lastName": "Peters",
     "teamId": "EL-MIL",
     "jersey": "25",
@@ -5808,8 +5808,8 @@
     "contract": null
   },
   {
-    "id": "el-darius-jamar-thompson",
-    "firstName": "Darius Jamar",
+    "id": "el-darius-thompson",
+    "firstName": "Darius",
     "lastName": "Thompson",
     "teamId": "EL-MIL",
     "jersey": "13",
@@ -5952,8 +5952,8 @@
     "contract": null
   },
   {
-    "id": "el-moses-anthony-wright",
-    "firstName": "Moses Anthony",
+    "id": "el-moses-wright",
+    "firstName": "Moses",
     "lastName": "Wright",
     "teamId": "EL-MIL",
     "jersey": "5",
@@ -6024,8 +6024,8 @@
     "contract": null
   },
   {
-    "id": "el-kamar-malik-baldwin",
-    "firstName": "Kamar Malik",
+    "id": "el-kamar-baldwin",
+    "firstName": "Kamar",
     "lastName": "Baldwin",
     "teamId": "EL-MUN",
     "jersey": "44",
@@ -6115,8 +6115,8 @@
     "contract": null
   },
   {
-    "id": "el-oscar-leon-da-silva",
-    "firstName": "Oscar Leon",
+    "id": "el-oscar-da-silva",
+    "firstName": "Oscar",
     "lastName": "Da Silva",
     "teamId": "EL-MUN",
     "jersey": "1",
@@ -6187,8 +6187,8 @@
     "contract": null
   },
   {
-    "id": "el-kilian-maurice-fischer",
-    "firstName": "Kilian Maurice",
+    "id": "el-kilian-fischer",
+    "firstName": "Kilian",
     "lastName": "Fischer",
     "teamId": "EL-MUN",
     "jersey": "17",
@@ -6350,8 +6350,8 @@
     "contract": null
   },
   {
-    "id": "el-tobias-brahe-jensen",
-    "firstName": "Tobias Brahe",
+    "id": "el-tobias-jensen",
+    "firstName": "Tobias",
     "lastName": "Jensen",
     "teamId": "EL-MUN",
     "jersey": "8",
@@ -6388,8 +6388,8 @@
     "contract": null
   },
   {
-    "id": "el-justinian-lewis-jessup",
-    "firstName": "Justinian Lewis",
+    "id": "el-justinian-jessup",
+    "firstName": "Justinian",
     "lastName": "Jessup",
     "teamId": "EL-MUN",
     "jersey": "10",
@@ -6552,8 +6552,8 @@
     "contract": null
   },
   {
-    "id": "el-miles-benjamin-norris",
-    "firstName": "Miles Benjamin",
+    "id": "el-miles-norris",
+    "firstName": "Miles",
     "lastName": "Norris",
     "teamId": "EL-MUN",
     "jersey": "0",
@@ -6689,8 +6689,8 @@
     "contract": null
   },
   {
-    "id": "el-johannes-pierre-loti-thiemann",
-    "firstName": "Johannes Pierre Loti",
+    "id": "el-johannes-thiemann",
+    "firstName": "Johannes",
     "lastName": "Thiemann",
     "teamId": "EL-MUN",
     "jersey": "32",
@@ -6780,8 +6780,8 @@
     "contract": null
   },
   {
-    "id": "el-caspar-david-vossenberg",
-    "firstName": "Caspar David",
+    "id": "el-caspar-vossenberg",
+    "firstName": "Caspar",
     "lastName": "Vossenberg",
     "teamId": "EL-MUN",
     "jersey": "37",
@@ -6799,9 +6799,9 @@
     "contract": null
   },
   {
-    "id": "el-duane-eddy-washington-jr",
-    "firstName": "Duane Eddy",
-    "lastName": "Washington Jr.",
+    "id": "el-duane-washington",
+    "firstName": "Duane",
+    "lastName": "Washington",
     "teamId": "EL-MUN",
     "jersey": "4",
     "positions": [
@@ -6871,8 +6871,8 @@
     "contract": null
   },
   {
-    "id": "el-austin-jermaine-wiley",
-    "firstName": "Austin Jermaine",
+    "id": "el-austin-wiley",
+    "firstName": "Austin",
     "lastName": "Wiley",
     "teamId": "EL-MUN",
     "jersey": "50",
@@ -6909,8 +6909,8 @@
     "contract": null
   },
   {
-    "id": "el-tyler-quincy-dorsey",
-    "firstName": "Tyler Quincy",
+    "id": "el-tyler-dorsey",
+    "firstName": "Tyler",
     "lastName": "Dorsey",
     "teamId": "EL-OLY",
     "jersey": "22",
@@ -6981,8 +6981,8 @@
     "contract": null
   },
   {
-    "id": "el-evan-mehdi-fournier",
-    "firstName": "Evan , Mehdi",
+    "id": "el-evan-fournier",
+    "firstName": "Evan",
     "lastName": "Fournier",
     "teamId": "EL-OLY",
     "jersey": "94",
@@ -7053,8 +7053,8 @@
     "contract": null
   },
   {
-    "id": "el-donta-lavell-hall",
-    "firstName": "Donta Lavell",
+    "id": "el-donta-hall",
+    "firstName": "Donta",
     "lastName": "Hall",
     "teamId": "EL-OLY",
     "jersey": "45",
@@ -7125,8 +7125,8 @@
     "contract": null
   },
   {
-    "id": "el-tyrique-daniel-jones",
-    "firstName": "Tyrique Daniel",
+    "id": "el-tyrique-jones",
+    "firstName": "Tyrique",
     "lastName": "Jones",
     "teamId": "EL-OLY",
     "jersey": "88",
@@ -7197,8 +7197,8 @@
     "contract": null
   },
   {
-    "id": "el-cory-ephram-joseph",
-    "firstName": "Cory Ephram",
+    "id": "el-cory-joseph",
+    "firstName": "Cory",
     "lastName": "Joseph",
     "teamId": "EL-OLY",
     "jersey": "34",
@@ -7262,9 +7262,9 @@
     "contract": null
   },
   {
-    "id": "el-codi-tyree-miller-mc-intyre",
-    "firstName": "Codi Tyree",
-    "lastName": "Miller-Mc Intyre",
+    "id": "el-codi-miller-mcintyre",
+    "firstName": "Codi",
+    "lastName": "Miller-Mcintyre",
     "teamId": "EL-OLY",
     "jersey": "0",
     "positions": [
@@ -7406,9 +7406,9 @@
     "contract": null
   },
   {
-    "id": "el-jean-claudio-montero-berroa",
-    "firstName": "Jean Claudio",
-    "lastName": "Montero Berroa",
+    "id": "el-jean-montero",
+    "firstName": "Jean",
+    "lastName": "Montero",
     "teamId": "EL-OLY",
     "jersey": "8",
     "positions": [
@@ -7570,8 +7570,8 @@
     "contract": null
   },
   {
-    "id": "el-konstantinos-papanikolaou",
-    "firstName": "Konstantinos",
+    "id": "el-kostas-papanikolaou",
+    "firstName": "Kostas",
     "lastName": "Papanikolaou",
     "teamId": "EL-OLY",
     "jersey": "16",
@@ -7661,8 +7661,8 @@
     "contract": null
   },
   {
-    "id": "el-alexanter-vezenkov",
-    "firstName": "Alexanter",
+    "id": "el-sasha-vezenkov",
+    "firstName": "Sasha",
     "lastName": "Vezenkov",
     "teamId": "EL-OLY",
     "jersey": "14",
@@ -7805,8 +7805,8 @@
     "contract": null
   },
   {
-    "id": "el-armoni-daetrell-nikee-brooks",
-    "firstName": "Armoni Daetrell Nikee",
+    "id": "el-armoni-brooks",
+    "firstName": "Armoni",
     "lastName": "Brooks",
     "teamId": "EL-PAM",
     "jersey": "12",
@@ -7877,9 +7877,9 @@
     "contract": null
   },
   {
-    "id": "el-alvaro-cardenas-torre",
+    "id": "el-alvaro-cardenas",
     "firstName": "Alvaro",
-    "lastName": "Cardenas Torre",
+    "lastName": "Cardenas",
     "teamId": "EL-PAM",
     "jersey": "7",
     "positions": [
@@ -7896,9 +7896,9 @@
     "contract": null
   },
   {
-    "id": "el-gonzalo-corbalan-gutierrez",
+    "id": "el-gonzalo-corbalan",
     "firstName": "Gonzalo",
-    "lastName": "Corbalan Gutierrez",
+    "lastName": "Corbalan",
     "teamId": "EL-PAM",
     "jersey": "20",
     "positions": [
@@ -7934,9 +7934,9 @@
     "contract": null
   },
   {
-    "id": "el-lucas-mari-tardio",
+    "id": "el-lucas-mari",
     "firstName": "Lucas",
-    "lastName": "Mari Tardio",
+    "lastName": "Mari",
     "teamId": "EL-PAM",
     "jersey": "23",
     "positions": [
@@ -7953,8 +7953,8 @@
     "contract": null
   },
   {
-    "id": "el-omari-kamau-moore",
-    "firstName": "Omari Kamau",
+    "id": "el-omari-moore",
+    "firstName": "Omari",
     "lastName": "Moore",
     "teamId": "EL-PAM",
     "jersey": "10",
@@ -8045,9 +8045,9 @@
     "contract": null
   },
   {
-    "id": "el-josep-puerto-guaita",
+    "id": "el-josep-puerto",
     "firstName": "Josep",
-    "lastName": "Puerto Guaita",
+    "lastName": "Puerto",
     "teamId": "EL-PAM",
     "jersey": "2",
     "positions": [
@@ -8091,8 +8091,8 @@
     "contract": null
   },
   {
-    "id": "el-nathan-donald-reuvers",
-    "firstName": "Nathan Donald",
+    "id": "el-nathan-reuvers",
+    "firstName": "Nathan",
     "lastName": "Reuvers",
     "teamId": "EL-PAM",
     "jersey": "3",
@@ -8137,9 +8137,9 @@
     "contract": null
   },
   {
-    "id": "el-jasiel-rivero-fernandez",
+    "id": "el-jasiel-rivero",
     "firstName": "Jasiel",
-    "lastName": "Rivero Fernandez",
+    "lastName": "Rivero",
     "teamId": "EL-PAM",
     "jersey": "41",
     "positions": [
@@ -8209,9 +8209,9 @@
     "contract": null
   },
   {
-    "id": "el-mario-saint-supery-fernandez",
+    "id": "el-mario-saint-supery",
     "firstName": "Mario",
-    "lastName": "Saint-Supery Fernandez",
+    "lastName": "Saint-Supery",
     "teamId": "EL-PAM",
     "jersey": "5",
     "positions": [
@@ -8228,8 +8228,8 @@
     "contract": null
   },
   {
-    "id": "el-neal-omar-sako",
-    "firstName": "Neal Omar",
+    "id": "el-neal-sako",
+    "firstName": "Neal",
     "lastName": "Sako",
     "teamId": "EL-PAM",
     "jersey": "13",
@@ -8300,9 +8300,9 @@
     "contract": null
   },
   {
-    "id": "el-timothy-neocartes-shorts-vtori",
-    "firstName": "Timothy Neocartes",
-    "lastName": "Shorts Vtori",
+    "id": "el-tj-shorts",
+    "firstName": "Tj",
+    "lastName": "Shorts",
     "teamId": "EL-PAM",
     "jersey": "0",
     "positions": [
@@ -8372,9 +8372,9 @@
     "contract": null
   },
   {
-    "id": "el-yankuba-sima-fatty",
+    "id": "el-yankuba-sima",
     "firstName": "Yankuba",
-    "lastName": "Sima Fatty",
+    "lastName": "Sima",
     "teamId": "EL-PAM",
     "jersey": "77",
     "positions": [
@@ -8418,8 +8418,8 @@
     "contract": null
   },
   {
-    "id": "el-kameron-milton-allante-taylor",
-    "firstName": "Kameron Milton Allante",
+    "id": "el-kameron-taylor",
+    "firstName": "Kameron",
     "lastName": "Taylor",
     "teamId": "EL-PAM",
     "jersey": "1",
@@ -8464,8 +8464,8 @@
     "contract": null
   },
   {
-    "id": "el-el-hadji-omar-brancou-badio",
-    "firstName": "El Hadji Omar Brancou",
+    "id": "el-brancou-badio",
+    "firstName": "Brancou",
     "lastName": "Badio",
     "teamId": "EL-PAN",
     "jersey": "7",
@@ -8510,8 +8510,8 @@
     "contract": null
   },
   {
-    "id": "el-isaac-evolue-etue-bofenda-bonga",
-    "firstName": "Isaac Evolue Etue Bofenda",
+    "id": "el-isaac-bonga",
+    "firstName": "Isaac",
     "lastName": "Bonga",
     "teamId": "EL-PAN",
     "jersey": "32",
@@ -8582,8 +8582,8 @@
     "contract": null
   },
   {
-    "id": "el-moustapha-falou-fall",
-    "firstName": "Moustapha Falou",
+    "id": "el-moustapha-fall",
+    "firstName": "Moustapha",
     "lastName": "Fall",
     "teamId": "EL-PAN",
     "jersey": "93",
@@ -8726,8 +8726,8 @@
     "contract": null
   },
   {
-    "id": "el-holdyn-jerian-grant",
-    "firstName": "Holdyn Jerian",
+    "id": "el-jerian-grant",
+    "firstName": "Jerian",
     "lastName": "Grant",
     "teamId": "EL-PAN",
     "jersey": "22",
@@ -8798,8 +8798,8 @@
     "contract": null
   },
   {
-    "id": "el-nigel-alexander-hayes-davis",
-    "firstName": "Nigel Alexander",
+    "id": "el-nigel-hayes-davis",
+    "firstName": "Nigel",
     "lastName": "Hayes-Davis",
     "teamId": "EL-PAN",
     "jersey": "11",
@@ -8870,9 +8870,9 @@
     "contract": null
   },
   {
-    "id": "el-juan-alberto-hernangomez-geuer",
-    "firstName": "Juan Alberto",
-    "lastName": "Hernangomez Geuer",
+    "id": "el-juancho-hernangomez",
+    "firstName": "Juancho",
+    "lastName": "Hernangomez",
     "teamId": "EL-PAN",
     "jersey": "41",
     "positions": [
@@ -9060,8 +9060,8 @@
     "contract": null
   },
   {
-    "id": "el-mathias-michel-lessort",
-    "firstName": "Mathias Michel",
+    "id": "el-mathias-lessort",
+    "firstName": "Mathias",
     "lastName": "Lessort",
     "teamId": "EL-PAN",
     "jersey": "26",
@@ -9204,8 +9204,8 @@
     "contract": null
   },
   {
-    "id": "el-kendrick-melvin-nunn",
-    "firstName": "Kendrick Melvin",
+    "id": "el-kendrick-nunn",
+    "firstName": "Kendrick",
     "lastName": "Nunn",
     "teamId": "EL-PAN",
     "jersey": "25",
@@ -9276,8 +9276,8 @@
     "contract": null
   },
   {
-    "id": "el-nikolaos-agapitos-rogkavopoulos",
-    "firstName": "Nikolaos Agapitos",
+    "id": "el-nikolaos-rogkavopoulos",
+    "firstName": "Nikolaos",
     "lastName": "Rogkavopoulos",
     "teamId": "EL-PAN",
     "jersey": "17",
@@ -9348,8 +9348,8 @@
     "contract": null
   },
   {
-    "id": "el-konstantinos-sloukas",
-    "firstName": "Konstantinos",
+    "id": "el-kostas-sloukas",
+    "firstName": "Kostas",
     "lastName": "Sloukas",
     "teamId": "EL-PAN",
     "jersey": "10",
@@ -9458,8 +9458,8 @@
     "contract": null
   },
   {
-    "id": "el-kyle-lindsay-allman",
-    "firstName": "Kyle Lindsay",
+    "id": "el-kyle-allman",
+    "firstName": "Kyle",
     "lastName": "Allman",
     "teamId": "EL-PAR",
     "jersey": "0",
@@ -9496,8 +9496,8 @@
     "contract": null
   },
   {
-    "id": "el-kevarrius-keshawn-hayes",
-    "firstName": "Kevarrius Keshawn",
+    "id": "el-kevarrius-hayes",
+    "firstName": "Kevarrius",
     "lastName": "Hayes",
     "teamId": "EL-PAR",
     "jersey": "13",
@@ -9568,8 +9568,8 @@
     "contract": null
   },
   {
-    "id": "el-tonye-frank-jekiri",
-    "firstName": "Tonye Frank",
+    "id": "el-tonye-jekiri",
+    "firstName": "Tonye",
     "lastName": "Jekiri",
     "teamId": "EL-PAR",
     "jersey": "23",
@@ -9614,8 +9614,8 @@
     "contract": null
   },
   {
-    "id": "el-carlik-anthony-jones",
-    "firstName": "Carlik Anthony",
+    "id": "el-carlik-jones",
+    "firstName": "Carlik",
     "lastName": "Jones",
     "teamId": "EL-PAR",
     "jersey": "1",
@@ -9758,8 +9758,8 @@
     "contract": null
   },
   {
-    "id": "el-joffrey-stephane-morgan-lauvergne",
-    "firstName": "Joffrey Stephane Morgan",
+    "id": "el-joffrey-lauvergne",
+    "firstName": "Joffrey",
     "lastName": "Lauvergne",
     "teamId": "EL-PAR",
     "jersey": "77",
@@ -10020,8 +10020,8 @@
     "contract": null
   },
   {
-    "id": "el-lamar-brandon-stevens",
-    "firstName": "Lamar Brandon",
+    "id": "el-lamar-stevens",
+    "firstName": "Lamar",
     "lastName": "Stevens",
     "teamId": "EL-PAR",
     "jersey": "11",
@@ -10085,8 +10085,8 @@
     "contract": null
   },
   {
-    "id": "el-ethan-ivan-thompson",
-    "firstName": "Ethan Ivan",
+    "id": "el-ethan-thompson",
+    "firstName": "Ethan",
     "lastName": "Thompson",
     "teamId": "EL-PAR",
     "jersey": "5",
@@ -10176,8 +10176,8 @@
     "contract": null
   },
   {
-    "id": "el-derek-xavier-willis",
-    "firstName": "Derek Xavier",
+    "id": "el-derek-willis",
+    "firstName": "Derek",
     "lastName": "Willis",
     "teamId": "EL-PAR",
     "jersey": "35",
@@ -10248,8 +10248,8 @@
     "contract": null
   },
   {
-    "id": "el-joel-jean-michel-ayte-oluwa-toby-ayayi",
-    "firstName": "Joel, Jean Michel, Ayte, Oluwa Toby",
+    "id": "el-joel-ayayi",
+    "firstName": "Joel",
     "lastName": "Ayayi",
     "teamId": "EL-PRS",
     "jersey": "11",
@@ -10291,25 +10291,6 @@
         "dbpm": null
       }
     ],
-    "contract": null
-  },
-  {
-    "id": "el-joao-cardoso-pereira",
-    "firstName": "Joao",
-    "lastName": "Cardoso Pereira",
-    "teamId": "EL-PRS",
-    "jersey": "45",
-    "positions": [
-      "PF"
-    ],
-    "heightCm": 203,
-    "weightKg": 31,
-    "birthDate": "2000-08-28",
-    "country": "Brazil",
-    "draft": null,
-    "yearsPro": 7,
-    "face": null,
-    "stats": [],
     "contract": null
   },
   {
@@ -10496,9 +10477,9 @@
     "contract": null
   },
   {
-    "id": "el-sebastian-esteban-herrera-kratzborn",
-    "firstName": "Sebastian Esteban",
-    "lastName": "Herrera Kratzborn",
+    "id": "el-sebastian-herrera",
+    "firstName": "Sebastian",
+    "lastName": "Herrera",
     "teamId": "EL-PRS",
     "jersey": "7",
     "positions": [
@@ -10640,8 +10621,8 @@
     "contract": null
   },
   {
-    "id": "el-daulton-craig-hommes",
-    "firstName": "Daulton Craig",
+    "id": "el-daulton-hommes",
+    "firstName": "Daulton",
     "lastName": "Hommes",
     "teamId": "EL-PRS",
     "jersey": "34",
@@ -10731,8 +10712,27 @@
     "contract": null
   },
   {
-    "id": "el-jeremy-michael-morgan",
-    "firstName": "Jeremy Michael",
+    "id": "el-pereira-maozinha",
+    "firstName": "Pereira",
+    "lastName": "Maozinha",
+    "teamId": "EL-PRS",
+    "jersey": "45",
+    "positions": [
+      "PF"
+    ],
+    "heightCm": 203,
+    "weightKg": 31,
+    "birthDate": "2000-08-28",
+    "country": "Brazil",
+    "draft": null,
+    "yearsPro": 7,
+    "face": null,
+    "stats": [],
+    "contract": null
+  },
+  {
+    "id": "el-jeremy-morgan",
+    "firstName": "Jeremy",
     "lastName": "Morgan",
     "teamId": "EL-PRS",
     "jersey": "20",
@@ -10777,8 +10777,8 @@
     "contract": null
   },
   {
-    "id": "el-matthew-jared-melmoth-rhoden",
-    "firstName": "Matthew Jared Melmoth",
+    "id": "el-jared-rhoden",
+    "firstName": "Jared",
     "lastName": "Rhoden",
     "teamId": "EL-PRS",
     "jersey": "8",
@@ -10823,8 +10823,8 @@
     "contract": null
   },
   {
-    "id": "el-terence-michael-tarpey",
-    "firstName": "Terence Michael",
+    "id": "el-terry-tarpey",
+    "firstName": "Terry",
     "lastName": "Tarpey",
     "teamId": "EL-PRS",
     "jersey": "3",
@@ -10895,9 +10895,9 @@
     "contract": null
   },
   {
-    "id": "el-patrick-oneal-baldwin-jr",
-    "firstName": "Patrick Oneal",
-    "lastName": "Baldwin Jr.",
+    "id": "el-patrick-baldwin",
+    "firstName": "Patrick",
+    "lastName": "Baldwin",
     "teamId": "EL-RED",
     "jersey": "24",
     "positions": [
@@ -10933,8 +10933,8 @@
     "contract": null
   },
   {
-    "id": "el-jared-gladwyn-butler",
-    "firstName": "Jared Gladwyn",
+    "id": "el-jared-butler",
+    "firstName": "Jared",
     "lastName": "Butler",
     "teamId": "EL-RED",
     "jersey": "6",
@@ -10979,8 +10979,8 @@
     "contract": null
   },
   {
-    "id": "el-tyson-gregory-carter",
-    "firstName": "Tyson Gregory",
+    "id": "el-tyson-carter",
+    "firstName": "Tyson",
     "lastName": "Carter",
     "teamId": "EL-RED",
     "jersey": "11",
@@ -11097,6 +11097,25 @@
     "contract": null
   },
   {
+    "id": "el-nikola-djurisic",
+    "firstName": "Nikola",
+    "lastName": "Djurisic",
+    "teamId": "EL-RED",
+    "jersey": "23",
+    "positions": [
+      "SG"
+    ],
+    "heightCm": 204,
+    "weightKg": 91,
+    "birthDate": "2004-02-23",
+    "country": "Serbia",
+    "draft": null,
+    "yearsPro": 3,
+    "face": null,
+    "stats": [],
+    "contract": null
+  },
+  {
     "id": "el-ognjen-dobric",
     "firstName": "Ognjen",
     "lastName": "Dobric",
@@ -11169,27 +11188,8 @@
     "contract": null
   },
   {
-    "id": "el-nikola-durisic",
-    "firstName": "Nikola",
-    "lastName": "Durisic",
-    "teamId": "EL-RED",
-    "jersey": "23",
-    "positions": [
-      "SG"
-    ],
-    "heightCm": 204,
-    "weightKg": 91,
-    "birthDate": "2004-02-23",
-    "country": "Serbia",
-    "draft": null,
-    "yearsPro": 3,
-    "face": null,
-    "stats": [],
-    "contract": null
-  },
-  {
-    "id": "el-ebuka-rufus-izundu",
-    "firstName": "Ebuka Rufus",
+    "id": "el-ebuka-izundu",
+    "firstName": "Ebuka",
     "lastName": "Izundu",
     "teamId": "EL-RED",
     "jersey": "15",
@@ -11234,9 +11234,9 @@
     "contract": null
   },
   {
-    "id": "el-christopher-james-jones-jr",
-    "firstName": "Christopher James",
-    "lastName": "Jones Jr.",
+    "id": "el-chris-jones",
+    "firstName": "Chris",
+    "lastName": "Jones",
     "teamId": "EL-RED",
     "jersey": "1",
     "positions": [
@@ -11372,8 +11372,8 @@
     "contract": null
   },
   {
-    "id": "el-nwachukwu-iheukwumere-chima-moneke",
-    "firstName": "Nwachukwu Iheukwumere Chima",
+    "id": "el-chima-moneke",
+    "firstName": "Chima",
     "lastName": "Moneke",
     "teamId": "EL-RED",
     "jersey": "95",
@@ -11444,9 +11444,9 @@
     "contract": null
   },
   {
-    "id": "el-johnathan-landus-motley-harvey",
-    "firstName": "Johnathan Landus",
-    "lastName": "Motley-Harvey",
+    "id": "el-johnathan-motley",
+    "firstName": "Johnathan",
+    "lastName": "Motley",
     "teamId": "EL-RED",
     "jersey": "0",
     "positions": [
@@ -11490,8 +11490,8 @@
     "contract": null
   },
   {
-    "id": "el-jordan-ifeanyi-nwora",
-    "firstName": "Jordan Ifeanyi",
+    "id": "el-jordan-nwora",
+    "firstName": "Jordan",
     "lastName": "Nwora",
     "teamId": "EL-RED",
     "jersey": "33",
@@ -11562,8 +11562,8 @@
     "contract": null
   },
   {
-    "id": "el-jesusemilore-talodabijesu-ojeleye",
-    "firstName": "Jesusemilore Talodabijesu",
+    "id": "el-semi-ojeleye",
+    "firstName": "Semi",
     "lastName": "Ojeleye",
     "teamId": "EL-RED",
     "jersey": "37",
@@ -11608,8 +11608,8 @@
     "contract": null
   },
   {
-    "id": "el-nicholas-alan-weiler-babb",
-    "firstName": "Nicholas Alan",
+    "id": "el-nick-weiler-babb",
+    "firstName": "Nick",
     "lastName": "Weiler-Babb",
     "teamId": "EL-RED",
     "jersey": "3",
@@ -11680,8 +11680,8 @@
     "contract": null
   },
   {
-    "id": "el-armando-linwood-bacot-jr",
-    "firstName": "Armando Linwood",
+    "id": "el-armando-bacot-jr",
+    "firstName": "Armando",
     "lastName": "Bacot Jr.",
     "teamId": "EL-TEL",
     "jersey": "5",
@@ -11726,8 +11726,8 @@
     "contract": null
   },
   {
-    "id": "el-oshae-j-brissett",
-    "firstName": "Oshae J",
+    "id": "el-o-shae-j-brissett",
+    "firstName": "O'Shae J",
     "lastName": "Brissett",
     "teamId": "EL-TEL",
     "jersey": "10",
@@ -11772,9 +11772,9 @@
     "contract": null
   },
   {
-    "id": "el-jimmy-clark-jr-iii",
+    "id": "el-jimmy-clark-iii",
     "firstName": "Jimmy",
-    "lastName": "Clark Jr. III",
+    "lastName": "Clark III",
     "teamId": "EL-TEL",
     "jersey": "2",
     "positions": [
@@ -11844,9 +11844,9 @@
     "contract": null
   },
   {
-    "id": "el-bonzie-alexander-colson-ii",
-    "firstName": "Bonzie Alexander",
-    "lastName": "Colson II",
+    "id": "el-bonzie-colson",
+    "firstName": "Bonzie",
+    "lastName": "Colson",
     "teamId": "EL-TEL",
     "jersey": "50",
     "positions": [
@@ -11916,9 +11916,9 @@
     "contract": null
   },
   {
-    "id": "el-john-daniel-di-bartolomeo",
-    "firstName": "John Daniel",
-    "lastName": "Di Bartolomeo",
+    "id": "el-john-dibartolomeo",
+    "firstName": "John",
+    "lastName": "Dibartolomeo",
     "teamId": "EL-TEL",
     "jersey": "12",
     "positions": [
@@ -12007,8 +12007,8 @@
     "contract": null
   },
   {
-    "id": "el-jaylen-tremell-hoard",
-    "firstName": "Jaylen Tremell",
+    "id": "el-jaylen-hoard",
+    "firstName": "Jaylen",
     "lastName": "Hoard",
     "teamId": "EL-TEL",
     "jersey": "1",
@@ -12079,8 +12079,8 @@
     "contract": null
   },
   {
-    "id": "el-gur-gur-el-lavi",
-    "firstName": "Gur Gur El",
+    "id": "el-gur-lavi",
+    "firstName": "Gur",
     "lastName": "Lavi",
     "teamId": "EL-TEL",
     "jersey": "4",
@@ -12125,8 +12125,8 @@
     "contract": null
   },
   {
-    "id": "el-ty-jacob-leaf",
-    "firstName": "Ty Jacob",
+    "id": "el-tj-leaf",
+    "firstName": "Tj",
     "lastName": "Leaf",
     "teamId": "EL-TEL",
     "jersey": "22",
@@ -12171,8 +12171,8 @@
     "contract": null
   },
   {
-    "id": "el-gabriel-lundberg",
-    "firstName": "Gabriel",
+    "id": "el-iffe-lundberg",
+    "firstName": "Iffe",
     "lastName": "Lundberg",
     "teamId": "EL-TEL",
     "jersey": "0",
@@ -12315,8 +12315,8 @@
     "contract": null
   },
   {
-    "id": "el-william-henry-rayman",
-    "firstName": "William Henry",
+    "id": "el-william-rayman",
+    "firstName": "William",
     "lastName": "Rayman",
     "teamId": "EL-TEL",
     "jersey": "11",
@@ -12531,8 +12531,8 @@
     "contract": null
   },
   {
-    "id": "el-keaton-laf-ayette-wallace",
-    "firstName": "Keaton Laf Ayette",
+    "id": "el-keaton-wallace",
+    "firstName": "Keaton",
     "lastName": "Wallace",
     "teamId": "EL-TEL",
     "jersey": "17",
@@ -12550,8 +12550,8 @@
     "contract": null
   },
   {
-    "id": "el-wade-m-baldwin-iv",
-    "firstName": "Wade M",
+    "id": "el-wade-baldwin-iv",
+    "firstName": "Wade",
     "lastName": "Baldwin IV",
     "teamId": "EL-ULK",
     "jersey": "2",
@@ -12622,9 +12622,9 @@
     "contract": null
   },
   {
-    "id": "el-marcus-jerome-bingham-jr",
-    "firstName": "Marcus Jerome",
-    "lastName": "Bingham Jr.",
+    "id": "el-marcus-bingham",
+    "firstName": "Marcus",
+    "lastName": "Bingham",
     "teamId": "EL-ULK",
     "jersey": "1",
     "positions": [
@@ -12713,8 +12713,8 @@
     "contract": null
   },
   {
-    "id": "el-william-dalen-clyburn",
-    "firstName": "William Dalen",
+    "id": "el-will-clyburn",
+    "firstName": "Will",
     "lastName": "Clyburn",
     "teamId": "EL-ULK",
     "jersey": "21",
@@ -12785,8 +12785,8 @@
     "contract": null
   },
   {
-    "id": "el-landon-trent-forrest",
-    "firstName": "Landon Trent",
+    "id": "el-trent-forrest",
+    "firstName": "Trent",
     "lastName": "Forrest",
     "teamId": "EL-ULK",
     "jersey": "11",
@@ -12857,8 +12857,54 @@
     "contract": null
   },
   {
-    "id": "el-jonathan-juzang",
-    "firstName": "Jonathan",
+    "id": "el-talen-horton-tucker",
+    "firstName": "Talen",
+    "lastName": "Horton Tucker",
+    "teamId": "EL-ULK",
+    "jersey": "8",
+    "positions": [
+      "SG"
+    ],
+    "heightCm": 193,
+    "weightKg": 106,
+    "birthDate": "2000-11-25",
+    "country": "United States of America",
+    "draft": null,
+    "yearsPro": 6,
+    "face": null,
+    "stats": [
+      {
+        "season": "2025-26",
+        "team": "ULK",
+        "gp": 41,
+        "gs": 33,
+        "min": 977,
+        "pts": 643,
+        "orb": 45,
+        "drb": 109,
+        "ast": 89,
+        "stl": 29,
+        "blk": 20,
+        "tov": 87,
+        "pf": 99,
+        "fgm": 233,
+        "fga": 489,
+        "tpm": 40,
+        "tpa": 151,
+        "ftm": 137,
+        "fta": 181,
+        "usg": null,
+        "per": null,
+        "bpm": null,
+        "obpm": null,
+        "dbpm": null
+      }
+    ],
+    "contract": null
+  },
+  {
+    "id": "el-johnny-juzang",
+    "firstName": "Johnny",
     "lastName": "Juzang",
     "teamId": "EL-ULK",
     "jersey": "9",
@@ -12876,8 +12922,8 @@
     "contract": null
   },
   {
-    "id": "el-braxton-ellis-key",
-    "firstName": "Braxton Ellis",
+    "id": "el-braxton-key",
+    "firstName": "Braxton",
     "lastName": "Key",
     "teamId": "EL-ULK",
     "jersey": "12",
@@ -12922,8 +12968,8 @@
     "contract": null
   },
   {
-    "id": "el-deshane-davis-larkin",
-    "firstName": "Deshane Davis",
+    "id": "el-shane-larkin",
+    "firstName": "Shane",
     "lastName": "Larkin",
     "teamId": "EL-ULK",
     "jersey": "0",
@@ -13138,52 +13184,6 @@
     "contract": null
   },
   {
-    "id": "el-junior-christopher-obame-correia-silva",
-    "firstName": "Junior Christopher",
-    "lastName": "Obame Correia Silva",
-    "teamId": "EL-ULK",
-    "jersey": "30",
-    "positions": [
-      "C"
-    ],
-    "heightCm": 203,
-    "weightKg": 106,
-    "birthDate": "1996-09-19",
-    "country": "Gabon",
-    "draft": null,
-    "yearsPro": 11,
-    "face": null,
-    "stats": [
-      {
-        "season": "2025-26",
-        "team": "ULK",
-        "gp": 16,
-        "gs": 0,
-        "min": 139,
-        "pts": 70,
-        "orb": 13,
-        "drb": 14,
-        "ast": 6,
-        "stl": 5,
-        "blk": 2,
-        "tov": 15,
-        "pf": 30,
-        "fgm": 27,
-        "fga": 44,
-        "tpm": 0,
-        "tpa": 0,
-        "ftm": 16,
-        "fta": 18,
-        "usg": null,
-        "per": null,
-        "bpm": null,
-        "obpm": null,
-        "dbpm": null
-      }
-    ],
-    "contract": null
-  },
-  {
     "id": "el-sertac-sanli",
     "firstName": "Sertac",
     "lastName": "Sanli",
@@ -13275,8 +13275,8 @@
     "contract": null
   },
   {
-    "id": "el-shavon-oday-stokholm-shields",
-    "firstName": "Shavon Oday Stokholm",
+    "id": "el-shavon-shields",
+    "firstName": "Shavon",
     "lastName": "Shields",
     "teamId": "EL-ULK",
     "jersey": "31",
@@ -13347,42 +13347,42 @@
     "contract": null
   },
   {
-    "id": "el-talen-jalee-tucker",
-    "firstName": "Talen Jalee",
-    "lastName": "Tucker",
+    "id": "el-chris-silva",
+    "firstName": "Chris",
+    "lastName": "Silva",
     "teamId": "EL-ULK",
-    "jersey": "8",
+    "jersey": "30",
     "positions": [
-      "SG"
+      "C"
     ],
-    "heightCm": 193,
+    "heightCm": 203,
     "weightKg": 106,
-    "birthDate": "2000-11-25",
-    "country": "United States of America",
+    "birthDate": "1996-09-19",
+    "country": "Gabon",
     "draft": null,
-    "yearsPro": 6,
+    "yearsPro": 11,
     "face": null,
     "stats": [
       {
         "season": "2025-26",
         "team": "ULK",
-        "gp": 41,
-        "gs": 33,
-        "min": 977,
-        "pts": 643,
-        "orb": 45,
-        "drb": 109,
-        "ast": 89,
-        "stl": 29,
-        "blk": 20,
-        "tov": 87,
-        "pf": 99,
-        "fgm": 233,
-        "fga": 489,
-        "tpm": 40,
-        "tpa": 151,
-        "ftm": 137,
-        "fta": 181,
+        "gp": 16,
+        "gs": 0,
+        "min": 139,
+        "pts": 70,
+        "orb": 13,
+        "drb": 14,
+        "ast": 6,
+        "stl": 5,
+        "blk": 2,
+        "tov": 15,
+        "pf": 30,
+        "fgm": 27,
+        "fga": 44,
+        "tpm": 0,
+        "tpa": 0,
+        "ftm": 16,
+        "fta": 18,
         "usg": null,
         "per": null,
         "bpm": null,
@@ -13393,8 +13393,8 @@
     "contract": null
   },
   {
-    "id": "el-derrick-samuel-alston-jr",
-    "firstName": "Derrick Samuel",
+    "id": "el-derrick-alston-jr",
+    "firstName": "Derrick",
     "lastName": "Alston Jr.",
     "teamId": "EL-VIR",
     "jersey": "21",
@@ -13458,8 +13458,8 @@
     "contract": null
   },
   {
-    "id": "el-abdulrasheed-olamilekan-bello",
-    "firstName": "Abdulrasheed Olamilekan",
+    "id": "el-rasheed-bello",
+    "firstName": "Rasheed",
     "lastName": "Bello",
     "teamId": "EL-VIR",
     "jersey": "0",
@@ -13477,8 +13477,8 @@
     "contract": null
   },
   {
-    "id": "el-marcus-joshua-carr",
-    "firstName": "Marcus Joshua",
+    "id": "el-marcus-carr",
+    "firstName": "Marcus",
     "lastName": "Carr",
     "teamId": "EL-VIR",
     "jersey": "2",
@@ -13515,8 +13515,8 @@
     "contract": null
   },
   {
-    "id": "el-aliou-fadiala-diarra",
-    "firstName": "Aliou Fadiala",
+    "id": "el-aliou-diarra",
+    "firstName": "Aliou",
     "lastName": "Diarra",
     "teamId": "EL-VIR",
     "jersey": "31",
@@ -13561,8 +13561,8 @@
     "contract": null
   },
   {
-    "id": "el-mouhamet-rassoul-diouf",
-    "firstName": "Mouhamet Rassoul",
+    "id": "el-mouhamet-diouf",
+    "firstName": "Mouhamet",
     "lastName": "Diouf",
     "teamId": "EL-VIR",
     "jersey": "35",
@@ -13633,8 +13633,8 @@
     "contract": null
   },
   {
-    "id": "el-kessler-donovan-edwards",
-    "firstName": "Kessler Donovan",
+    "id": "el-kessler-edwards",
+    "firstName": "Kessler",
     "lastName": "Edwards",
     "teamId": "EL-VIR",
     "jersey": "9",
@@ -13725,8 +13725,8 @@
     "contract": null
   },
   {
-    "id": "el-trenton-jamar-frazier",
-    "firstName": "Trenton Jamar",
+    "id": "el-trent-frazier",
+    "firstName": "Trent",
     "lastName": "Frazier",
     "teamId": "EL-VIR",
     "jersey": "1",
@@ -13744,8 +13744,8 @@
     "contract": null
   },
   {
-    "id": "el-daniel-lorenzo-hackett",
-    "firstName": "Daniel Lorenzo",
+    "id": "el-daniel-hackett",
+    "firstName": "Daniel",
     "lastName": "Hackett",
     "teamId": "EL-VIR",
     "jersey": "23",
@@ -13835,8 +13835,8 @@
     "contract": null
   },
   {
-    "id": "el-kevin-mbala-kokila",
-    "firstName": "Kevin, Mbala",
+    "id": "el-kevin-kokila",
+    "firstName": "Kevin",
     "lastName": "Kokila",
     "teamId": "EL-VIR",
     "jersey": "3",
@@ -13854,8 +13854,8 @@
     "contract": null
   },
   {
-    "id": "el-wendell-horace-moore",
-    "firstName": "Wendell Horace",
+    "id": "el-wendell-moore",
+    "firstName": "Wendell",
     "lastName": "Moore",
     "teamId": "EL-VIR",
     "jersey": "8",
@@ -13873,8 +13873,8 @@
     "contract": null
   },
   {
-    "id": "el-kaodirichi-nkemjika-akobundu-ehiogu",
-    "firstName": "Kaodirichi Nkemjika",
+    "id": "el-kaodirichi-akobundu-ehiogu",
+    "firstName": "Kaodirichi",
     "lastName": "Akobundu-Ehiogu",
     "teamId": "EL-ZAL",
     "jersey": "2",
@@ -13911,8 +13911,8 @@
     "contract": null
   },
   {
-    "id": "el-sterling-damarco-brown",
-    "firstName": "Sterling Damarco",
+    "id": "el-sterling-brown",
+    "firstName": "Sterling",
     "lastName": "Brown",
     "teamId": "EL-ZAL",
     "jersey": "0",
@@ -14055,8 +14055,8 @@
     "contract": null
   },
   {
-    "id": "el-carsen-cade-edwards",
-    "firstName": "Carsen Cade",
+    "id": "el-carsen-edwards",
+    "firstName": "Carsen",
     "lastName": "Edwards",
     "teamId": "EL-ZAL",
     "jersey": "3",
@@ -14271,8 +14271,8 @@
     "contract": null
   },
   {
-    "id": "el-saben-anthonia-lee",
-    "firstName": "Saben Anthonia",
+    "id": "el-saben-lee",
+    "firstName": "Saben",
     "lastName": "Lee",
     "teamId": "EL-ZAL",
     "jersey": "7",
@@ -14343,8 +14343,8 @@
     "contract": null
   },
   {
-    "id": "el-maodo-sylvester-luis-lo",
-    "firstName": "Maodo Sylvester Luis",
+    "id": "el-maodo-lo",
+    "firstName": "Maodo",
     "lastName": "Lo",
     "teamId": "EL-ZAL",
     "jersey": "12",
@@ -14487,8 +14487,8 @@
     "contract": null
   },
   {
-    "id": "el-dustin-nathaniel-sleva",
-    "firstName": "Dustin Nathaniel",
+    "id": "el-dustin-sleva",
+    "firstName": "Dustin",
     "lastName": "Sleva",
     "teamId": "EL-ZAL",
     "jersey": "14",
@@ -14670,8 +14670,8 @@
     "contract": null
   },
   {
-    "id": "el-nigel-cole-williams-goss",
-    "firstName": "Nigel Cole",
+    "id": "el-nigel-williams-goss",
+    "firstName": "Nigel",
     "lastName": "Williams-Goss",
     "teamId": "EL-ZAL",
     "jersey": "1",

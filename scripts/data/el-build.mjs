@@ -57,7 +57,8 @@ function buildTeams() {
     return {
       id: `EL-${c.code}`,
       abbr: c.code,
-      city: titleCase(c.city),
+      // Club names already carry the city ("Real Madrid", "FC Barcelona"), so keep city blank for display.
+      city: '',
       name: c.abbreviatedName || c.name,
       league: 'EL',
       country: c.country?.name ?? '',
@@ -160,8 +161,10 @@ function buildPlayers() {
 
   for (const p of active) {
     const person = p.person;
-    const firstName = titleCase(person.passportName || person.name.split(',')[1] || '');
-    const lastName = titleCase(person.passportSurname || person.name.split(',')[0] || '');
+    // person.name is the basketball name ("LUWAWU-CABARROT, TIMOTHE"); passport fields hold long legal names.
+    const [surname, given] = String(person.name || '').split(',').map((x) => x.trim());
+    const firstName = titleCase(given || person.passportName || '');
+    const lastName = titleCase(surname || person.passportSurname || '');
     const heightCm = person.height || 198;
     const weightKg = person.weight || 95;
     const birthDate = person.birthDate ? person.birthDate.slice(0, 10) : '2000-07-01';

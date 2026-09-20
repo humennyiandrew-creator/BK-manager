@@ -111,6 +111,16 @@
   white-space: nowrap;
 }
 
+.gameComp {
+  font-size: 0.55rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border: 1px solid var(--panel-border);
+  border-radius: 3px;
+  padding: 0 0.2rem;
+}
+
 .gameWin {
   color: var(--positive);
   font-weight: 700;
