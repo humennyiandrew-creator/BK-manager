@@ -42,6 +42,8 @@ export interface Player {
   form?: number;                  // performance vs rating expectation, −3..+3 (weekly)
   fatigue?: number;               // 0–100 accumulated load; lowers starting energy in games
   devPlan?: Attr;                 // individual development target attribute
+  program?: DevProgram;           // active development programme
+  lastMeeting?: string;           // date of last 1-on-1
   potSeason?: number;             // POT change this season from performance (UI)
   minutesPromise?: { baselineMpg: number; checkDate: string; season: string }; // dynamic event follow-up
 }
@@ -151,6 +153,10 @@ export interface GameState {
   careerOver?: boolean;
   // ---- dynamic events ----
   events: GameEvent[];
+  scouting: Scouting;
+  prep?: OpponentPrep;
+  press?: Press;
+  promises: BoardPromise[];
   negotiations: Negotiation[];            // contract talks (user team), open + recent                     // pending + resolved log, newest first, kept to 60
   offseasonEventStage?: string;            // last offseason stage an event was rolled for
 }
@@ -173,6 +179,8 @@ export interface SeasonRecord {
 export type StaffRole = 'assistantOff' | 'assistantDef' | 'development' | 'medical' | 'scout' | 'analytics';
 export interface Staff {
   id: string; name: string; role: StaffRole;
+  xp?: number;                       // experience towards a rating point
+  course?: { name: string; weeksLeft: number; gain: number; cost: number };
   rating: number;        // 1–100
   age: number; salary: number; years: number;
   teamId: string | null;
@@ -190,6 +198,9 @@ export type RevenueCat = 'tickets' | 'tv' | 'merch' | 'sponsors' | 'playoffs';
 export type ExpenseCat = 'salaries' | 'staff' | 'facilities' | 'tax' | 'operations';
 export interface Finances {
   cash: number;
+  sponsors?: SponsorDeal[];
+  hype?: number;                     // 0–100 fan/media buzz: drives attendance, merch and sponsor offers
+  themeNights?: number;              // promo nights booked this season
   ticketPrice: number;                     // avg ticket, USD
   revenue: Record<RevenueCat, number>;     // this season
   expense: Record<ExpenseCat, number>;     // this season
@@ -250,4 +261,61 @@ export interface Negotiation {
   status: 'open' | 'signed' | 'walked';
   log: { by: 'team' | 'agent'; text: string; offer?: ContractOffer }[];
   date: string;
+}
+
+// ---------- C: between-match activities ----------
+
+export type ProgramKind = 'skill' | 'position' | 'physical' | 'mental';
+export interface DevProgram {
+  kind: ProgramKind;
+  label: string;
+  target: Attr | Position;           // attribute to raise, or new position for a role change
+  weeksLeft: number; weeksTotal: number;
+  progress: number;                  // 0–100
+  risk: number;                      // 0–1 chance of a setback at the end
+}
+
+export type ScoutTargetKind = 'region' | 'college' | 'player' | 'opponent';
+export interface ScoutAssignment {
+  id: number; staffId: string | null;
+  kind: ScoutTargetKind; key: string;   // region/conference name, player id, or team id
+  label: string;
+  weeksLeft: number; weeksTotal: number;
+  cost: number;
+}
+export interface Scouting {
+  assignments: ScoutAssignment[];
+  knowledge: Record<string, number>;    // prospect id → 0–1 extra accuracy from scouting
+  shortlist: string[];                  // prospect ids the user is tracking
+}
+
+export interface OpponentPrep {
+  gameId: number;
+  opponent: string;
+  report: { pace: number; threeRate: number; rimRate: number; star: string; scheme: string; weakness: string };
+  plan: 'contain-star' | 'take-away-three' | 'protect-rim' | 'force-turnovers' | 'run-them' | null;
+  prepared: boolean;                    // set when the user reviews + picks a plan before the game
+}
+
+export interface PressQuestion { id: string; text: string; choices: { id: string; label: string; tone: 'calm' | 'bold' | 'blunt' | 'deflect' }[] }
+export interface Press {
+  pending?: { date: string; questions: PressQuestion[]; answered: string[] };
+  lastDate?: string;
+}
+
+export interface BoardPromise {
+  id: number; date: string;
+  kind: 'playoffs' | 'wins' | 'develop' | 'payroll' | 'title';
+  target: number; label: string;
+  deadline: string;
+  status: 'open' | 'kept' | 'broken';
+  reward: { budget?: number; confidence: number };
+}
+
+export interface SponsorDeal {
+  id: number; name: string; tier: 'local' | 'national' | 'global';
+  perSeason: number; years: number;
+  bonus: { kind: 'playoffs' | 'title' | 'wins'; target: number; amount: number };
+  requiresHype: number;
+  signed: string;                       // date
 }

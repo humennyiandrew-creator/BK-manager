@@ -39,7 +39,8 @@ export const useGame = create<GameStore>((set, get) => ({
     const { s } = get();
     if (!s) return;
     fn(s);
-    set((st) => ({ rev: st.rev + 1 }));
+    // Engine mutates in place; hand out a new top-level object so memos keyed on `s` recompute.
+    set((st) => ({ s: st.s ? { ...st.s } : st.s, rev: st.rev + 1 }));
   },
 
   startNew: async (teamId, slot) => {
@@ -89,7 +90,7 @@ export const useGame = create<GameStore>((set, get) => ({
     set({ busy: true });
     setTimeout(() => {
       continueGame(s);
-      set((st) => ({ rev: st.rev + 1, busy: false }));
+      set((st) => ({ s: st.s ? { ...st.s } : st.s, rev: st.rev + 1, busy: false }));
       if (slot != null) void saveGame(slot, toSaveData(s));
     }, 30);
   },
