@@ -4,10 +4,12 @@ import DataTable, { type DataTableColumn } from '../components/DataTable';
 import BkImage from '../components/BkImage';
 import TeamBadge from '../components/TeamBadge';
 import ProgressBar from '../components/ProgressBar';
+import ScoutingTab from '../components/ScoutingTab';
 import { useGame, useGameState } from '../store/useGame';
 import { ageOf, type Attr } from '../../engine/ratings';
 import type { GameState, Player } from '../../engine/model';
 import { aiPick, draftUntilUser, makePick, nextPick, runLottery, scoutView } from '../../engine/draft';
+import { addToShortlist, removeFromShortlist } from '../../engine/scouting';
 import { standings } from '../../engine/season';
 import { hashString, mulberry32 } from '../../engine/rng';
 import { ATTR_GROUPS, ATTR_LABEL, attrVariant } from '../attrGroups';
@@ -15,6 +17,7 @@ import { formatDate, heightFtIn } from '../format';
 import { play } from '../sound';
 import styles from './DraftScreen.module.css';
 
+type SubTab = 'board' | 'scouting';
 interface Scouted { p: Player; ovr: number; pot: number; range: number }
 
 function scoutAttr(s: GameState, pid: string, teamId: string, attr: Attr, range: number): number {
@@ -118,6 +121,7 @@ export default function DraftScreen() {
   const mutate = useGame((g) => g.mutate);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [pickReveal, setPickReveal] = useState<Scouted | null>(null);
+  const [subTab, setSubTab] = useState<SubTab>('board');
 
   const scoutedList = useMemo<Scouted[]>(() => {
     if (!s) return [];
@@ -135,8 +139,18 @@ export default function DraftScreen() {
   const isUserTurn = liveMode && pending?.owner === s.userTeamId;
   const recentPicks = s.transactions.filter((t) => t.kind === 'draft').slice(0, 8);
 
+  const toggleShortlist = (pid: string) => mutate((st) => {
+    st.scouting.shortlist.includes(pid) ? removeFromShortlist(st, pid) : addToShortlist(st, pid);
+  });
+
   const columns: DataTableColumn<Scouted>[] = [
     { key: 'face', header: '', render: (r) => <BkImage path={r.p.face} alt={r.p.lastName} className={styles.faceThumb} /> },
+    {
+      key: 'star', header: '', render: (r) => {
+        const on = s.scouting.shortlist.includes(r.p.id);
+        return <button type="button" className={on ? styles.starActive : styles.starBtn} onClick={(e) => { e.stopPropagation(); toggleShortlist(r.p.id); }}>{on ? '★' : '☆'}</button>;
+      }
+    },
     { key: 'name', header: 'Name', render: (r) => `${r.p.firstName} ${r.p.lastName}` },
     { key: 'pos', header: 'Pos', render: (r) => r.p.positions.join('/') },
     { key: 'age', header: 'Age', align: 'right', render: (r) => Math.floor(ageOf(r.p.birthDate, new Date(s.date))) },
@@ -144,7 +158,12 @@ export default function DraftScreen() {
     { key: 'college', header: 'College/Club', render: (r) => r.p.college ?? '-' },
     { key: 'country', header: 'Country', render: (r) => r.p.country },
     { key: 'ovr', header: 'Scout OVR', align: 'right', render: (r) => `${r.ovr}±${r.range}` },
-    { key: 'pot', header: 'Scout POT', align: 'right', render: (r) => `${r.pot}±${r.range}` },
+    {
+      key: 'pot', header: 'Scout POT', align: 'right', render: (r) => {
+        const k = s.scouting.knowledge[r.p.id] ?? 0;
+        return <span>{k > 0 && <span className={styles.eyeIcon} title={`Scouted ${Math.round(k * 100)}%`}>&#128065;</span>}{r.pot}±{r.range}</span>;
+      }
+    },
   ];
 
   const simToPick = () => mutate((st) => { draftUntilUser(st); });
@@ -163,6 +182,12 @@ export default function DraftScreen() {
 
   return (
     <div className={styles.wrap}>
+      <div className={styles.subTabs}>
+        <button type="button" className={subTab === 'board' ? `${styles.subTab} ${styles.subTabActive}` : styles.subTab} onClick={() => setSubTab('board')}>Big Board</button>
+        <button type="button" className={subTab === 'scouting' ? `${styles.subTab} ${styles.subTabActive}` : styles.subTab} onClick={() => setSubTab('scouting')}>Scouting</button>
+      </div>
+      {subTab === 'scouting' && <ScoutingTab s={s} mutate={mutate} />}
+      {subTab === 'board' && <>
       {onTheClock && (
         <div className={styles.clockBanner}>
           <span className={styles.clockText}>You&rsquo;re on the clock — Pick #{s.draftOrder.indexOf(pending!.id) + 1}</span>
@@ -239,6 +264,7 @@ export default function DraftScreen() {
           </div>
         </div>
       )}
+      </>}
     </div>
   );
 }

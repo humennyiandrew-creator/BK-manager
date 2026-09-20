@@ -151,7 +151,8 @@ export function progressionDaily(s: GameState) {
     const growth = base > 0 ? base * e.growthMul * schedMul * minutesMul * work : base / Math.max(0.8, e.growthMul * 0.5 + 0.5);
     // Performance feeds back: overperformers grow a little faster and raise their ceiling, flops the reverse.
     const form = p.form ?? 0;
-    applyDelta(s, p, growth + form * 0.035 + gauss(rng) * 0.12, plan.individual[p.id] ?? plan.focus, rng);
+    const programBonus = p.program ? 0.15 : 0; // active development programme: small extra weekly growth
+    applyDelta(s, p, growth + form * 0.035 + gauss(rng) * 0.12 + programBonus, plan.individual[p.id] ?? plan.focus, rng);
     const filmN = filmSessionsThisWeek(s, p.teamId);
     if (filmN > 0) {
       const bump = filmN * 0.15;

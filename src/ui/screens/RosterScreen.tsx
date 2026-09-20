@@ -5,11 +5,13 @@ import BkImage from '../components/BkImage';
 import ProgressBar from '../components/ProgressBar';
 import ConfirmDialog from '../components/ConfirmDialog';
 import Sparkline from '../components/Sparkline';
+import MeetingDialog from '../components/MeetingDialog';
 import { useGame, useGameState } from '../store/useGame';
 import { teamRoster } from '../selectors';
 import { ageOf } from '../../engine/ratings';
-import type { Player } from '../../engine/model';
+import type { GameState, Player } from '../../engine/model';
 import { releasePlayer } from '../../engine/freeagency';
+import { canMeet } from '../../engine/meetings';
 import { isTwoWay } from '../../engine/cba';
 import { ATTR_GROUPS, ATTR_LABEL, attrVariant } from '../attrGroups';
 import { formatMoney, heightFtIn, perGame } from '../format';
@@ -68,6 +70,7 @@ export default function RosterScreen() {
   const [sortDir, setSortDir] = useState<1 | -1>(-1);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [releaseId, setReleaseId] = useState<string | null>(null);
+  const [meetingId, setMeetingId] = useState<string | null>(null);
 
   const roster = useMemo(() => (s ? teamRoster(s, s.userTeamId) : []), [s]);
   const sorted = useMemo(() => {
@@ -146,8 +149,9 @@ export default function RosterScreen() {
         <DataTable columns={columns} rows={sorted} rowKey={(p) => p.id} highlightedRowKey={selected?.id} onRowClick={(p) => setSelectedId(p.id)} compact animateRows />
       </Panel>
       <Panel title="Player Detail" className={styles.detailPanel}>
-        {selected && <PlayerDetail player={selected} onRelease={() => setReleaseId(selected.id)} />}
+        {selected && <PlayerDetail player={selected} s={s} onRelease={() => setReleaseId(selected.id)} onMeet={() => setMeetingId(selected.id)} />}
       </Panel>
+      {meetingId && <MeetingDialog s={s} playerId={meetingId} mutate={mutate} onClose={() => setMeetingId(null)} />}
       {releaseTarget && (
         <ConfirmDialog
           title={`Release ${releaseTarget.firstName} ${releaseTarget.lastName}?`}
@@ -162,8 +166,9 @@ export default function RosterScreen() {
   );
 }
 
-function PlayerDetail({ player: p, onRelease }: { player: Player; onRelease: () => void }) {
+function PlayerDetail({ player: p, s, onRelease, onMeet }: { player: Player; s: GameState; onRelease: () => void; onMeet: () => void }) {
   const age = Math.floor(ageOf(p.birthDate));
+  const meetOk = canMeet(s, p.id);
   return (
     <div className={styles.detail}>
       <div className={styles.detailHead}>
@@ -177,6 +182,7 @@ function PlayerDetail({ player: p, onRelease }: { player: Player; onRelease: () 
             {p.draft ? `Draft ${p.draft.year} R${p.draft.round} P${p.draft.pick}` : 'Undrafted'} · OVR {p.ratings.ovr} · POT {Math.round(p.ratings.pot)}
           </div>
         </div>
+        <button type="button" className={styles.meetBtn} disabled={!meetOk} title={meetOk ? '1-on-1 meeting' : 'Met with him recently'} onClick={onMeet}>1-on-1</button>
         <button type="button" className={styles.releaseBtn} onClick={onRelease}>Release</button>
       </div>
 

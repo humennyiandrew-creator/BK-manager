@@ -8,6 +8,13 @@ import { trainingDaily } from './training';
 import { aiTradeDaily } from './trade';
 import { freeAgencyDaily } from './freeagency';
 import { eventsDaily } from './events';
+import { scoutingWeekly } from './scouting';
+import { programsWeekly } from './programs';
+import { buildPrep, prepDaily } from './prep';
+import { pressDaily } from './media';
+import { checkPromises } from './mgmt/board';
+import { sponsorsWeekly } from './sponsors';
+import { staffWeekly } from './mgmt/staff';
 
 export function dailyUpdate(s: GameState, playedToday: Game[]) {
   for (const g of playedToday) if (g.home === s.userTeamId || g.away === s.userTeamId) boardAfterGame(s, g);
@@ -15,7 +22,15 @@ export function dailyUpdate(s: GameState, playedToday: Game[]) {
   facilitiesDaily(s);
   trainingDaily(s);
   progressionDaily(s);
+  scoutingWeekly(s);
+  programsWeekly(s);
+  buildPrep(s);
+  prepDaily(s);
   if (s.phase === 'regular' && s.date <= s.keyDates.tradeDeadline) aiTradeDaily(s);
   freeAgencyDaily(s);
   eventsDaily(s);
+  pressDaily(s, playedToday);
+  checkPromises(s);
+  sponsorsWeekly(s);
+  staffWeekly(s);
 }

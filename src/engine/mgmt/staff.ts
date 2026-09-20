@@ -2,6 +2,8 @@
 import type { GameState, Staff, StaffRole } from '../model';
 import { hashString, mulberry32 } from '../rng';
 import { clamp, marketFactor, teamStrength } from './market';
+import { standings } from '../season';
+import { daysBetween } from '../schedule';
 
 export const ROLES: StaffRole[] = ['assistantOff', 'assistantDef', 'development', 'medical', 'scout', 'analytics'];
 export const ROLE_LABEL: Record<StaffRole, string> = {
@@ -91,4 +93,65 @@ export function fireStaff(s: GameState, staffId: string): string | null {
   msg(s, `${staffer.name} released`, `${ROLE_LABEL[staffer.role]} released, paid out $${(payout / 1e6).toFixed(1)}M remaining on his deal.`);
   staffer.teamId = null;
   return null;
+}
+
+// ---------- C: staff development ----------
+
+export interface StaffCourse { name: string; weeks: number; cost: number; gain: number }
+
+/** 2-3 course options for a staffer: cost/weeks scale with rating gain and the staffer's own level. */
+export function staffCourses(s: GameState, staffId: string): StaffCourse[] {
+  const st = s.staff.find((x) => x.id === staffId);
+  if (!st) return [];
+  const rng = mulberry32(hashString(`${s.seed}|course|${staffId}`));
+  const names = ['Weekend Clinic', 'Regional Certification', 'Advanced Coaching Course'];
+  const opts: StaffCourse[] = [];
+  const n = 2 + Math.floor(rng() * 2);
+  for (let i = 0; i < Math.min(n, 3); i++) {
+    const gain = 2 + Math.floor(rng() * 4); // 2-5
+    const weeks = 2 + Math.floor(rng() * 5); // 2-6
+    const cost = Math.round((gain * 60_000 + weeks * 20_000) * (1 + rng() * 0.3) / 5_000) * 5_000;
+    opts.push({ name: `${names[i % names.length]}`, weeks, cost, gain });
+  }
+  return opts;
+}
+
+export function enrollStaff(s: GameState, staffId: string, course: StaffCourse): string | null {
+  const st = s.staff.find((x) => x.id === staffId);
+  if (!st) return 'Staff member not found';
+  if (st.teamId !== s.userTeamId) return 'Not on your staff';
+  if (st.course) return 'Already enrolled in a course';
+  if (s.finance.cash < course.cost) return 'Not enough cash';
+  s.finance.cash -= course.cost;
+  st.course = { name: course.name, weeksLeft: course.weeks, gain: course.gain, cost: course.cost };
+  msg(s, `${st.name} enrolled`, `${st.name} is enrolled in ${course.name} (${course.weeks} weeks, +${course.gain} rating on completion).`);
+  return null;
+}
+
+const XP_PER_LEVEL = 100;
+
+/** Weekly (every 7th day from Oct 1): staff gain xp from usage/results; courses tick down. */
+export function staffWeekly(s: GameState): void {
+  const d = daysBetween(`${s.seasonYear}-10-01`, s.date);
+  if (d <= 0 || d % 7 !== 0) return;
+  const winPct = standings(s, s.teams[s.userTeamId].conference).find((r) => r.teamId === s.userTeamId)?.pct ?? 0.5;
+  const rng = mulberry32(hashString(`${s.seed}|staffxp|${s.date}`));
+  for (const st of s.staff) {
+    if (!st.teamId) continue;
+    const resultBonus = st.teamId === s.userTeamId ? Math.round((winPct - 0.5) * 6) : 0;
+    st.xp = (st.xp ?? 0) + Math.max(1, 3 + resultBonus + Math.round(rng() * 2));
+    if (st.rating < 99 && (st.xp ?? 0) >= XP_PER_LEVEL) {
+      st.xp -= XP_PER_LEVEL;
+      st.rating = Math.min(99, st.rating + 1);
+      if (st.teamId === s.userTeamId) msg(s, `${st.name} improves`, `${ROLE_LABEL[st.role]} ${st.name} has developed — rating now ${st.rating}.`);
+    }
+    if (st.course) {
+      st.course.weeksLeft -= 1;
+      if (st.course.weeksLeft <= 0) {
+        st.rating = Math.min(99, st.rating + st.course.gain);
+        if (st.teamId === s.userTeamId) msg(s, `${st.name} completes course`, `${st.name} finished ${st.course.name}: +${st.course.gain} rating (now ${st.rating}).`);
+        st.course = undefined;
+      }
+    }
+  }
 }

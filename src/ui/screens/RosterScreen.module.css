@@ -116,7 +116,7 @@
 }
 
 .releaseBtn {
-  margin-left: auto;
+  margin-left: 0;
   align-self: flex-start;
   background: var(--panel-alt);
   border: 1px solid var(--negative);
@@ -132,6 +132,29 @@
 .releaseBtn:hover {
   background: var(--negative);
   color: var(--text);
+}
+
+.meetBtn {
+  margin-left: auto;
+  align-self: flex-start;
+  background: var(--panel-alt);
+  border: 1px solid var(--cyan);
+  color: var(--cyan);
+  border-radius: var(--radius);
+  padding: 0.4rem 0.8rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.meetBtn:hover:not(:disabled) {
+  background: var(--cyan);
+  color: var(--bg);
+}
+
+.meetBtn:disabled {
+  opacity: 0.4;
 }
 
 .detailFace {

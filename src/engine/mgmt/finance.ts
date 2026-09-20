@@ -5,6 +5,7 @@ import { standings } from '../season';
 import { daysBetween } from '../schedule';
 import { FACILITY_IDS, facilityLevel } from './facilities';
 import { clamp, marketFactor, top3Ovr } from './market';
+import { sponsorDailyIncome } from '../sponsors';
 
 export function initFinances(s: GameState): void {
   const team = s.teams[s.userTeamId];
@@ -16,8 +17,16 @@ export function initFinances(s: GameState): void {
     expense: { salaries: 0, staff: 0, facilities: 0, tax: 0, operations: 0 },
     monthly: [],
     attendance: [],
+    hype: 50,
+    themeNights: 0,
+    sponsors: [],
   };
   s.finance = finance;
+}
+
+/** ±15% attendance/merch swing between hype 0 and 100, neutral at 50. */
+function hypeMul(f: Finances): number {
+  return 1 + (((f.hype ?? 50) - 50) / 50) * 0.15;
 }
 
 function msg(s: GameState, subject: string, body: string) {
@@ -41,7 +50,9 @@ export function financeDaily(s: GameState, playedToday: Game[]): void {
     const priceRatio = f.ticketPrice / 110;
     const elasticity = clamp(1 - (priceRatio - 1) * 0.45, 0.55, 1.15);
     const arenaBoost = 0.86 + facilityLevel(s, team.id, 'arena') * 0.028;
-    const frac = clamp((0.55 + winPct * 0.3 + star * 0.15) * elasticity * arenaBoost, 0.3, 1);
+    const themeBoost = f.themeNightPending ? 1.12 : 1;
+    const frac = clamp((0.55 + winPct * 0.3 + star * 0.15) * elasticity * arenaBoost * hypeMul(f) * themeBoost, 0.3, 1);
+    f.themeNightPending = false;
     const attendees = team.arenaCapacity * frac;
     let rev = attendees * f.ticketPrice;
     if (g.type !== 'regular') {
@@ -94,7 +105,7 @@ export function financeDaily(s: GameState, playedToday: Game[]): void {
     const marketNorm = clamp((marketFactor(team.abbr) - 0.8) / 0.7, 0, 1);
     const annualMS = clamp(60_000_000 + (60_000_000 + marketNorm * 30_000_000) * popularity, 60_000_000, 150_000_000);
     const msDaily = annualMS / 365;
-    f.revenue.merch += msDaily * 0.45;
+    f.revenue.merch += msDaily * 0.45 * hypeMul(f);
     f.revenue.sponsors += msDaily * 0.55;
     f.cash += msDaily;
 
@@ -102,6 +113,12 @@ export function financeDaily(s: GameState, playedToday: Game[]): void {
       const bonusDaily = f.sponsorBonus / 30;
       f.revenue.sponsors += bonusDaily;
       f.cash += bonusDaily;
+    }
+
+    const sponsorDaily = sponsorDailyIncome(s);
+    if (sponsorDaily) {
+      f.revenue.sponsors += sponsorDaily;
+      f.cash += sponsorDaily;
     }
   }
 
@@ -122,6 +139,7 @@ export function financeDaily(s: GameState, playedToday: Game[]): void {
     const prev = f.monthly[f.monthly.length - 1];
     if (prev) {
       msg(s, 'Monthly financial summary', `${prev.month}: revenue $${(prev.revenue / 1e6).toFixed(1)}M, expense $${(prev.expense / 1e6).toFixed(1)}M, cash $${(prev.cash / 1e6).toFixed(1)}M.`);
+      f.hype = Math.round(clamp((f.hype ?? 50) + ((50 - (f.hype ?? 50)) * 0.3), 0, 100));
     }
     entry = { month, revenue: 0, expense: 0, cash: f.cash };
     f.monthly.push(entry);

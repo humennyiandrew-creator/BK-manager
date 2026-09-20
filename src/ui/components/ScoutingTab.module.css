@@ -1,0 +1,163 @@
+.wrap {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 18rem 1fr 1fr;
+  gap: var(--gap);
+  overflow: auto;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+}
+
+.statsPanel,
+.newPanel,
+.activePanel,
+.shortlistPanel {
+  min-height: 0;
+}
+
+.statRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  padding: 0.25rem 0;
+}
+
+.statRow span:last-child {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.field {
+  margin-bottom: 0.7rem;
+}
+
+.field label {
+  display: block;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-dim);
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+}
+
+.select {
+  width: 100%;
+  background: var(--panel-alt);
+  border: 1px solid var(--panel-border);
+  color: var(--text);
+  border-radius: var(--radius);
+  padding: 0.4rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+.slider {
+  width: 100%;
+  accent-color: var(--cyan);
+}
+
+.hint {
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  margin: -0.3rem 0 0.7rem;
+}
+
+.startBtn {
+  width: 100%;
+  background: var(--red);
+  color: var(--text);
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.startBtn:disabled {
+  background: var(--panel-alt);
+  color: var(--text-dim);
+}
+
+.empty {
+  color: var(--text-dim);
+  font-size: 0.75rem;
+  padding: 0.5rem 0;
+}
+
+.assignRow {
+  border-bottom: 1px solid var(--panel-border);
+  padding: 0.5rem 0;
+}
+
+.assignRow:last-child {
+  border-bottom: none;
+}
+
+.assignHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.35rem;
+}
+
+.assignLabel {
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.cancelBtn {
+  background: var(--panel-alt);
+  border: 1px solid var(--negative);
+  color: var(--negative);
+  border-radius: var(--radius);
+  padding: 0.2rem 0.5rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.assignMeta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  margin-top: 0.3rem;
+}
+
+.shortRow {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--panel-border);
+  font-size: 0.75rem;
+}
+
+.shortRow:last-child {
+  border-bottom: none;
+}
+
+.shortName {
+  font-weight: 700;
+  flex: 1;
+}
+
+.shortMeta {
+  color: var(--text-muted);
+  font-size: 0.68rem;
+}
+
+.removeBtn {
+  background: transparent;
+  border: 1px solid var(--panel-border);
+  color: var(--text-dim);
+  border-radius: var(--radius);
+  padding: 0.2rem 0.5rem;
+  font-size: 0.62rem;
+}

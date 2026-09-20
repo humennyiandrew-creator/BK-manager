@@ -33,6 +33,73 @@
   gap: 0.6rem;
 }
 
+.roleGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.devRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.2rem 0 0.4rem;
+  font-size: 0.65rem;
+  color: var(--text-dim);
+}
+
+.xpLabel {
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.xpBar {
+  flex: 1;
+  height: 0.3rem;
+}
+
+.courseStatus {
+  color: var(--cyan);
+  white-space: nowrap;
+}
+
+.courseBtn {
+  background: transparent;
+  border: 1px solid var(--panel-border);
+  color: var(--text-muted);
+  border-radius: var(--radius);
+  padding: 0.15rem 0.5rem;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+}
+
+.courseBtn:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
+
+.courseOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.3rem 0 0.6rem;
+}
+
+.courseOption {
+  text-align: left;
+  background: var(--panel-alt);
+  border: 1px solid var(--panel-border);
+  color: var(--text);
+  border-radius: var(--radius);
+  padding: 0.35rem 0.6rem;
+  font-size: 0.7rem;
+}
+
+.courseOption:hover {
+  border-color: var(--cyan);
+}
+
 .roleRow,
 .marketRow {
   display: grid;

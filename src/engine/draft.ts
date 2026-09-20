@@ -39,10 +39,13 @@ export function generateDraftClass(s: GameState, year: number) {
 export function scoutView(s: GameState, pid: string, teamId: string): { ovr: number; pot: number; range: number } {
   const p = s.players[pid];
   const skill = staffRating(s, teamId, 'scout') / 100 * 0.7 + facilityLevel(s, teamId, 'scouting') / 5 * 0.3;
-  const range = Math.max(1, Math.round(2 + (1 - skill) * 10) - (hasNode(s, teamId, 'scouting_analyticsScouts') ? 1 : 0) - (hasNode(s, teamId, 'scouting_intlOffice') && p.country !== 'USA' ? 2 : 0));
+  let range = Math.max(1, Math.round(2 + (1 - skill) * 10) - (hasNode(s, teamId, 'scouting_analyticsScouts') ? 1 : 0) - (hasNode(s, teamId, 'scouting_intlOffice') && p.country !== 'USA' ? 2 : 0));
+  // Scouting assignments (user team only) narrow the range further and bias the noise toward the truth.
+  const knowledge = teamId === s.userTeamId ? (s.scouting?.knowledge?.[pid] ?? 0) : 0;
+  if (knowledge > 0) range = Math.max(1, range * (1 - 0.7 * knowledge));
   const rng = mulberry32(hashString(`${s.seed}|scout|${teamId}|${pid}`));
   const noise = (rng() - 0.5) * 2 * range;
-  return { ovr: Math.round(p.ratings.ovr + noise * 0.4), pot: Math.round(p.ratings.pot + noise), range };
+  return { ovr: Math.round(p.ratings.ovr + noise * 0.4), pot: Math.round(p.ratings.pot + noise), range: Math.round(range) };
 }
 
 // ---------- order ----------

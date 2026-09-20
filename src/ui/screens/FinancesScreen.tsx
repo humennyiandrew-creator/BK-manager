@@ -8,6 +8,7 @@ import { standings } from '../../engine/season';
 import { facilityLevel } from '../../engine/mgmt/facilities';
 import { clamp, top3Ovr } from '../../engine/mgmt/market';
 import type { ExpenseCat, GameState, RevenueCat } from '../../engine/model';
+import { bookThemeNight, signSponsor, sponsorOffers, THEME_NIGHT_CAP } from '../../engine/sponsors';
 import { formatMoney, formatMoneyShort } from '../format';
 import styles from './FinancesScreen.module.css';
 
@@ -51,10 +52,21 @@ function MonthlyChart({ monthly }: { monthly: GameState['finance']['monthly'] })
   );
 }
 
+function bonusProgress(s: GameState, bonus: { kind: 'playoffs' | 'title' | 'wins'; target: number; amount: number }): string {
+  if (bonus.kind === 'wins') {
+    const team = s.teams[s.userTeamId];
+    const w = standings(s, team.conference).find((r) => r.teamId === team.id)?.w ?? 0;
+    return `${w}/${bonus.target} wins → $${(bonus.amount / 1e6).toFixed(1)}M`;
+  }
+  if (bonus.kind === 'playoffs') return `Reach the playoffs → $${(bonus.amount / 1e6).toFixed(1)}M`;
+  return `Win the title → $${(bonus.amount / 1e6).toFixed(1)}M`;
+}
+
 export default function FinancesScreen() {
   const s = useGameState();
   const mutate = useGame((g) => g.mutate);
   const [price, setPrice] = useState<number | null>(null);
+  const [note, setNote] = useState<string | null>(null);
   if (!s) return null;
 
   const f = s.finance;
@@ -76,6 +88,12 @@ export default function FinancesScreen() {
   };
 
   const recent = f.attendance.slice(-16);
+  const hype = f.hype ?? 50;
+  const offers = sponsorOffers(s);
+  const themeNights = f.themeNightSeason === s.season ? (f.themeNights ?? 0) : 0;
+
+  const doSign = (offerId: number) => mutate((st) => { setNote(signSponsor(st, offerId)); });
+  const doTheme = () => mutate((st) => { setNote(bookThemeNight(st)); });
 
   return (
     <div className={styles.wrap}>
@@ -138,6 +156,46 @@ export default function FinancesScreen() {
               ))}
             </div>
           )}
+        </Panel>
+
+        <Panel title="Hype & Promotions" className={styles.panel} headerRight={<span className={styles.hypeValue}>{Math.round(hype)}</span>}>
+          <ProgressBar value={hype} variant={hype >= 65 ? 'positive' : hype <= 35 ? 'negative' : 'cyan'} />
+          <div className={styles.themeRow}>
+            <span>Theme nights: {themeNights}/{THEME_NIGHT_CAP}</span>
+            <button type="button" className={styles.signBtn} disabled={themeNights >= THEME_NIGHT_CAP} onClick={doTheme}>Book Theme Night</button>
+          </div>
+        </Panel>
+
+        <Panel title="Sponsors" className={styles.panel} flush>
+          <div className={styles.sponsorList}>
+            {(f.sponsors ?? []).length === 0 && <div className={styles.chartEmpty}>No active sponsors.</div>}
+            {(f.sponsors ?? []).map((d) => (
+              <div key={d.id} className={styles.sponsorRow}>
+                <div className={styles.sponsorInfo}>
+                  <span className={styles.sponsorName}>{d.name}</span>
+                  <span className={styles.sponsorMeta}>{d.tier} · {formatMoneyShort(d.perSeason)}/yr · {d.years}yr</span>
+                </div>
+                <span className={styles.sponsorBonus}>{bonusProgress(s, d.bonus)}</span>
+              </div>
+            ))}
+          </div>
+          <div className={styles.sponsorDivider}>Available offers</div>
+          <div className={styles.sponsorList}>
+            {offers.length === 0 && <div className={styles.chartEmpty}>No offers this season.</div>}
+            {offers.map((o) => {
+              const locked = o.requiresHype > hype;
+              return (
+                <div key={o.id} className={styles.sponsorRow}>
+                  <div className={styles.sponsorInfo}>
+                    <span className={styles.sponsorName}>{o.name}</span>
+                    <span className={styles.sponsorMeta}>{o.tier} · {formatMoneyShort(o.perSeason)}/yr · {o.years}yr{locked ? ` · needs ${o.requiresHype} hype` : ''}</span>
+                  </div>
+                  <button type="button" className={styles.signBtn} disabled={locked || (f.sponsors ?? []).length >= 3} onClick={() => doSign(o.id)}>Sign</button>
+                </div>
+              );
+            })}
+          </div>
+          {note && <div className={styles.sponsorNote}>{note}</div>}
         </Panel>
       </div>
     </div>

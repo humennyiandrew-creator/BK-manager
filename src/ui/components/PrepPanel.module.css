@@ -1,0 +1,57 @@
+.panel {
+  flex-shrink: 0;
+}
+
+.opp {
+  margin-bottom: 0.6rem;
+}
+
+.reportGrid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.25rem 0.8rem;
+  font-size: 0.74rem;
+  margin-bottom: 0.7rem;
+}
+
+.reportGrid span:nth-child(odd) {
+  color: var(--text-dim);
+  text-transform: uppercase;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  align-self: center;
+}
+
+.reportGrid span:nth-child(even) {
+  font-weight: 700;
+}
+
+.plans {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.planBtn {
+  text-align: left;
+  background: var(--panel-alt);
+  border: 1px solid var(--panel-border);
+  color: var(--text-muted);
+  border-radius: var(--radius);
+  padding: 0.4rem 0.7rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.planActive {
+  border-color: var(--cyan);
+  color: var(--text);
+  background: color-mix(in srgb, var(--cyan) 15%, var(--panel-alt));
+}
+
+.status {
+  margin: 0.6rem 0 0;
+  font-size: 0.68rem;
+  color: var(--positive);
+}

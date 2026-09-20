@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import Panel from '../components/Panel';
 import ProgressBar from '../components/ProgressBar';
 import { useGameState, useGame } from '../store/useGame';
-import { ROLES, ROLE_LABEL, STAFF_BUDGET, hireStaff, fireStaff } from '../../engine/mgmt/staff';
+import { ROLES, ROLE_LABEL, STAFF_BUDGET, hireStaff, fireStaff, staffCourses, enrollStaff, type StaffCourse } from '../../engine/mgmt/staff';
 import type { Staff, StaffRole } from '../../engine/model';
 import { formatMoneyShort } from '../format';
 import { attrVariant } from '../attrGroups';
@@ -13,6 +13,7 @@ export default function StaffScreen() {
   const mutate = useGame((g) => g.mutate);
   const [filter, setFilter] = useState<StaffRole>('assistantOff');
   const [error, setError] = useState<string | null>(null);
+  const [courseFor, setCourseFor] = useState<string | null>(null);
 
   const current = useMemo(() => {
     if (!s) return {} as Record<StaffRole, Staff | undefined>;
@@ -40,6 +41,12 @@ export default function StaffScreen() {
     mutate((st) => fireStaff(st, id));
     setError(null);
   };
+  const doEnroll = (id: string, course: StaffCourse) => {
+    let err: string | null = null;
+    mutate((st) => { err = enrollStaff(st, id, course); });
+    setError(err);
+    setCourseFor(null);
+  };
 
   return (
     <div className={styles.wrap}>
@@ -52,17 +59,42 @@ export default function StaffScreen() {
         <div className={styles.roleList}>
           {ROLES.map((r) => {
             const st = current[r];
+            const options = st && courseFor === st.id ? staffCourses(s, st.id) : null;
             return (
-              <div key={r} className={styles.roleRow}>
-                <div className={styles.roleInfo}>
-                  <span className={styles.roleName}>{ROLE_LABEL[r]}</span>
-                  <span className={styles.staffName}>{st ? st.name : 'Vacant'}</span>
+              <div key={r} className={styles.roleGroup}>
+                <div className={styles.roleRow}>
+                  <div className={styles.roleInfo}>
+                    <span className={styles.roleName}>{ROLE_LABEL[r]}</span>
+                    <span className={styles.staffName}>{st ? st.name : 'Vacant'}</span>
+                  </div>
+                  <ProgressBar value={st?.rating ?? 40} variant={attrVariant(st?.rating ?? 40)} className={styles.ratingBar} />
+                  <span className={styles.ratingValue}>{st?.rating ?? 40}</span>
+                  <span className={styles.salary}>{st ? formatMoneyShort(st.salary) : '-'}</span>
+                  <span className={styles.years}>{st ? `${st.years}yr` : '-'}</span>
+                  <button type="button" className={styles.fireBtn} disabled={!st} onClick={() => st && doFire(st.id)}>Fire</button>
                 </div>
-                <ProgressBar value={st?.rating ?? 40} variant={attrVariant(st?.rating ?? 40)} className={styles.ratingBar} />
-                <span className={styles.ratingValue}>{st?.rating ?? 40}</span>
-                <span className={styles.salary}>{st ? formatMoneyShort(st.salary) : '-'}</span>
-                <span className={styles.years}>{st ? `${st.years}yr` : '-'}</span>
-                <button type="button" className={styles.fireBtn} disabled={!st} onClick={() => st && doFire(st.id)}>Fire</button>
+                {st && (
+                  <div className={styles.devRow}>
+                    <span className={styles.xpLabel}>XP</span>
+                    <ProgressBar value={st.xp ?? 0} max={100} variant="cyan" className={styles.xpBar} />
+                    {st.course ? (
+                      <span className={styles.courseStatus}>{st.course.name}: {st.course.weeksLeft}wk left (+{st.course.gain})</span>
+                    ) : (
+                      <button type="button" className={styles.courseBtn} onClick={() => setCourseFor(courseFor === st.id ? null : st.id)}>
+                        {courseFor === st.id ? 'Close' : 'Courses'}
+                      </button>
+                    )}
+                  </div>
+                )}
+                {options && (
+                  <div className={styles.courseOptions}>
+                    {options.map((c, i) => (
+                      <button key={i} type="button" className={styles.courseOption} onClick={() => st && doEnroll(st.id, c)}>
+                        {c.name} · {c.weeks}wk · {formatMoneyShort(c.cost)} · +{c.gain} rating
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             );
           })}

@@ -3,6 +3,7 @@ import Panel from '../components/Panel';
 import { useGame, useGameState } from '../store/useGame';
 import { useUI } from '../store/useUI';
 import { useTransfersNav } from '../store/useTransfersNav';
+import { useBoardNav } from '../store/useBoardNav';
 import { respondToOffer } from '../../engine/trade';
 import type { Message } from '../../engine/model';
 import { formatDate } from '../format';
@@ -106,6 +107,11 @@ export default function MessagesScreen() {
                 </div>
               );
             })()}
+            {selected.kind === 'other' && selected.subject.startsWith('Press conference: questions waiting') && (
+              <div className={styles.offerActions}>
+                <button type="button" className={styles.viewOfferBtn} onClick={() => { useBoardNav.getState().requestTab('media'); setTab('board'); }}>Answer</button>
+              </div>
+            )}
           </div>
         )}
       </Panel>

@@ -2,6 +2,8 @@ import Panel from '../components/Panel';
 import DataTable, { type DataTableColumn } from '../components/DataTable';
 import ProgressBar from '../components/ProgressBar';
 import TeamBadge from '../components/TeamBadge';
+import ProgramsPanel from '../components/ProgramsPanel';
+import PrepPanel from '../components/PrepPanel';
 import { useGameState, useGame } from '../store/useGame';
 import { teamRoster } from '../selectors';
 import { ageOf, ATTRS, type Attr } from '../../engine/ratings';
@@ -157,6 +159,7 @@ export default function TrainingScreen() {
   return (
     <div className={styles.wrap}>
       <div className={styles.left}>
+        <PrepPanel s={s} mutate={mutate} />
         <Panel title="Weekly Schedule" className={styles.weekPanel}>
           <div className={styles.weekGrid}>
             {weekDates.map((date, i) => {
@@ -210,6 +213,8 @@ export default function TrainingScreen() {
             <div className={styles.summaryRow}><span>Familiarity</span><span>+{famGain.toFixed(1)}/wk</span></div>
           </div>
         </Panel>
+
+        <ProgramsPanel s={s} mutate={mutate} />
       </div>
 
       <Panel title="Roster Development" className={styles.rosterPanel} flush>
