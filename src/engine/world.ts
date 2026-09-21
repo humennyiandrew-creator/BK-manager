@@ -55,6 +55,7 @@ export function newGame(teams: Team[], raw: RawPlayer[], userTeamId: string, see
     if ((t.league ?? 'NBA') === 'NBA') trimRoster(t.id, players);
     else {
       fillRoster(t, players, seasonYear, seed, ratings);
+      trimEuroSquad(t, players);
       euroContracts(t.id, players, seasonYear);
     }
     refreshRotation(teamStates[t.id], players);
@@ -87,7 +88,8 @@ export function newGame(teams: Team[], raw: RawPlayer[], userTeamId: string, see
     training: Object.fromEntries(teams.map((t) => [t.id, defaultTraining()])),
     picks: [], tradeOffers: [], transactions: [], draftClass: [], draftOrder: [],
     startYear: seasonYear, maxSeasons: 5, history: [], events: [], negotiations: [],
-    scouting: { assignments: [], knowledge: {}, shortlist: [] }, promises: [],
+    scouting: { assignments: [], knowledge: {}, shortlist: [] }, promises: [], bids: [],
+    manager: { name: 'Head Coach', reputation: 45, unemployed: false, hiredOn: `${seasonYear}-10-01`, salary: 2_500_000, contractYears: 3, hotSeat: 20, offers: [], history: [] },
     keyDates: { tradeDeadline: `${seasonYear + 1}-02-05`, regularEnd, draft: `${seasonYear + 1}-06-24`, freeAgency: `${seasonYear + 1}-06-30` },
   };
   initStaff(s);
@@ -139,4 +141,12 @@ function fillRoster(t: Team, players: Record<string, Player>, seasonYear: number
     players[id] = p;
     ratings.set(id, p.ratings);
   }
+}
+
+
+/** European squads register up to 16; clubs keep a free slot for transfer business. */
+function trimEuroSquad(t: Team, players: Record<string, Player>) {
+  const limit = leagueOf(t.league).maxRoster - 1;
+  const squad = Object.values(players).filter((p) => p.teamId === t.id).sort((a, b) => b.ratings.ovr - a.ratings.ovr);
+  for (const p of squad.slice(limit)) p.teamId = null;
 }

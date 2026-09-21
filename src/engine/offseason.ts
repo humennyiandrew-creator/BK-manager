@@ -14,6 +14,8 @@ import { annualProgression } from './progression';
 import { autoTactics } from './playbook/systems';
 import { LONG_TERM, objectiveByRank, objectiveLabel } from './mgmt/board';
 import { teamStrengthRank } from './mgmt/market';
+import { euroTransferDaily } from './transfers-euro';
+import { managerDaily } from './manager';
 
 const FA_DAYS = 10;
 
@@ -234,6 +236,9 @@ export function offseasonStageLabel(s: GameState): string {
 /** One "Continue" in the offseason. */
 export function offseasonStep(s: GameState) {
   if (s.phase !== 'offseason' || s.careerOver) return;
+  // The summer market and the coaching carousel keep moving between stages.
+  euroTransferDaily(s);
+  managerDaily(s);
   if (!s.offseason) {
     recordSeason(s);
     if (s.seasonYear - s.startYear + 1 >= s.maxSeasons) {

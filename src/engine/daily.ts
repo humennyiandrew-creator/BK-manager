@@ -7,6 +7,8 @@ import { progressionDaily } from './progression';
 import { trainingDaily } from './training';
 import { aiTradeDaily } from './trade';
 import { freeAgencyDaily } from './freeagency';
+import { managerDaily } from './manager';
+import { euroTransferDaily, returnLoans } from './transfers-euro';
 import { eventsDaily } from './events';
 import { scoutingWeekly } from './scouting';
 import { programsWeekly } from './programs';
@@ -28,6 +30,9 @@ export function dailyUpdate(s: GameState, playedToday: Game[]) {
   prepDaily(s);
   if (s.phase === 'regular' && s.date <= s.keyDates.tradeDeadline) aiTradeDaily(s);
   freeAgencyDaily(s);
+  euroTransferDaily(s);
+  returnLoans(s);
+  managerDaily(s);
   eventsDaily(s);
   pressDaily(s, playedToday);
   checkPromises(s);

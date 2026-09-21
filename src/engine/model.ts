@@ -44,6 +44,7 @@ export interface Player {
   devPlan?: Attr;                 // individual development target attribute
   program?: DevProgram;           // active development programme
   lastMeeting?: string;           // date of last 1-on-1
+  loan?: { parent: string; until: string }; // on loan from another club
   potSeason?: number;             // POT change this season from performance (UI)
   minutesPromise?: { baselineMpg: number; checkDate: string; season: string }; // dynamic event follow-up
 }
@@ -161,7 +162,9 @@ export interface GameState {
   prep?: OpponentPrep;
   press?: Press;
   promises: BoardPromise[];
-  negotiations: Negotiation[];            // contract talks (user team), open + recent                     // pending + resolved log, newest first, kept to 60
+  manager: ManagerCareer;
+  negotiations: Negotiation[];            // contract talks (user team), open + recent
+  bids: TransferBid[];                    // European transfer market                     // pending + resolved log, newest first, kept to 60
   offseasonEventStage?: string;            // last offseason stage an event was rolled for
 }
 
@@ -322,4 +325,42 @@ export interface SponsorDeal {
   bonus: { kind: 'playoffs' | 'title' | 'wins'; target: number; amount: number };
   requiresHype: number;
   signed: string;                       // date
+}
+
+// ---------- manager career ----------
+
+export interface JobOffer {
+  id: number; date: string; teamId: string;
+  league: string; objective: ObjectiveKind;
+  salary: number; years: number;
+  budget: number;                    // wage budget / payroll room the club promises
+  expires: string;
+  reason: string;                    // why the seat is open
+}
+
+export interface ManagerCareer {
+  name: string;
+  reputation: number;                // 0–100, drives which clubs come calling
+  unemployed: boolean;
+  hiredOn: string;                   // date the current job started
+  salary: number;
+  contractYears: number;
+  hotSeat: number;                   // 0–100 risk of being sacked
+  offers: JobOffer[];
+  history: { teamId: string; from: string; to?: string; record: string; result: string }[];
+}
+
+// ---------- European transfer market ----------
+
+export interface TransferBid {
+  id: number; date: string;
+  playerId: string;
+  fromTeam: string;                  // selling club
+  toTeam: string;                    // buying club
+  fee: number;
+  wage: number; years: number;       // terms offered to the player
+  status: 'pending' | 'accepted' | 'rejected' | 'completed' | 'withdrawn';
+  fromUser: boolean;                 // true when the user's club is buying
+  note?: string;
+  expires: string;
 }
