@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, type CSSProperties } from 'react';
-import { useUI } from './store/useUI';
+import { useUI, type TabId } from './store/useUI';
 import { useGame, useGameState } from './store/useGame';
 import TopBar from './components/TopBar';
 import TabBar from './components/TabBar';
@@ -13,6 +13,7 @@ import StartMenuScreen from './screens/StartMenuScreen';
 import ChooseTeamScreen from './screens/ChooseTeamScreen';
 import MatchScreen from './screens/MatchScreen';
 import CareerSummary from './screens/CareerSummary';
+import BetweenJobsScreen from './screens/BetweenJobsScreen';
 import { SCREENS } from './screens';
 import { userGameToday, nextUserGame, opponentOf, daysUntil, userTeam } from './selectors';
 import { formatDate } from './format';
@@ -21,6 +22,11 @@ import { pendingUserEvent } from '../engine/events';
 import { computeAccent } from './accent';
 import { play } from './sound';
 import styles from './App.module.css';
+
+/** Tabs that require an active job — show a "between jobs" empty state while unemployed. */
+const UNEMPLOYED_LOCKED = new Set<TabId>([
+  'transfers', 'training', 'playbook', 'squadHub', 'staff', 'facilities', 'board', 'finances', 'draft'
+]);
 
 /** Delegated button-sound listener, mounted once at the app root. */
 function useButtonSounds() {
@@ -75,6 +81,13 @@ function Shell() {
     if (!pending) seenPendingId.current = null;
   }, [pending, openEvent]);
 
+  const wasUnemployed = useRef(s?.manager.unemployed ?? false);
+  useEffect(() => {
+    if (!s) return;
+    if (s.manager.unemployed && !wasUnemployed.current) setTab('career');
+    wasUnemployed.current = s.manager.unemployed;
+  }, [s?.manager.unemployed, setTab]);
+
   const team = s ? userTeam(s) : null;
   const accent = useMemo(
     () => computeAccent(team?.colors.primary, team?.colors.secondary),
@@ -112,7 +125,7 @@ function Shell() {
       <TopBar continueSlot={<ContinueWidget s={s} busy={busy} onContinue={doContinue} />} />
       <div className={styles.content}>
         <ScreenTransition tabKey={tab}>
-          <Screen />
+          {s.manager.unemployed && UNEMPLOYED_LOCKED.has(tab) ? <BetweenJobsScreen tab={tab} /> : <Screen />}
         </ScreenTransition>
       </div>
       <div className={styles.infoRow}>

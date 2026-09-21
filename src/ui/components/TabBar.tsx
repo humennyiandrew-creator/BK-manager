@@ -3,6 +3,7 @@ import type { TabId } from '../store/useUI';
 import styles from './TabBar.module.css';
 import {
   IconHome,
+  IconCareer,
   IconMessages,
   IconCalendar,
   IconRoster,
@@ -27,6 +28,7 @@ interface TabDef {
 
 const TABS: TabDef[] = [
   { id: 'home', label: 'Home', Icon: IconHome },
+  { id: 'career', label: 'Career', Icon: IconCareer },
   { id: 'messages', label: 'Messages', Icon: IconMessages },
   { id: 'calendar', label: 'Calendar', Icon: IconCalendar },
   { id: 'roster', label: 'Roster', Icon: IconRoster },

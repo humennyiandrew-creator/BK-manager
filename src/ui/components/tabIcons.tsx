@@ -11,6 +11,7 @@ function base(children: ReactNode, props: IconProps) {
 }
 
 export const IconHome = (p: IconProps) => base(<><path d="M3 11l9-7 9 7" /><path d="M5 10v9h14v-9" /></>, p);
+export const IconCareer = (p: IconProps) => base(<><path d="M4 21V10.5L12 4l8 6.5V21" /><rect x="9" y="13" width="6" height="8" /><circle cx="12" cy="8.5" r="1.6" /></>, p);
 export const IconMessages = (p: IconProps) => base(<path d="M4 5h16v11H8l-4 4z" />, p);
 export const IconCalendar = (p: IconProps) => base(<><rect x="3" y="5" width="18" height="15" rx="1" /><path d="M3 9h18M8 3v4M16 3v4" /></>, p);
 export const IconRoster = (p: IconProps) => base(<><circle cx="9" cy="8" r="3" /><path d="M3 20c0-4 3-6 6-6s6 2 6 6" /><path d="M16 6a3 3 0 010 6M21 20c0-3-2-5-4-5.5" /></>, p);

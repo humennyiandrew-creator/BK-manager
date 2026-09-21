@@ -2,6 +2,7 @@ import { create } from 'zustand';
 
 export const TAB_IDS = [
   'home',
+  'career',
   'messages',
   'calendar',
   'roster',

@@ -17,6 +17,11 @@ interface Derived {
 }
 
 function derive(s: GameState): Derived {
+  if (s.manager.unemployed) {
+    const n = s.manager.offers.length;
+    return { label: 'Continue', main: `Between jobs — ${n} offer${n === 1 ? '' : 's'}` };
+  }
+
   const pendingEvent = pendingUserEvent(s);
   if (pendingEvent) {
     const d = daysUntil(s, pendingEvent.expires);

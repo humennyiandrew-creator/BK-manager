@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react';
 import type { TabId } from '../store/useUI';
 import HomeScreen from './HomeScreen';
+import CareerScreen from './CareerScreen';
 import MessagesScreen from './MessagesScreen';
 import CalendarScreen from './CalendarScreen';
 import RosterScreen from './RosterScreen';
@@ -18,6 +19,7 @@ import SettingsScreen from './SettingsScreen';
 
 export const SCREENS: Record<TabId, ComponentType> = {
   home: HomeScreen,
+  career: CareerScreen,
   messages: MessagesScreen,
   calendar: CalendarScreen,
   roster: RosterScreen,

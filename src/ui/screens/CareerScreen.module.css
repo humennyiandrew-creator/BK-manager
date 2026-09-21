@@ -1,0 +1,229 @@
+.screen {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-3) 1.4rem 1rem;
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: var(--gap);
+}
+
+.leftPanel {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.profileTop {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding-bottom: 0.7rem;
+}
+
+.ring {
+  width: 4.4rem;
+  height: 4.4rem;
+  flex-shrink: 0;
+}
+
+.ringTrack {
+  fill: none;
+  stroke: var(--panel-border);
+  stroke-width: 6;
+}
+
+.ringFill {
+  fill: none;
+  stroke: var(--cyan);
+  stroke-width: 6;
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: 34px 34px;
+  transition: stroke-dashoffset 0.3s ease;
+}
+
+.ringText {
+  fill: var(--text);
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.profileInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  min-width: 0;
+}
+
+.nameInput {
+  background: var(--panel-alt);
+  border: 1px solid var(--panel-border);
+  color: var(--text);
+  border-radius: var(--radius);
+  padding: 0.35rem 0.6rem;
+  font-size: 0.9rem;
+  font-weight: 800;
+  width: 12rem;
+}
+
+.nameInput:focus {
+  outline: none;
+  border-color: var(--cyan);
+}
+
+.unemployedBadge {
+  color: var(--text-dim);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+}
+
+.statRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.statRow span:first-child {
+  color: var(--text-muted);
+}
+
+.statRow span:last-child {
+  font-weight: 700;
+}
+
+.divider {
+  height: 1px;
+  background: var(--panel-border);
+  margin: 0.6rem 0;
+}
+
+.gaugeHead {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-dim);
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+}
+
+.resignBtn {
+  margin-top: 1rem;
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--negative);
+  color: var(--negative);
+  border-radius: var(--radius);
+  padding: 0.55rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.resignBtn:hover {
+  background: var(--negative);
+  color: var(--bg);
+}
+
+.rightCol {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  min-height: 0;
+}
+
+.offersPanel {
+  flex: 1.2;
+  min-height: 0;
+}
+
+.historyPanel {
+  flex: 1;
+  min-height: 0;
+}
+
+.count {
+  color: var(--text-dim);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.offerList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.8rem;
+  overflow-y: auto;
+}
+
+.offerCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: var(--panel-alt);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  padding: 0.75rem 0.9rem;
+}
+
+.offerHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+}
+
+.acceptBtn {
+  background: var(--positive);
+  color: var(--bg);
+  border: none;
+  border-radius: var(--radius);
+  padding: 0.4rem 0.9rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.offerMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.offerMeta b {
+  color: var(--text);
+}
+
+.offerReason {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+.expiry {
+  font-size: 0.66rem;
+  color: var(--text-dim);
+}
+
+.empty {
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  text-align: center;
+  padding: 1.2rem;
+}

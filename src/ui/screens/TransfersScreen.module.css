@@ -345,6 +345,81 @@
   font-size: 0.6rem;
 }
 
+.offerBtn {
+  background: transparent;
+  border: 1px solid var(--panel-border);
+  color: var(--text-muted);
+  border-radius: var(--radius);
+  padding: 0.25rem 0.7rem;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 700;
+}
+
+.offerBtn:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
+
+/* ---------- european market ---------- */
+
+.euroHeader {
+  display: flex;
+  gap: 1.2rem;
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.9rem;
+  align-items: center;
+}
+
+.euroHeader span {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.windowOpen {
+  margin-left: auto;
+  color: var(--positive) !important;
+}
+
+.windowShut {
+  margin-left: auto;
+  color: var(--negative) !important;
+}
+
+.searchRow {
+  flex-shrink: 0;
+}
+
+.searchInput {
+  width: 100%;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  color: var(--text);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.8rem;
+  font-size: 0.8rem;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--cyan);
+}
+
+.select {
+  background: var(--panel-alt);
+  border: 1px solid var(--panel-border);
+  color: var(--text);
+  border-radius: var(--radius);
+  padding: 0.4rem 0.6rem;
+  font-size: 0.8rem;
+}
+
 /* ---------- modals ---------- */
 
 .backdrop {

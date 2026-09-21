@@ -3,6 +3,7 @@ import type { TabId } from './store/useUI';
 /** Per-tab title/subtitle for each screen's HeroHeader. */
 export const TAB_TITLES: Record<TabId, { title: string; subtitle: string }> = {
   home: { title: 'Home', subtitle: 'Team overview' },
+  career: { title: 'Career', subtitle: 'Job market and coaching record' },
   messages: { title: 'Messages', subtitle: 'Inbox and notifications' },
   calendar: { title: 'Calendar', subtitle: 'Season schedule' },
   roster: { title: 'Roster', subtitle: 'Player list and depth chart' },

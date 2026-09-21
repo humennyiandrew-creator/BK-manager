@@ -15,13 +15,18 @@ import { evaluateTrade, playerValue, pickValue, proposeTrade, respondToOffer, tr
 import { askingPrice, freeAgents, releasePlayer } from '../../engine/freeagency';
 import { capNumbers, isTwoWay, marketValue, payroll as cbaPayroll, rosterOf, salaryIn, yearsLeft } from '../../engine/cba';
 import { buyoutCost } from '../../engine/euro';
+import { leagueOf } from '../../engine/leagues';
+import {
+  type BidResult, askingPriceFor, loanOut, makeBid, respondToBid,
+  transferValue, transferWindowOpen, wageRoom
+} from '../../engine/transfers-euro';
 import { formatDate, formatMoney, formatMoneyShort } from '../format';
 import NegotiationModal from '../components/NegotiationModal';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { toast } from '../components/Toasts';
 import styles from './TransfersScreen.module.css';
 
-type SubTab = 'trade' | 'offers' | 'fa' | 'buyout' | 'tx';
+type SubTab = 'trade' | 'offers' | 'fa' | 'buyout' | 'tx' | 'market' | 'bids' | 'loans';
 type Asset = { kind: 'player'; id: string; player: Player } | { kind: 'pick'; id: string; pick: DraftPick };
 type Mutate = (fn: (s: GameState) => void) => void;
 
@@ -368,10 +373,243 @@ function TransactionsTab({ s }: { s: GameState }) {
   );
 }
 
+// ---------- european market ----------
+
+function EuroHeaderStrip({ s }: { s: GameState }) {
+  const league = leagueOf(s.teams[s.userTeamId].league);
+  const squad = rosterOf(s, s.userTeamId).length;
+  const open = transferWindowOpen(s);
+  const md = s.date.slice(5);
+  const windowLabel = !open
+    ? 'Window shut'
+    : md >= '01-01' && md <= '02-15'
+    ? 'Winter window open — closes 15 Feb'
+    : 'Summer window open — closes 30 Sep';
+  return (
+    <div className={styles.euroHeader}>
+      <span>Cash {formatMoneyShort(s.finance.cash)}</span>
+      <span>Wage Room {formatMoneyShort(wageRoom(s, s.userTeamId))}</span>
+      <span>Squad {squad}/{league.maxRoster}</span>
+      <span className={open ? styles.windowOpen : styles.windowShut}>{windowLabel}</span>
+    </div>
+  );
+}
+
+function BidModal({ s, mutate, playerId, onClose }: { s: GameState; mutate: Mutate; playerId: string; onClose: () => void }) {
+  const p = s.players[playerId];
+  const ask = askingPriceFor(s, p);
+  const curWage = salaryIn(p, s.season);
+  const room = wageRoom(s, s.userTeamId);
+  const [fee, setFee] = useState(Math.round(ask / 50_000) * 50_000);
+  const [wage, setWage] = useState(Math.max(curWage, 100_000));
+  const [years, setYears] = useState(3);
+  const [result, setResult] = useState<string | null>(null);
+
+  const cash = s.finance?.cash ?? 0;
+  const cashOk = fee <= cash;
+  const wageOk = wage <= room;
+  const feeMax = Math.max(50_000, Math.round((ask * 2) / 50_000) * 50_000);
+  const wageMax = Math.max(room, wage, curWage, 1_000_000);
+
+  const submit = () => {
+    let r: BidResult | undefined;
+    mutate((st) => { r = makeBid(st, playerId, fee, wage, years); });
+    if (r) { setResult(r.text); if (r.ok) toast(r.text, 'success'); }
+  };
+
+  return (
+    <div className={`${styles.backdrop} fade-in`} onClick={onClose}>
+      <div className={styles.offerModal} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.offerModalHead}>
+          <BkImage path={p.face} alt={p.lastName} className={styles.offerModalFace} />
+          <div>
+            <div className={styles.offerModalName}>{p.firstName} {p.lastName}</div>
+            <div className={styles.offerModalMeta}>{s.teams[p.teamId!]?.name} · Asking {formatMoneyShort(ask)}</div>
+          </div>
+        </div>
+        <label className={styles.offerField}>
+          <span>Fee: {formatMoney(fee)}</span>
+          <input type="range" min={0} max={feeMax} step={50_000} value={fee} onChange={(e) => setFee(Number(e.target.value))} />
+        </label>
+        <label className={styles.offerField}>
+          <span>Wage: {formatMoney(wage)}/yr</span>
+          <input type="range" min={100_000} max={wageMax} step={10_000} value={wage} onChange={(e) => setWage(Number(e.target.value))} />
+        </label>
+        <label className={styles.offerField}>
+          <span>Years: {years}</span>
+          <input type="range" min={1} max={5} step={1} value={years} onChange={(e) => setYears(Number(e.target.value))} />
+        </label>
+        <div className={cashOk ? styles.legalOk : styles.legalBad}>{cashOk ? `Cash OK (${formatMoneyShort(cash)} available)` : `Not enough cash (${formatMoneyShort(cash)} available)`}</div>
+        <div className={wageOk ? styles.legalOk : styles.legalBad}>{wageOk ? `Wage room OK (${formatMoneyShort(room)} left)` : `Exceeds wage room (${formatMoneyShort(room)} left)`}</div>
+        {result && <div className={styles.toast}>{result}</div>}
+        <div className={styles.offerModalBtns}>
+          <button type="button" className={styles.cancelBtn} onClick={onClose}>Close</button>
+          <button type="button" className={styles.proposeBtn} disabled={!cashOk || !wageOk} onClick={submit}>Submit Bid</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MarketTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
+  const openPlayer = useUI((u) => u.openPlayer);
+  const [query, setQuery] = useState('');
+  const [bidId, setBidId] = useState<string | null>(null);
+  const userLeague = s.teams[s.userTeamId].league ?? 'NBA';
+
+  const rows = useMemo(
+    () => Object.values(s.players)
+      .filter((p) => p.teamId && p.teamId !== s.userTeamId && !p.retired && !p.prospect && (s.teams[p.teamId]?.league ?? 'NBA') === userLeague)
+      .filter((p) => !query || `${p.firstName} ${p.lastName}`.toLowerCase().includes(query.toLowerCase()))
+      .sort((a, b) => b.ratings.ovr - a.ratings.ovr),
+    [s.players, s.teams, userLeague, query]
+  );
+
+  const columns: DataTableColumn<Player>[] = [
+    { key: 'face', header: '', render: (p) => <BkImage path={p.face} alt={p.lastName} className={styles.faceThumb} /> },
+    { key: 'name', header: 'Name', render: (p) => `${p.firstName} ${p.lastName}` },
+    { key: 'club', header: 'Club', render: (p) => <TeamBadge logoPath={s.teams[p.teamId!]?.logo ?? null} name={s.teams[p.teamId!]?.abbr ?? '?'} /> },
+    { key: 'age', header: 'Age', align: 'right', render: (p) => Math.floor(ageOf(p.birthDate)), sortValue: (p) => ageOf(p.birthDate) },
+    { key: 'ovr', header: 'OVR', align: 'right', render: (p) => p.ratings.ovr, sortValue: (p) => p.ratings.ovr },
+    { key: 'wage', header: 'Wage', align: 'right', render: (p) => formatMoneyShort(salaryIn(p, s.season)), sortValue: (p) => salaryIn(p, s.season) },
+    { key: 'yrs', header: 'Yrs Left', align: 'right', render: (p) => yearsLeft(p, s.season), sortValue: (p) => yearsLeft(p, s.season) },
+    { key: 'val', header: 'Your Value', align: 'right', render: (p) => formatMoneyShort(transferValue(s, p)), sortValue: (p) => transferValue(s, p) },
+    { key: 'ask', header: 'Asking', align: 'right', render: (p) => formatMoneyShort(askingPriceFor(s, p)), sortValue: (p) => askingPriceFor(s, p) },
+    { key: 'action', header: '', align: 'right', render: (p) => <button type="button" className={styles.offerBtn} onClick={(e) => { e.stopPropagation(); setBidId(p.id); }}>Bid</button> }
+  ];
+
+  return (
+    <div className={styles.faWrap}>
+      <div className={styles.searchRow}>
+        <input className={styles.searchInput} placeholder="Search players…" value={query} onChange={(e) => setQuery(e.target.value)} />
+      </div>
+      <Panel title="Market" className={styles.faPanel} flush>
+        {rows.length === 0 && <div className={styles.empty}>No players found at other clubs.</div>}
+        {rows.length > 0 && <DataTable columns={columns} rows={rows} rowKey={(p) => p.id} onRowOpen={(p) => openPlayer(p.id)} compact />}
+      </Panel>
+      {bidId && <BidModal s={s} mutate={mutate} playerId={bidId} onClose={() => setBidId(null)} />}
+    </div>
+  );
+}
+
+function IncomingBidsTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
+  const [msg, setMsg] = useState<string | null>(null);
+  const bids = s.bids.filter((b) => b.fromTeam === s.userTeamId && b.status === 'pending');
+
+  const respond = (id: number, accept: boolean) => {
+    let r: BidResult | undefined;
+    mutate((st) => { r = respondToBid(st, id, accept); });
+    if (r) {
+      setMsg(r.text);
+      if (accept) toast(r.text, 'success');
+      setTimeout(() => setMsg(null), 3000);
+    }
+  };
+
+  return (
+    <Panel title="Incoming Bids" className={styles.offersPanel} flush>
+      {msg && <div className={styles.toast}>{msg}</div>}
+      {bids.length === 0 && <div className={styles.empty}>No incoming bids</div>}
+      <div className={styles.offerList}>
+        {bids.map((b) => {
+          const p = s.players[b.playerId];
+          if (!p) return null;
+          const val = askingPriceFor(s, p);
+          return (
+            <div key={b.id} className={styles.offerCard}>
+              <TeamBadge logoPath={s.teams[b.toTeam]?.logo ?? null} name={s.teams[b.toTeam]?.name ?? ''} className={styles.offerTeam} />
+              <div className={styles.offerBody}>
+                <div><span className={styles.offerLabel}>Player</span> {p.firstName} {p.lastName}</div>
+                <div><span className={styles.offerLabel}>Fee</span> {formatMoneyShort(b.fee)} <span className={styles.offerValue}>(your valuation {formatMoneyShort(val)})</span></div>
+                <div className={styles.offerExpiry}>Expires {formatDate(b.expires)}</div>
+              </div>
+              <div className={styles.offerBtns}>
+                <button type="button" className={styles.acceptBtn} onClick={() => respond(b.id, true)}>Accept</button>
+                <button type="button" className={styles.declineBtn} onClick={() => respond(b.id, false)}>Reject</button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </Panel>
+  );
+}
+
+function LoansTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
+  const openPlayer = useUI((u) => u.openPlayer);
+  const [targetId, setTargetId] = useState<string | null>(null);
+  const [clubId, setClubId] = useState('');
+  const userLeague = s.teams[s.userTeamId].league ?? 'NBA';
+
+  const eligible = useMemo(
+    () => rosterOf(s, s.userTeamId).filter((p) => ageOf(p.birthDate) <= 24).sort((a, b) => b.ratings.ovr - a.ratings.ovr),
+    [s.players, s.teams, s.userTeamId]
+  );
+  const clubs = useMemo(
+    () => Object.values(s.teams).filter((t) => t.id !== s.userTeamId && (t.league ?? 'NBA') === userLeague).sort((a, b) => a.name.localeCompare(b.name)),
+    [s.teams, userLeague]
+  );
+
+  const columns: DataTableColumn<Player>[] = [
+    { key: 'face', header: '', render: (p) => <BkImage path={p.face} alt={p.lastName} className={styles.faceThumb} /> },
+    { key: 'name', header: 'Name', render: (p) => `${p.firstName} ${p.lastName}` },
+    { key: 'pos', header: 'Pos', render: (p) => p.positions.join('/') },
+    { key: 'age', header: 'Age', align: 'right', render: (p) => Math.floor(ageOf(p.birthDate)), sortValue: (p) => ageOf(p.birthDate) },
+    { key: 'ovr', header: 'OVR/POT', align: 'right', render: (p) => `${p.ratings.ovr}/${p.ratings.pot}`, sortValue: (p) => p.ratings.ovr },
+    {
+      key: 'action', header: '', align: 'right', render: (p) => (
+        <button type="button" className={styles.offerBtn} onClick={(e) => { e.stopPropagation(); setTargetId(p.id); setClubId(clubs[0]?.id ?? ''); }}>Loan Out</button>
+      )
+    }
+  ];
+
+  const target = targetId ? s.players[targetId] : null;
+  const doLoan = () => {
+    if (!target || !clubId) { setTargetId(null); return; }
+    let r: BidResult | undefined;
+    mutate((st) => { r = loanOut(st, target.id, clubId); });
+    if (r) toast(r.text, r.ok ? 'success' : 'error');
+    setTargetId(null);
+  };
+
+  return (
+    <div className={styles.faWrap}>
+      <Panel title="Loan Listed (24 & Under)" className={styles.faPanel} flush>
+        {eligible.length === 0 && <div className={styles.empty}>No eligible players (24 and under).</div>}
+        {eligible.length > 0 && <DataTable columns={columns} rows={eligible} rowKey={(p) => p.id} onRowOpen={(p) => openPlayer(p.id)} compact />}
+      </Panel>
+      {target && (
+        <div className={`${styles.backdrop} fade-in`} onClick={() => setTargetId(null)}>
+          <div className={styles.offerModal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.offerModalHead}>
+              <BkImage path={target.face} alt={target.lastName} className={styles.offerModalFace} />
+              <div>
+                <div className={styles.offerModalName}>{target.firstName} {target.lastName}</div>
+                <div className={styles.offerModalMeta}>Loan to another club for the season</div>
+              </div>
+            </div>
+            <label className={styles.offerField}>
+              <span>Club</span>
+              <select className={styles.select} value={clubId} onChange={(e) => setClubId(e.target.value)}>
+                {clubs.map((t) => <option key={t.id} value={t.id}>{t.city} {t.name}</option>)}
+              </select>
+            </label>
+            <div className={styles.offerModalBtns}>
+              <button type="button" className={styles.cancelBtn} onClick={() => setTargetId(null)}>Cancel</button>
+              <button type="button" className={styles.proposeBtn} disabled={!clubId} onClick={doLoan}>Confirm Loan</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function TransfersScreen() {
   const s = useGameState();
   const mutate = useGame((g) => g.mutate);
-  const [subTab, setSubTab] = useState<SubTab>('trade');
+  const isEuroClub = (s?.teams[s.userTeamId]?.league ?? 'NBA') !== 'NBA';
+  const [subTab, setSubTab] = useState<SubTab>(isEuroClub ? 'market' : 'trade');
   const jump = useTransfersNav((st) => st.jumpTo);
 
   useEffect(() => {
@@ -380,24 +618,36 @@ export default function TransfersScreen() {
 
   if (!s) return null;
 
-  const railItems: SideRailItem<SubTab>[] = [
-    { id: 'trade', label: 'Trade Center', icon: IconTransfers },
-    { id: 'offers', label: 'Offers', icon: IconMessages, badge: s.tradeOffers.length },
-    { id: 'fa', label: 'Free Agents', icon: IconRoster },
-    { id: 'buyout', label: 'Buyout Targets', icon: IconTransfers },
-    { id: 'tx', label: 'Transactions', icon: IconFinances }
-  ];
+  const railItems: SideRailItem<SubTab>[] = isEuroClub
+    ? [
+        { id: 'market', label: 'Market', icon: IconTransfers },
+        { id: 'bids', label: 'Incoming Bids', icon: IconMessages, badge: s.bids.filter((b) => b.fromTeam === s.userTeamId && b.status === 'pending').length },
+        { id: 'loans', label: 'Loans', icon: IconRoster },
+        { id: 'fa', label: 'Free Agents', icon: IconRoster },
+        { id: 'tx', label: 'Transactions', icon: IconFinances }
+      ]
+    : [
+        { id: 'trade', label: 'Trade Center', icon: IconTransfers },
+        { id: 'offers', label: 'Offers', icon: IconMessages, badge: s.tradeOffers.length },
+        { id: 'fa', label: 'Free Agents', icon: IconRoster },
+        { id: 'buyout', label: 'Buyout Targets', icon: IconTransfers },
+        { id: 'tx', label: 'Transactions', icon: IconFinances }
+      ];
 
   return (
     <div className={styles.screen}>
-      <HeroHeader title="Transfers" subtitle="Trade and free agency" />
+      <HeroHeader title="Transfers" subtitle={isEuroClub ? 'European transfer market' : 'Trade and free agency'} />
+      {isEuroClub && <EuroHeaderStrip s={s} />}
       <div className={styles.body}>
         <SideRail items={railItems} active={subTab} onSelect={setSubTab} />
         <div className={styles.content}>
-          {subTab === 'trade' && <TradeCenter s={s} mutate={mutate} />}
-          {subTab === 'offers' && <OffersTab s={s} mutate={mutate} />}
+          {!isEuroClub && subTab === 'trade' && <TradeCenter s={s} mutate={mutate} />}
+          {!isEuroClub && subTab === 'offers' && <OffersTab s={s} mutate={mutate} />}
+          {!isEuroClub && subTab === 'buyout' && <BuyoutTargetsPanel s={s} mutate={mutate} />}
+          {isEuroClub && subTab === 'market' && <MarketTab s={s} mutate={mutate} />}
+          {isEuroClub && subTab === 'bids' && <IncomingBidsTab s={s} mutate={mutate} />}
+          {isEuroClub && subTab === 'loans' && <LoansTab s={s} mutate={mutate} />}
           {subTab === 'fa' && <FreeAgentsTab s={s} mutate={mutate} />}
-          {subTab === 'buyout' && <BuyoutTargetsPanel s={s} mutate={mutate} />}
           {subTab === 'tx' && <TransactionsTab s={s} />}
         </div>
       </div>
