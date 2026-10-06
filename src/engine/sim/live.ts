@@ -8,7 +8,7 @@ import type { Role, Spot } from '../playbook/types';
 import { S } from '../playbook/plays';
 import {
   NBA_RULES, commitEvent, decide, doSubs, drainFor, makeSide, possessionLength, sortCourt, tickEnergy,
-  type Ev, type Outcome, type Rules, type ShotType, type SP, type Side,
+  type Ev, type Outcome, type Rules, type ShotType, type SP, type Side, type TalkBoost,
 } from './fast';
 
 export const COURT = { w: 94, h: 50, hoop: 5.25 };
@@ -17,19 +17,39 @@ export interface Ent { id: string; side: 0 | 1; x: number; y: number; tx: number
 export interface BallState { x: number; y: number; z: number; holder: string | null }
 export interface PbpLine { period: number; clock: number; text: string; home: number; away: number; side: 0 | 1 | null; kind: 'score' | 'miss' | 'to' | 'foul' | 'reb' | 'info' | 'sub' }
 export type MatchState = 'pregame' | 'live' | 'timeout' | 'break' | 'final';
+export type Intensity = -1 | 0 | 1;
+export type TeamTalk = 'calm' | 'fire' | 'attack';
+
+/** Timeout team talks: a short-lived edge for the next few trips down the floor. */
+export const TALKS: Record<TeamTalk, { label: string; hint: string; boost: Omit<TalkBoost, 'left'> }> = {
+  calm: { label: 'Settle down', hint: 'Value the ball — far fewer turnovers for the next few trips.', boost: { edge: 0.004, toMul: 0.7, defEdge: 0 } },
+  fire: { label: 'Turn up the heat', hint: 'Lock in on defense — tougher looks for them for a few trips.', boost: { edge: 0, toMul: 1, defEdge: 0.02 } },
+  attack: { label: 'Attack the mismatch', hint: 'Better shots on offense, at a little more turnover risk.', boost: { edge: 0.02, toMul: 1.12, defEdge: 0 } },
+};
+const TALK_POSSESSIONS = 12;
+
+/** Shot location in half-court feet (basket at x=5.25, y=25), whichever end it was taken at. */
+export interface ShotMark { side: 0 | 1; x: number; y: number; made: boolean; three: boolean; id: string; period: number }
+export interface FlowPoint { t: number; margin: number; wp: number }
+export interface Run { side: 0 | 1; a: number; b: number }
 
 export interface Snapshot {
   state: MatchState;
   period: number; clock: number; shotClock: number;
   score: [number, number];
   possession: 0 | 1;
-  players: { id: string; side: 0 | 1; x: number; y: number; jersey: string; name: string; energy: number; fouls: number; ball: boolean }[];
+  players: { id: string; side: 0 | 1; x: number; y: number; jersey: string; name: string; energy: number; fouls: number; ball: boolean; streak: number }[];
   ball: BallState;
   screens: [string, string][];
   play: string | null;             // offense play currently running
   timeouts: [number, number];
   bonus: [boolean, boolean];
   pbp: PbpLine[];
+  intensity: [Intensity, Intensity];
+  momentum: number;                // −1..1, positive = home on top lately
+  run: Run | null;                 // current scoring run (≥ 8 points, opponent ≤ 2)
+  winProb: number;                 // home win probability 0–1
+  talk: [TeamTalk | null, TeamTalk | null]; // active team-talk effect per side
 }
 
 interface Beat { at: number; fn: () => void }
@@ -48,6 +68,9 @@ export class LiveMatch {
   timeouts: [number, number] = [7, 7];
   autoSubs: [boolean, boolean] = [true, true];
   pbp: PbpLine[] = [];
+  shots: ShotMark[] = [];
+  flow: FlowPoint[] = [];
+  talkUsed: [boolean, boolean] = [false, false];
 
   private rng: Rng;
   private ents = new Map<string, Ent>();
@@ -70,6 +93,10 @@ export class LiveMatch {
   private drain: number;
   private defTick = 0;
   private forceDead = false;
+  private scoreLog: { t: number; side: 0 | 1; pts: number }[] = [];
+  private streaks = new Map<string, number>();   // consecutive FG makes (+) / misses (−)
+  private talkOn: [TeamTalk | null, TeamTalk | null] = [null, null];
+  private prior: number;                          // pre-game expected home margin
 
   constructor(home: TeamState, away: TeamState, players: Record<string, Player>, seed: number, userSide: 0 | 1 | null, rules = NBA_RULES) {
     this.rules = rules;
@@ -78,7 +105,11 @@ export class LiveMatch {
     this.H = makeSide(home, players, true);
     this.A = makeSide(away, players, false);
     this.clock = rules.periodSec;
+    this.timeouts = this.fiba ? [2, 2] : [7, 7];
     this.drain = drainFor(home, away);
+    const str = (s: Side) => s.roster.slice(0, 8).reduce((x, sp) => x + sp.p.ratings.ovr, 0) / Math.max(1, Math.min(8, s.roster.length));
+    this.prior = (str(this.H) - str(this.A)) * 1.1 + 2;
+    this.flow = [{ t: 0, margin: 0, wp: this.winProb() }];
     for (const s of [this.H, this.A]) for (const sp of s.court) this.addEnt(sp, s, 47, 25);
     this.tipOffSetup();
   }
@@ -88,6 +119,19 @@ export class LiveMatch {
   sideOf = (s: Side): 0 | 1 => (s === this.H ? 0 : 1);
   sideObj = (i: 0 | 1) => (i === 0 ? this.H : this.A);
 
+  /** FIBA: 2 timeouts in the first half, 3 in the second. NBA: 7, capped at 4 after halftime. */
+  get fiba() { return this.rules.periodSec === 600; }
+  maxTimeouts() { return this.fiba ? (this.period <= 2 ? 2 : 3) : this.period >= 3 ? 4 : 7; }
+  setIntensity(side: 0 | 1, v: Intensity) { this.sideObj(side).intensity = v; }
+  /** One team talk per timeout, only during that side's huddle. */
+  teamTalk(side: 0 | 1, talk: TeamTalk): boolean {
+    if (this.state !== 'timeout' || this.talkUsed[side]) return false;
+    this.talkUsed[side] = true;
+    this.talkOn[side] = talk;
+    this.sideObj(side).boost = { left: TALK_POSSESSIONS, ...TALKS[talk].boost };
+    this.log(side, 'info', `${this.sideObj(side).team.abbr} huddle: "${TALKS[talk].label}"`);
+    return true;
+  }
   requestTimeout(side: 0 | 1) { if (this.timeouts[side] > 0) this.pendingTimeout[side] = true; }
   callPlay(side: 0 | 1, playId: string | null) { this.calledPlay[side] = playId; }
   sub(side: 0 | 1, outId: string, inId: string) { this.pendingSubs.push({ side, out: outId, in: inId }); }
@@ -136,7 +180,7 @@ export class LiveMatch {
     const players: Snapshot['players'] = [];
     for (const s of [this.H, this.A]) for (const sp of s.court) {
       const e = this.entOf(sp);
-      players.push({ id: sp.p.id, side: this.sideOf(s), x: e.x, y: e.y, jersey: sp.p.jersey, name: name(sp), energy: sp.energy, fouls: sp.line.pf, ball: this.ball.holder === sp.p.id });
+      players.push({ id: sp.p.id, side: this.sideOf(s), x: e.x, y: e.y, jersey: sp.p.jersey, name: name(sp), energy: sp.energy, fouls: sp.line.pf, ball: this.ball.holder === sp.p.id, streak: this.streaks.get(sp.p.id) ?? 0 });
     }
     return {
       state: this.state, period: this.period, clock: this.clock, shotClock: this.shotClock,
@@ -145,7 +189,71 @@ export class LiveMatch {
       timeouts: [...this.timeouts] as [number, number],
       bonus: [this.A.fouls >= this.rules.bonusAt, this.H.fouls >= this.rules.bonusAt],
       pbp: this.pbp,
+      intensity: [this.H.intensity ?? 0, this.A.intensity ?? 0],
+      momentum: this.momentum(), run: this.currentRun(), winProb: this.winProb(),
+      talk: [this.H.boost ? this.talkOn[0] : null, this.A.boost ? this.talkOn[1] : null],
     };
+  }
+
+  // ---------- game flow analytics ----------
+
+  /** Net scoring over the last ~2.5 minutes of game time, scaled to −1..1. */
+  momentum(): number {
+    let h = 0, a = 0;
+    for (let i = this.scoreLog.length - 1; i >= 0 && this.elapsed - this.scoreLog[i].t <= 150; i--) {
+      if (this.scoreLog[i].side === 0) h += this.scoreLog[i].pts; else a += this.scoreLog[i].pts;
+    }
+    return Math.max(-1, Math.min(1, (h - a) / 12));
+  }
+
+  /** Biggest run still going: one side scoring 8+ while the other manages 2 or fewer. */
+  currentRun(): Run | null {
+    let best: Run | null = null;
+    for (const side of [0, 1] as const) {
+      let a = 0, b = 0;
+      for (let i = this.scoreLog.length - 1; i >= 0; i--) {
+        const e = this.scoreLog[i];
+        if (e.side === side) a += e.pts;
+        else if (b + e.pts > 2) break;
+        else b += e.pts;
+      }
+      if (a >= 8 && (!best || a > best.a)) best = { side, a, b };
+    }
+    return best;
+  }
+
+  /** Home win probability from margin, time left and the pre-game edge. */
+  winProb(): number {
+    const total = this.rules.periods * this.rules.periodSec;
+    const left = this.period > this.rules.periods ? this.clock : (this.rules.periods - this.period) * this.rules.periodSec + this.clock;
+    const frac = Math.max(0, left / total);
+    const margin = this.H.pts - this.A.pts;
+    if (this.state === 'final') return margin > 0 ? 1 : 0;
+    const sigma = (this.fiba ? 10.5 : 12.5) * Math.sqrt(frac) + 0.6;
+    return normCdf((margin + this.prior * frac) / sigma);
+  }
+
+  private noteScore(side: 0 | 1, pts: number) {
+    this.scoreLog.push({ t: this.elapsed, side, pts });
+  }
+
+  private noteShot(off: Side, shooter: SP, ev: Ev & { k: 'shot' }, x: number, y: number) {
+    const right = this.hoop(off).x > 47;
+    this.shots.push({
+      side: this.sideOf(off), x: right ? COURT.w - x : x, y: right ? COURT.h - y : y,
+      made: ev.made, three: ev.type === 'three', id: shooter.p.id, period: this.period,
+    });
+    const cur = this.streaks.get(shooter.p.id) ?? 0;
+    this.streaks.set(shooter.p.id, ev.made ? Math.max(0, cur) + 1 : Math.min(0, cur) - 1);
+  }
+
+  /** AI coaches push late in close games and ease off in blowouts or when gassed. */
+  private aiIntensity(i: 0 | 1) {
+    const s = this.sideObj(i);
+    const margin = i === 0 ? this.H.pts - this.A.pts : this.A.pts - this.H.pts;
+    const late = this.period >= this.rules.periods && this.clock < 300;
+    const energy = s.court.reduce((x, sp) => x + sp.energy, 0) / Math.max(1, s.court.length);
+    s.intensity = late && Math.abs(margin) <= 8 ? 1 : margin >= 18 || energy < 0.5 ? -1 : 0;
   }
 
   result(): GameResult {
@@ -326,15 +434,24 @@ export class LiveMatch {
       this.pendingTimeout[i] = false;
       this.timeouts[i]--;
       this.run = [0, 0];
+      this.talkUsed = [false, false];
       for (const s of [this.H, this.A]) s.court.forEach((sp) => (sp.energy = Math.min(1, sp.energy + 0.06)));
       this.log(i, 'info', `Timeout ${this.sideObj(i).team.abbr}`);
       this.state = 'timeout';
+      // The other bench uses the stoppage too.
+      for (const j of [0, 1] as const) if (j !== this.userSide) this.teamTalk(j, this.currentRun()?.side === 1 - j ? 'fire' : this.rng() < 0.5 ? 'attack' : 'calm');
       return;
     }
     this.applySubs(dead);
+    for (const i of [0, 1] as const) {
+      if (i !== this.userSide) this.aiIntensity(i);
+      const s = this.sideObj(i);
+      if (s.boost && --s.boost.left <= 0) s.boost = undefined;
+    }
+    this.flow.push({ t: this.elapsed, margin: this.H.pts - this.A.pts, wp: this.winProb() });
 
     const prev = this.o;
-    const dur = Math.min(this.clock, possessionLength(off, def, prev ? { ...prev, keep: this.prevKeep, transition: this.prevTransition, event: this.prevEvent } : null, this.rng));
+    const dur = Math.min(this.clock, possessionLength(off, def, prev ? { ...prev, keep: this.prevKeep, transition: this.prevTransition, event: this.prevEvent } : null, this.rng, this.rules));
     const clutch = this.period >= this.rules.periods && this.clock < 120 && Math.abs(this.H.pts - this.A.pts) <= 5;
     const side = this.sideOf(off);
     this.o = decide(off, def, this.rng, this.rules, { transition: this.prevTransition, calledPlay: this.calledPlay[side], clutch });
@@ -448,7 +565,7 @@ export class LiveMatch {
           this.throwBall(hoop.x, hoop.y, 0.8, 5, null, () => {
             commitEvent(off, def, ev);
             this.log(offSide, ev.made ? 'score' : 'miss', `${name(ev.by)} ${ev.made ? 'makes' : 'misses'} free throw ${ev.n} of ${ev.of}`);
-            if (ev.made) this.run[offSide] += 1;
+            if (ev.made) { this.run[offSide] += 1; this.noteScore(offSide, 1); }
           });
           this.ball.x = e.x; this.ball.y = e.y;
         });
@@ -474,9 +591,12 @@ export class LiveMatch {
           const dur = ev.type === 'rim' ? 0.5 : ev.type === 'mid' ? 0.9 : 1.1;
           const tx = ev.block ? hoop.x + (this.rng() - 0.5) * 12 : hoop.x;
           const ty = ev.block ? hoop.y + (this.rng() - 0.5) * 14 : hoop.y;
+          const sx = e.tx, sy = e.ty; // the spot the shot type was drawn for
           this.throwBall(tx, ty, ev.block ? 0.4 : dur, ev.type === 'rim' ? 2 : 6, null, () => {
             commitEvent(off, def, ev);
             this.shotReleased = false;
+            this.noteShot(off, shooter, ev, sx, sy);
+            if (ev.made) this.noteScore(offSide, ev.type === 'three' ? 3 : 2);
             const what = ev.type === 'three' ? `${feet}-ft three` : ev.type === 'mid' ? `${feet}-ft jumper` : ev.fastBreak ? 'fast-break layup' : shooter.p.ratings.attrs.dunk > 75 && this.rng() < 0.5 ? 'dunk' : 'layup';
             if (ev.made) {
               this.run[offSide] += ev.type === 'three' ? 3 : 2;
@@ -530,6 +650,7 @@ export class LiveMatch {
     const regEnd = this.period >= this.rules.periods;
     if (regEnd && this.H.pts !== this.A.pts) {
       this.state = 'final';
+      this.flow.push({ t: this.elapsed, margin: this.H.pts - this.A.pts, wp: this.winProb() });
       this.log(null, 'info', `Final: ${this.H.team.abbr} ${this.H.pts} – ${this.A.team.abbr} ${this.A.pts}`);
       return;
     }
@@ -537,7 +658,7 @@ export class LiveMatch {
     this.period++;
     this.clock = this.period <= this.rules.periods ? this.rules.periodSec : this.rules.otSec;
     this.H.fouls = this.A.fouls = 0;
-    if (this.period === 3) this.timeouts = [Math.min(this.timeouts[0], 4), Math.min(this.timeouts[1], 4)];
+    if (this.period === 3) this.timeouts = this.fiba ? [3, 3] : [Math.min(this.timeouts[0], 4), Math.min(this.timeouts[1], 4)];
     for (const s of [this.H, this.A]) s.roster.forEach((sp) => (sp.energy = Math.min(1, sp.energy + (this.period === 3 ? 0.35 : 0.18))));
     // Q2/Q3 to tip loser, Q4 to tip winner; OT alternates from Q4.
     const loser = this.tipWinner === this.H ? this.A : this.H;
@@ -548,4 +669,12 @@ export class LiveMatch {
     this.ball = { x: e.x, y: e.y, z: 3, holder: pg.p.id };
     this.state = 'break';
   }
+}
+
+/** Standard normal CDF (Abramowitz–Stegun erf approximation). */
+function normCdf(x: number): number {
+  const z = Math.abs(x) / Math.SQRT2;
+  const k = 1 / (1 + 0.3275911 * z);
+  const erf = 1 - (((((1.061405429 * k - 1.453152027) * k) + 1.421413741) * k - 0.284496736) * k + 0.254829592) * k * Math.exp(-z * z);
+  return x >= 0 ? 0.5 * (1 + erf) : 0.5 * (1 - erf);
 }

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import Panel from '../components/Panel';
 import DataTable, { type DataTableColumn } from '../components/DataTable';
 import BkImage from '../components/BkImage';
+import ArcBadge from '../components/hub/ArcBadge';
 import ProgressBar from '../components/ProgressBar';
 import ConfirmDialog from '../components/ConfirmDialog';
 import Sparkline from '../components/Sparkline';
@@ -101,7 +102,7 @@ export default function RosterScreen() {
   const columns: DataTableColumn<Player>[] = [
     { key: 'jersey', header: th('jersey', '#'), render: (p) => p.jersey },
     { key: 'face', header: '', render: (p) => <BkImage path={p.face} alt={p.lastName} className={styles.faceThumb} /> },
-    { key: 'name', header: th('name', 'Name'), render: (p) => `${p.firstName} ${p.lastName}` },
+    { key: 'name', header: th('name', 'Name'), render: (p) => <span className={styles.nameCell}>{p.firstName} {p.lastName} <ArcBadge arc={p.arc} season={s.season} /></span> },
     { key: 'pos', header: th('pos', 'Pos'), render: (p) => p.positions.join('/') },
     { key: 'age', header: th('age', 'Age'), align: 'right', render: (p) => Math.floor(ageOf(p.birthDate)) },
     { key: 'height', header: th('height', 'Ht'), align: 'right', render: (p) => heightFtIn(p.heightCm) },

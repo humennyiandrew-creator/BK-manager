@@ -1,0 +1,32 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.08rem 0.4rem;
+  border-radius: 2px;
+  font-size: 0.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.up {
+  color: #0b1a10;
+  background: linear-gradient(100deg, #3ddc97, #9cf2c8);
+  box-shadow: 0 0 10px -2px rgba(61, 220, 151, 0.6);
+}
+
+.down {
+  color: #fff;
+  background: linear-gradient(100deg, #ff4d5e, #b3263a);
+  box-shadow: 0 0 10px -2px rgba(255, 77, 94, 0.5);
+}
+
+.label {
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 700;
+  opacity: 0.85;
+}

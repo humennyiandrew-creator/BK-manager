@@ -8,6 +8,7 @@ import { PLAY_BY_ID } from '../playbook/plays';
 import { SCHEMES, SYSTEMS } from '../playbook/systems';
 import type { Play, Role, ShotType } from '../playbook/types';
 import { defenseFit, lineupProfile, offenseFit, type DefFit, type OffFit, type Profile } from '../playbook/fit';
+import { chemistryEdge } from '../chemistry';
 
 export type { ShotType };
 export interface Rules { periods: number; periodSec: number; otSec: number; foulOut: number; bonusAt: number; possSec?: number }
@@ -32,10 +33,10 @@ export const K = {
   create: 0.0022,
   offIQ: 0.0015,
   help: 0.003,
-  usgExp: 1.6,
+  usgExp: 1.0,      // shot share ∝ usage, so stars land near real usage rates (1.6 gave them ~55% of shots)
   drain: 0.00085,
   recover: 0.0016,
-  playFocus: 0.9,   // how strongly play options steer shooter choice
+  playFocus: 0.35,  // how strongly play options steer shooter choice (mild: plays shape shots, not one man's usage)
   playShot: 0.45,   // chance the shot type comes from the play instead of player tendency
   playEdge: 0.02,   // make-prob bonus when play beats the scheme (penalty when weak)
   breakBonus: 0.07, // fast-break rim bonus
@@ -56,7 +57,14 @@ export interface Side {
   pts: number;
   fouls: number;        // team fouls this period
   home: boolean;
+  intensity?: -1 | 0 | 1;  // live coaching: conserve / balanced / push (fast sim leaves it neutral)
+  boost?: TalkBoost;       // live coaching: timeout team-talk effect for the next few possessions
 }
+
+/** Temporary effect of a timeout team talk; `left` counts possessions (both ends). */
+export interface TalkBoost { left: number; edge: number; toMul: number; defEdge: number }
+
+const intensityOf = (s: Side) => s.intensity ?? 0;
 
 const a = (sp: SP) => sp.p.ratings.attrs;
 const avg = (list: SP[], f: (sp: SP) => number) => list.reduce((s, x) => s + f(x), 0) / list.length;
@@ -153,7 +161,7 @@ export function schemeFit(def: Side, off: Side): DefFit {
 }
 
 export function tickEnergy(s: Side, sec: number, drainMul = 1) {
-  drainMul *= sideFit(s).fit.drainMul;
+  drainMul *= sideFit(s).fit.drainMul * (1 + intensityOf(s) * 0.35);
   for (const sp of s.roster) {
     if (s.court.includes(sp)) {
       sp.sec += sec;
@@ -234,7 +242,8 @@ export function decide(off: Side, def: Side, rng: Rng, rules: Rules, ctx: Decide
   const of = sideFit(off).fit, df = schemeFit(def, off);
   const pTo = K.toBase * sys.toMul * (1 + (sch.toMul - 1) * df.mul) * of.toMul
     * (1 + (62 - (a(handler).ballHandle + a(handler).passing) / 2) * 0.01)
-    * (1 + (avg(def.court, (x) => a(x).steal) - 62) * 0.008);
+    * (1 + (avg(def.court, (x) => a(x).steal) - 62) * 0.008)
+    * (1 + intensityOf(def) * 0.06) * (off.boost?.toMul ?? 1);
   if (rng() < pTo) {
     const by = pick(off.court, (x) => usage(x) * (130 - a(x).ballHandle), rng);
     const steal = rng() < K.stealShare ? pick(def.court, (x) => a(x).steal ** 2, rng) : null;
@@ -292,7 +301,9 @@ export function decide(off: Side, def: Side, rng: Rng, rules: Rules, ctx: Decide
   const edge = (off.home ? K.homeEdge : 0) + contextEdge(handler, def.court) + K.offIQ * (a(shooter).offIQ - 62)
     - schemeD + (fastBreak ? (type === 'rim' ? K.breakBonus : 0.02) : playEdge) - (shooter === boxed ? 0.03 : 0)
     + of.edge + (type === 'rim' ? of.rimEdge : type === 'three' ? of.threeEdge : 0)
-    + ((off.team.familiarity ?? 85) - 85) / 40 * 0.006;
+    + ((off.team.familiarity ?? 85) - 85) / 40 * 0.006
+    + chemistryEdge(off.team.chemistry)
+    + intensityOf(off) * 0.012 - intensityOf(def) * 0.008 + (off.boost?.edge ?? 0) - (def.boost?.defEdge ?? 0);
   const pMake = shotProb(shooter, defender, protector, type, edge);
   const passers = off.court.filter((x) => x !== shooter);
   const assistBy = (): SP | null => (rng() < K.assist[type] * sys.assistMul

@@ -228,56 +228,162 @@
   height: 100%;
 }
 
-.detailHead {
+.hero {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 0.8rem;
-  padding: 0.6rem;
+  gap: 1rem;
+  padding: 1.1rem 1rem;
   border-radius: var(--radius-sm);
   overflow: hidden;
+  background:
+    linear-gradient(105deg, color-mix(in srgb, var(--team) 70%, transparent) 0%, color-mix(in srgb, var(--team) 25%, transparent) 55%, transparent 90%),
+    repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.03) 0 0.35rem, transparent 0.35rem 1.4rem);
 }
 
-.detailHead > * {
-  position: relative;
+.heroWatermark {
+  position: absolute;
+  right: -2rem;
+  top: 50%;
+  width: 13rem;
+  height: 13rem;
+  object-fit: contain;
+  opacity: 0.12;
+  transform: translateY(-50%) rotate(-8deg);
+  pointer-events: none;
 }
 
 .detailLogo {
-  width: 3.6rem;
-  height: 3.6rem;
+  position: relative;
+  width: 5rem;
+  height: 5rem;
   object-fit: contain;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
 }
 
-.detailName {
-  font-size: 1.05rem;
-  font-weight: 800;
+.heroText {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
 }
 
-.detailMeta {
-  color: var(--text-muted);
+.heroCity {
   font-size: 0.75rem;
-  margin: 0.15rem 0 0.3rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.heroName {
+  font-size: 2.1rem;
+  font-weight: 900;
+  font-style: italic;
+  text-transform: uppercase;
+  line-height: 1;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+}
+
+.heroTier {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.3rem;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.facts > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.55rem 0.7rem;
+  background: var(--panel-alt);
+  border: 1px solid var(--panel-border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-sm);
+}
+
+.facts span,
+.keyHead {
+  font-size: 0.58rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+}
+
+.facts b {
+  font-size: 0.88rem;
 }
 
 .detailPlayers {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.3rem;
 }
 
 .detailPlayer {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 2.2rem 1.8rem 1fr 5rem 2rem;
+  align-items: center;
+  gap: 0.5rem;
   background: var(--panel-alt);
   border: 1px solid var(--panel-border);
-  border-radius: var(--radius);
-  padding: 0.5rem 0.7rem;
+  border-radius: var(--radius-sm);
+  padding: 0.35rem 0.6rem;
   font-size: 0.82rem;
 }
 
-.detailOvr {
-  color: var(--cyan);
+.keyFace {
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.keyPos {
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: var(--text-dim);
+}
+
+.keyName {
   font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.keyBar {
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+}
+
+.keyBar > span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+.detailOvr {
+  color: var(--accent);
+  font-weight: 900;
+  font-style: italic;
+  font-size: 1rem;
+  text-align: right;
 }
 
 .startBtn {

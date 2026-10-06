@@ -1,0 +1,379 @@
+.subhead {
+  font-size: 0.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #e3a32e;
+}
+
+/* ---------- pregame ---------- */
+
+.pre {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1rem;
+  width: 100%;
+}
+
+.preMain {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: start;
+  gap: 1.5rem;
+}
+
+.preSide {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+}
+
+.preRight {
+  align-items: flex-end;
+  text-align: right;
+}
+
+.preLogo {
+  width: 5rem;
+  height: 5rem;
+  object-fit: contain;
+  margin-bottom: 0.3rem;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
+}
+
+.preCity {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+}
+
+.preName {
+  font-size: 1.8rem;
+  font-weight: 900;
+  font-style: italic;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.preStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.7rem;
+  margin-top: 0.4rem;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+}
+
+.preRight .preStats {
+  justify-content: flex-end;
+}
+
+.preStats b {
+  color: var(--text);
+}
+
+.preStars {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+
+.preStar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  width: 4.2rem;
+}
+
+.preFace {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.preStarName {
+  font-size: 0.66rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.preOvr {
+  font-size: 0.78rem;
+  font-weight: 900;
+  color: var(--accent);
+}
+
+.preCenter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding-top: 1.5rem;
+}
+
+.preVs {
+  font-size: 2.4rem;
+  font-weight: 900;
+  font-style: italic;
+  color: var(--text-dim);
+  line-height: 1;
+}
+
+.preOddsLabel {
+  margin-top: 0.6rem;
+  font-size: 0.56rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+}
+
+.preOdds {
+  font-size: 1.8rem;
+  font-weight: 900;
+}
+
+.preOdds small {
+  font-size: 0.9rem;
+}
+
+.preOdds em {
+  font-size: 0.8rem;
+  font-style: normal;
+  color: var(--text-muted);
+}
+
+.preRules {
+  font-size: 0.64rem;
+  color: var(--text-dim);
+}
+
+.preObj {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+/* ---------- postgame ---------- */
+
+.post {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  width: 100%;
+}
+
+.postHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.result {
+  font-size: 1.6rem;
+  font-weight: 900;
+  font-style: italic;
+  text-transform: uppercase;
+}
+
+.win { color: var(--positive); }
+.loss { color: var(--negative); }
+
+.final {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 900;
+}
+
+.final i {
+  font-style: normal;
+  color: var(--text-dim);
+}
+
+.finalLogo {
+  width: 2rem;
+  height: 2rem;
+  object-fit: contain;
+}
+
+.postGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2rem;
+}
+
+.postCol {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.potg {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.6rem 0.7rem;
+  background: linear-gradient(100deg, rgba(227, 163, 46, 0.18), transparent 80%);
+  border-left: 3px solid #e3a32e;
+  border-radius: 2px;
+}
+
+.potgFace {
+  width: 3.6rem;
+  height: 3.6rem;
+  border-radius: 50%;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.potgText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+.potgName {
+  font-size: 1.05rem;
+  font-weight: 900;
+  font-style: italic;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.potgName em {
+  font-style: normal;
+  font-size: 0.7rem;
+  color: var(--text-dim);
+}
+
+.compare {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.cmpHead {
+  display: grid;
+  grid-template-columns: 3rem 1fr 3rem;
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: var(--text-dim);
+}
+
+.cmpHead span:last-child {
+  text-align: right;
+}
+
+.cmpRow {
+  display: grid;
+  grid-template-columns: 3rem 1fr 3rem;
+  align-items: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.cmpRow > span:last-child {
+  text-align: right;
+}
+
+.better {
+  color: var(--text);
+  font-weight: 900;
+}
+
+.cmpMid {
+  display: grid;
+  grid-template-columns: 1fr 5rem 1fr;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.cmpLabel {
+  text-align: center;
+  font-size: 0.58rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+
+.cmpBar {
+  display: flex;
+  justify-content: flex-end;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.cmpBarR {
+  justify-content: flex-start;
+}
+
+.cmpBar > span {
+  height: 100%;
+}
+
+.grades {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  max-height: 15rem;
+  overflow-y: auto;
+}
+
+.gradeRow {
+  display: grid;
+  grid-template-columns: 1.7rem 1fr auto 2.4rem;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.2rem 0;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.gradeFace {
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 50%;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.gradeName {
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.gradeLine {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+.gradeBadge {
+  text-align: center;
+  font-size: 0.78rem;
+  font-weight: 900;
+  border-radius: 2px;
+  padding: 0.12rem 0;
+}
+
+.gA { background: var(--positive); color: #062114; }
+.gB { background: #9ad94f; color: #142106; }
+.gC { background: #e3a32e; color: #211705; }
+.gD { background: var(--negative); color: #fff; }

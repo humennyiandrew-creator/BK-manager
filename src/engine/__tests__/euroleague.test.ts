@@ -30,3 +30,24 @@ it('plays a EuroLeague season', () => {
   console.log(table.map((r) => `${s.teams[r.teamId].abbr} ${r.w}-${r.l}`).join(', '));
   expect(s.champion).toBeTruthy();
 }, 300000);
+
+it('an NBA career with the EuroLeague loaded finishes seasons and reschedules both leagues', async () => {
+  const { simOffseason } = await import('../offseason');
+  const teams = [...(nbaTeams as Team[]), ...(elTeams as Team[])];
+  const players = [...(nbaPlayers as RawPlayer[]), ...(elPlayers as RawPlayer[])];
+  const s = newGame(teams, players, '1610612738', 4);
+  const mixed = () => s.games.filter((g) => (g.comp ?? 'NBA') === 'NBA' && (s.teams[g.home].league === 'EL' || s.teams[g.away].league === 'EL')).length;
+  simToEndOfSeason(s);
+  expect(s.phase).toBe('offseason');
+  expect(s.champion).toBeTruthy();
+  expect(s.teams[s.champion!].league ?? 'NBA').toBe('NBA');
+  expect(s.elChampion).toBeTruthy();
+  simOffseason(s);
+  expect(s.season).toBe('2027-28');
+  expect(s.elChampion).toBeUndefined();
+  expect(s.games.filter((g) => (g.comp ?? 'NBA') === 'NBA')).toHaveLength(1230);
+  expect(s.games.filter((g) => g.comp === 'EL').length).toBeGreaterThan(300);
+  expect(mixed()).toBe(0);
+  const ids = s.games.map((g) => g.id);
+  expect(new Set(ids).size).toBe(ids.length);
+}, 300000);

@@ -1,8 +1,9 @@
 import { create } from 'zustand';
 import type { GameState } from '../../engine/model';
 import { newGame } from '../../engine/world';
-import { continueGame, userGameToday } from '../../engine/season';
+import { continueGame, standings, userGameToday } from '../../engine/season';
 import { pendingUserEvent } from '../../engine/events';
+import { buildMatchObjectives } from '../../engine/objectives';
 import type { SaveData } from '../../types/bk';
 import { loadGame, saveGame } from '../saves';
 import { loadLeagueData } from '../loadData';
@@ -11,7 +12,12 @@ import { useUI } from './useUI';
 
 function toSaveData(s: GameState): SaveData {
   const team = s.teams[s.userTeamId];
-  return { teamName: `${team.city} ${team.name}`, date: s.date, state: s };
+  const row = standings(s, undefined, team.league ?? 'NBA').find((r) => r.teamId === team.id);
+  return {
+    teamName: `${team.city} ${team.name}`, date: s.date, state: s,
+    teamId: team.id, logo: team.logo, color: team.colors.primary, season: s.season,
+    record: row ? `${row.w}-${row.l}` : '0-0',
+  };
 }
 
 interface GameStore {
@@ -83,6 +89,7 @@ export const useGame = create<GameStore>((set, get) => ({
     if (pending) { useUI.getState().openEvent(pending.id); return; }
     const today = userGameToday(s);
     if (today) {
+      buildMatchObjectives(s, today);
       useMatch.getState().start(s, today);
       useUI.getState().setView('match');
       return;

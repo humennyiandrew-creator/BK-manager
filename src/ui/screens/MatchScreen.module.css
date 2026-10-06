@@ -327,12 +327,22 @@
 }
 
 .overlayPanelWide {
-  min-width: 30rem;
+  width: min(58rem, 94%);
+  max-height: 94%;
+  overflow-y: auto;
+  background:
+    linear-gradient(115deg, color-mix(in srgb, var(--accent) 10%, transparent) 0%, transparent 40%),
+    var(--panel);
+}
+
+.overlayPanelWide .overlayBtns {
+  align-self: center;
 }
 
 .overlayTitle {
-  font-size: 1.05rem;
-  font-weight: 800;
+  font-size: 1.3rem;
+  font-weight: 900;
+  font-style: italic;
   text-align: center;
 }
 
@@ -346,36 +356,10 @@
   gap: 0.7rem;
 }
 
-.pregameRow {
-  display: flex;
-  align-items: center;
-  gap: 1.4rem;
-}
 
-.vs {
-  color: var(--text-dim);
-  font-weight: 800;
-  font-size: 0.8rem;
-}
 
-.teamBig {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.4rem;
-}
 
-.teamBigLogo {
-  width: 4.5rem;
-  height: 4.5rem;
-  object-fit: contain;
-}
 
-.teamBigName {
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-align: center;
-}
 
 .primaryBtn {
   background: var(--red);
@@ -426,31 +410,9 @@
   font-weight: 700;
 }
 
-.topPerfRow {
-  display: flex;
-  gap: 1.5rem;
-}
 
-.topPerfCol {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  min-width: 10rem;
-}
 
-.topPerfTeam {
-  font-size: 0.7rem;
-  font-weight: 800;
-  color: var(--cyan);
-  text-transform: uppercase;
-}
 
-.topPerfRow2 {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.6rem;
-  font-size: 0.72rem;
-}
 
 /* ---------- play-by-play ---------- */
 
@@ -695,3 +657,57 @@
   color: var(--text-dim);
   text-align: right;
 }
+
+/* ---------- live HUD: sponsor goals, momentum, win probability ---------- */
+
+.hud {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 1.4rem;
+  padding: 0.35rem 0.8rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+}
+
+.hudObjectives {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  gap: 0.4rem;
+  overflow: hidden;
+}
+
+.hudMuted {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+}
+
+.objChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.55rem;
+  border: 1px solid var(--panel-border);
+  border-left: 3px solid #e3a32e;
+  border-radius: 2px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--text-muted);
+}
+
+.objChip b {
+  color: var(--text);
+}
+
+.objMark {
+  color: #e3a32e;
+}
+
+.obj_met { border-left-color: var(--positive); background: rgba(61, 220, 151, 0.08); color: var(--text); }
+.obj_met .objMark { color: var(--positive); }
+.obj_failed { border-left-color: var(--negative); opacity: 0.55; text-decoration: line-through; }
+.obj_failed .objMark { color: var(--negative); }
+.obj_on { border-left-color: var(--cyan); }

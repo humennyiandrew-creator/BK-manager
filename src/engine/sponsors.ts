@@ -17,9 +17,9 @@ declare module './model' {
 
 export type SponsorOffer = Omit<SponsorDeal, 'signed'>;
 
-const BRAND_LOCAL = ['Ridgeline Motors', 'Bluewater Bank', 'Crestview Realty', 'Harbor Grill', 'Summit Insurance', 'Northgate Automall'];
-const BRAND_NATIONAL = ['Vertex Airlines', 'Pinnacle Telecom', 'Comet Energy', 'Orbit Wireless', 'Anchor Financial', 'Solstice Apparel'];
-const BRAND_GLOBAL = ['Zenith Motors', 'Helix Technologies', 'Meridian Cola', 'Titan Athletic', 'Quantum Electronics', 'Nova Streaming'];
+export const BRAND_LOCAL = ['Ridgeline Motors', 'Bluewater Bank', 'Crestview Realty', 'Harbor Grill', 'Summit Insurance', 'Northgate Automall'];
+export const BRAND_NATIONAL = ['Vertex Airlines', 'Pinnacle Telecom', 'Comet Energy', 'Orbit Wireless', 'Anchor Financial', 'Solstice Apparel'];
+export const BRAND_GLOBAL = ['Zenith Motors', 'Helix Technologies', 'Meridian Cola', 'Titan Athletic', 'Quantum Electronics', 'Nova Streaming'];
 
 function msg(s: GameState, subject: string, body: string) {
   s.messages.unshift({ id: s.nextId++, date: s.date, from: 'Business Operations', subject, body, read: false, kind: 'finance' });

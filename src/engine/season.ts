@@ -13,6 +13,8 @@ import { clamp } from './mgmt/market';
 import { hasNode } from './mgmt/facilities';
 import { offseasonStep } from './offseason';
 import { eventsDaily } from './events';
+import { settleMatchObjectives } from './objectives';
+import { newsAfterGame, newsInjury } from './news';
 
 // ---------- standings ----------
 
@@ -104,11 +106,13 @@ export function applyResult(s: GameState, g: Game, res: GameResult) {
     p.fatigue = clamp((p.fatigue ?? 0) + b.min * 0.35 * (loadMgmt ? 0.85 : 1), 0, 100);
     if (rollInjury(p, b.min, rng, (injMul[p.teamId!] ?? 1) * fatigueInjuryMul(p))) {
       refreshRotation(s.teams[p.teamId!], s.players);
+      newsInjury(s, p);
       if (p.teamId === s.userTeamId) {
         msg(s, 'Medical Staff', `${p.firstName} ${p.lastName} injured`, `${p.injury!.name}. Expected out ${p.injury!.daysLeft} days.`, 'injury');
       }
     }
   }
+  newsAfterGame(s, g, res);
   g.result = isUser ? res : { home: res.home, away: res.away, periods: res.periods };
   if (isUser) {
     const us = g.home === s.userTeamId;
@@ -116,6 +120,7 @@ export function applyResult(s: GameState, g: Game, res: GameResult) {
     const won = us ? res.home > res.away : res.away > res.home;
     const score = us ? `${res.home}-${res.away}` : `${res.away}-${res.home}`;
     msg(s, 'Assistant Coach', `${won ? 'Win' : 'Loss'} ${us ? 'vs' : '@'} ${opp.abbr} ${score}`, `Final${res.periods.length > 4 ? ` (${res.periods.length - 4}OT)` : ''}: ${score}.`, 'result');
+    settleMatchObjectives(s, g, res);
   }
   if (g.seriesId) updateSeries(s, g);
 }
@@ -173,6 +178,8 @@ function startPlayoffs(s: GameState) {
 function postseasonTick(s: GameState) {
   const pct = record(s);
   const better = (a: string, b: string): [string, string] => ((pct.get(a) ?? 0) >= (pct.get(b) ?? 0) ? [a, b] : [b, a]);
+  // Only the NBA bracket: other competitions (EuroLeague) run their own postseason alongside.
+  const nba = () => s.series.filter((x) => (x.comp ?? 'NBA') === 'NBA');
   if (s.phase === 'playin') {
     for (const conf of ['East', 'West'] as const) {
       const s78 = s.series.find((x) => x.id === `PI-${conf}-7v8`)!;
@@ -181,12 +188,12 @@ function postseasonTick(s: GameState) {
         newSeries(s, { id: `PI-${conf}-8th`, kind: 'playin', round: 0, conf, high: loserOf(s78), low: s910.winner, bestOf: 1 });
       }
     }
-    if (s.series.filter((x) => x.kind === 'playin').length === 6 && s.series.every((x) => x.kind !== 'playin' || x.winner)) startPlayoffs(s);
+    if (nba().filter((x) => x.kind === 'playin').length === 6 && nba().every((x) => x.kind !== 'playin' || x.winner)) startPlayoffs(s);
   }
   if (s.phase === 'playoffs') {
     for (let round = 1; round <= 3; round++) {
-      const done = s.series.filter((x) => x.round === round);
-      if (!done.length || done.some((x) => !x.winner) || s.series.some((x) => x.round === round + 1)) continue;
+      const done = nba().filter((x) => x.round === round);
+      if (!done.length || done.some((x) => !x.winner) || nba().some((x) => x.round === round + 1)) continue;
       if (round < 3) {
         for (const conf of ['East', 'West'] as const) {
           const bySlot = (slot: string) => done.find((x) => x.conf === conf && x.slot === slot)!.winner!;
@@ -201,7 +208,7 @@ function postseasonTick(s: GameState) {
         newSeries(s, { id: 'Finals', kind: 'playoff', round: 4, conf: null, high, low, bestOf: 7 });
       }
     }
-    const finals = s.series.find((x) => x.round === 4);
+    const finals = nba().find((x) => x.round === 4);
     if (finals?.winner) {
       s.champion = finals.winner;
       s.phase = 'offseason';
@@ -211,7 +218,7 @@ function postseasonTick(s: GameState) {
     }
   }
   // Schedule next game for every live series without a pending game.
-  for (const se of s.series) {
+  for (const se of nba()) {
     if (se.winner || s.games.some((g) => g.seriesId === se.id && !g.result)) continue;
     const n = se.winsHigh + se.winsLow + 1;
     const highHome = se.bestOf === 1 || [1, 2, 5, 7].includes(n);

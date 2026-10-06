@@ -6,7 +6,8 @@ import { capNumbers, contractRows, isTwoWay, marketValue, minSalary, rosterOf, s
 import { ageOf } from './ratings';
 import { hashString, mulberry32 } from './rng';
 import { refreshRotation } from './rotation';
-import { addDays, buildSchedule } from './schedule';
+import { addDays } from './schedule';
+import { buildSeasonGames } from './world';
 import { standings } from './season';
 import { addPickYear, aiPick, draftUntilUser, generateDraftClass, nextPick, runLottery } from './draft';
 import { askingPrice, expireContracts, freeAgents, offseasonMarketDay, releasePlayer } from './freeagency';
@@ -16,6 +17,7 @@ import { LONG_TERM, objectiveByRank, objectiveLabel } from './mgmt/board';
 import { teamStrengthRank } from './mgmt/market';
 import { euroTransferDaily } from './transfers-euro';
 import { managerDaily } from './manager';
+import { rollSeasonArcs } from './arcs';
 
 const FA_DAYS = 10;
 
@@ -203,10 +205,12 @@ function newSeason(s: GameState) {
     refreshRotation(t, s.players);
     if (t.id !== s.userTeamId) autoTactics(t.tactics, rosterOf(s, t.id));
   }
-  s.games = buildSchedule(Object.values(s.teams), Y, s.seed + Y, s.nextId);
-  s.nextId += s.games.length + 1;
+  s.games = buildSeasonGames(Object.values(s.teams), Y, s.seed + Y, s.nextId);
+  s.nextId = s.games.reduce((m, g) => Math.max(m, g.id), s.nextId) + 1;
+  s.elChampion = undefined;
+  const userComp = s.teams[s.userTeamId].league ?? 'NBA';
   s.keyDates = {
-    tradeDeadline: `${Y + 1}-02-05`, regularEnd: s.games.reduce((m, g) => (g.date > m ? g.date : m), ''),
+    tradeDeadline: `${Y + 1}-02-05`, regularEnd: s.games.filter((g) => (g.comp ?? 'NBA') === userComp).reduce((m, g) => (g.date > m ? g.date : m), ''),
     draft: `${Y + 1}-06-24`, freeAgency: `${Y + 1}-06-30`,
   };
   addPickYear(s, Y + 5);
@@ -219,6 +223,7 @@ function newSeason(s: GameState) {
   s.board.confidence = Math.round(s.board.confidence * 0.8 + 60 * 0.2);
   for (const st of s.staff) if (st.teamId && --st.years <= 0) st.years = 2; // auto-renew
   msg(s, 'Board of Directors', `${label} season objective`, `The board expects: ${objectiveLabel(s.board.objective)}.`, 'board');
+  rollSeasonArcs(s);
 }
 
 // ---------- driver ----------

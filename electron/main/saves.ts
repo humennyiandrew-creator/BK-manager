@@ -24,6 +24,12 @@ export interface SaveMeta {
   teamName: string;
   date: string;
   savedAt: string;
+  // Optional card details (saves written before these existed simply omit them).
+  teamId?: string;
+  logo?: string;
+  color?: string;
+  record?: string;
+  season?: string;
 }
 
 function savesDir(): string {
@@ -60,7 +66,12 @@ export async function listSaves(): Promise<SaveMeta[]> {
       const raw = await readFile(path);
       const json = await gunzipAsync(raw);
       const file = JSON.parse(json.toString('utf-8')) as SaveFile;
-      results.push({ slot, teamName: file.data.teamName, date: file.data.date, savedAt: file.savedAt });
+      const d = file.data;
+      const opt = (k: string) => (typeof d[k] === 'string' ? (d[k] as string) : undefined);
+      results.push({
+        slot, teamName: d.teamName, date: d.date, savedAt: file.savedAt,
+        teamId: opt('teamId'), logo: opt('logo'), color: opt('color'), record: opt('record'), season: opt('season'),
+      });
     } catch {
       // corrupt save, skip
     }

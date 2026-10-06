@@ -87,10 +87,24 @@ export function drawCourt(ctx: CanvasRenderingContext2D, mode: 'full' | 'half', 
 
 export interface PlayerDrawOpts {
   x: number; y: number; label: string; sub: string; energy: number; fouls: number; fill: string; hasBall: boolean; glow?: number;
+  heat?: number; // shooting streak: >0 on fire (3+ makes in a row), <0 ice cold (4+ misses)
+  pulse?: number; // 0–1 animation phase for the heat ring
 }
 
 export function drawPlayer(ctx: CanvasRenderingContext2D, o: PlayerDrawOpts) {
   const r = 1.4;
+  if (o.heat) {
+    const hot = o.heat > 0;
+    const p = o.pulse ?? 0;
+    const grad = ctx.createRadialGradient(o.x, o.y, r * 0.6, o.x, o.y, r + 2.2 + p * 0.5);
+    grad.addColorStop(0, hot ? 'rgba(255,120,30,0.0)' : 'rgba(90,190,255,0.0)');
+    grad.addColorStop(0.55, hot ? `rgba(255,110,20,${0.35 + p * 0.25})` : `rgba(110,200,255,${0.3 + p * 0.2})`);
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.beginPath();
+    ctx.fillStyle = grad;
+    ctx.arc(o.x, o.y, r + 2.2 + p * 0.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
   if (o.glow && o.glow > 0) {
     ctx.beginPath();
     ctx.strokeStyle = `rgba(255,210,61,${o.glow * 0.8})`;

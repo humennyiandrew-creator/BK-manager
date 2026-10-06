@@ -6,6 +6,9 @@ import { staffRating } from './mgmt/staff';
 import { facilityLevel, hasNode } from './mgmt/facilities';
 import { daysBetween } from './schedule';
 import { filmSessionsThisWeek, scheduleGrowthMul, scheduleInjuryMul } from './training';
+import { arcActive, settleArc, tickArc } from './arcs';
+import { standings } from './season';
+import { clamp } from './mgmt/market';
 
 export const FOCUS_ATTRS: Record<TrainingFocus, Attr[]> = {
   balanced: [],
@@ -135,8 +138,14 @@ export function progressionDaily(s: GameState) {
   const d = daysBetween(`${s.seasonYear}-10-01`, s.date);
   if (d <= 0 || d % 7 !== 0) return;
   updateForm(s);
+  const week = d / 7;
   const rng = mulberry32(hashString(`${s.seed}|prog|${s.date}`));
   const eff = new Map<string, ReturnType<typeof trainingEffects>>();
+  // Team record feeds morale: winning rooms are happier rooms.
+  const record = new Map<string, { gp: number; pct: number }>();
+  for (const comp of new Set(Object.values(s.teams).map((t) => t.league ?? 'NBA'))) {
+    for (const r of standings(s, undefined, comp)) record.set(r.teamId, { gp: r.w + r.l, pct: r.pct });
+  }
   for (const p of Object.values(s.players)) {
     if (!p.teamId || p.retired) continue;
     if (!eff.has(p.teamId)) eff.set(p.teamId, trainingEffects(s, p.teamId));
@@ -148,11 +157,17 @@ export function progressionDaily(s: GameState) {
     const work = 0.85 + p.ratings.personality.workEthic / 66;
     const base = annualExpected(age, p.ratings.ovr, p.ratings.pot) * IN_SEASON_SHARE / WEEKS;
     const schedMul = scheduleGrowthMul(s, p.teamId) * fatigueGrowthMul(p);
-    const growth = base > 0 ? base * e.growthMul * schedMul * minutesMul * work : base / Math.max(0.8, e.growthMul * 0.5 + 0.5);
+    let growth = base > 0 ? base * e.growthMul * schedMul * minutesMul * work : base / Math.max(0.8, e.growthMul * 0.5 + 0.5);
+    // A breakout season pauses age decline; a collapse pauses normal growth — the arc is the story.
+    if (arcActive(p, s.season, week)) growth = p.arc!.kind === 'breakout' ? Math.max(0, growth) : Math.min(0, growth);
     // Performance feeds back: overperformers grow a little faster and raise their ceiling, flops the reverse.
     const form = p.form ?? 0;
     const programBonus = p.program ? 0.15 : 0; // active development programme: small extra weekly growth
     applyDelta(s, p, growth + form * 0.035 + gauss(rng) * 0.12 + programBonus, plan.individual[p.id] ?? plan.focus, rng);
+    const arcStep = tickArc(s, p, week);
+    if (arcStep) p.lastChange = arcStep;
+    (p.ovrTrack ??= []).push(p.ratings.ovr);
+    if (p.ovrTrack.length > 40) p.ovrTrack.shift();
     const filmN = filmSessionsThisWeek(s, p.teamId);
     if (filmN > 0) {
       const bump = filmN * 0.15;
@@ -168,8 +183,12 @@ export function progressionDaily(s: GameState) {
       p.ratings.pot = +next.toFixed(2);
     }
     // Morale: playing time vs role expectation, winning, heavy training grind.
-    const expectMin = 12 + Math.max(0, p.ratings.ovr - 65) * 1.3;
-    const target = 60 + Math.max(-25, Math.min(20, (mpg - expectMin) * 1.5)) - (e.fatigueMul - 1) * 40;
+    // Stars expect ~35 mpg, rotation players ~20, the end of the bench a few minutes; no games yet = no complaint.
+    const rec = record.get(p.teamId);
+    const expectMin = 8 + clamp((p.ratings.ovr - 62) * 1.05, 0, 28);
+    const minutesTerm = rec?.gp ? clamp((mpg - expectMin) * 1.5, -25, 20) : 0;
+    const winTerm = rec?.gp ? (rec.pct - 0.5) * 16 * Math.min(1, rec.gp / 10) : 0;
+    const target = 62 + minutesTerm + winTerm - (e.fatigueMul - 1) * 40;
     p.morale = Math.round(Math.max(0, Math.min(100, p.morale + (target - p.morale) * 0.15)));
   }
 }
@@ -180,6 +199,7 @@ export function annualProgression(s: GameState) {
   for (const p of Object.values(s.players)) {
     if (p.retired) continue;
     p.ovrHistory = [...(p.ovrHistory ?? []), { season: s.season, ovr: p.ratings.ovr, pot: p.ratings.pot }].slice(-6);
+    settleArc(s, p);
     const age = ageOf(p.birthDate, new Date(`${s.seasonYear + 1}-07-01`));
     const e = p.teamId ? trainingEffects(s, p.teamId) : { growthMul: 0.85 };
     const base = annualExpected(age, p.ratings.ovr, p.ratings.pot) * (1 - IN_SEASON_SHARE);

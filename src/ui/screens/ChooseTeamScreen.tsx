@@ -20,6 +20,14 @@ function Stars({ n }: { n: number }) {
   );
 }
 
+const TIER: Record<number, string> = { 5: 'Contender', 4: 'Playoff team', 3: 'In the mix', 2: 'Rebuilding', 1: 'Long rebuild' };
+
+/** What ownership will ask for, by squad strength in its own league. */
+function expectation(p: TeamPreview): string {
+  const share = p.rank / Math.max(1, p.leagueSize);
+  return share <= 0.14 ? 'Win the title' : share <= 0.34 ? 'Go deep in the playoffs' : share <= 0.6 ? 'Make the playoffs' : 'Develop the youth';
+}
+
 function TeamRow({ preview, selected, onSelect }: { preview: TeamPreview; selected: boolean; onSelect: () => void }) {
   const { team, stars } = preview;
   return (
@@ -151,28 +159,35 @@ export default function ChooseTeamScreen() {
             {!detail && <div className={styles.empty}>Select a team</div>}
             {detail && (
               <div className={styles.detail}>
-                <div className={`${styles.detailHead} diagonal-accent`}>
+                <div className={styles.hero} style={{ '--team': detail.team.colors.primary } as CSSProperties}>
+                  <BkImage path={detail.team.logo} alt="" className={styles.heroWatermark} />
                   <BkImage path={detail.team.logo} alt={detail.team.name} className={styles.detailLogo} />
-                  <div>
-                    <div className={styles.detailName}>{detail.team.city} {detail.team.name}</div>
-                    <div className={styles.detailMeta}>
-                      {detail.team.league === 'EL'
-                        ? <>{detail.team.country} &middot; {detail.team.arenaCapacity.toLocaleString()} capacity</>
-                        : <>{detail.team.conference} &middot; {detail.team.division}</>}
-                    </div>
-                    <Stars n={detail.stars} />
+                  <div className={styles.heroText}>
+                    <span className={styles.heroCity}>{detail.team.city}</span>
+                    <span className={styles.heroName}>{detail.team.name}</span>
+                    <span className={styles.heroTier}><Stars n={detail.stars} /> {TIER[detail.stars]}</span>
                   </div>
                 </div>
+                <div className={styles.facts}>
+                  <div><span>Board expects</span><b>{expectation(detail)}</b></div>
+                  <div><span>Squad strength</span><b className="mono-num">#{detail.rank} of {detail.leagueSize}</b></div>
+                  <div><span>{detail.team.league === 'EL' ? 'Country' : 'Conference'}</span><b>{detail.team.league === 'EL' ? detail.team.country : `${detail.team.conference} · ${detail.team.division}`}</b></div>
+                  <div><span>Arena</span><b className="mono-num">{detail.team.arenaCapacity.toLocaleString()} seats</b></div>
+                </div>
+                <div className={styles.keyHead}>Key players</div>
                 <div className={styles.detailPlayers}>
                   {detail.topPlayers.map((p) => (
                     <div key={p.id} className={styles.detailPlayer}>
-                      <span>{p.firstName} {p.lastName}</span>
-                      <span className={styles.detailOvr}>{p.ovr}</span>
+                      <BkImage path={p.face} alt={p.lastName} className={styles.keyFace} />
+                      <span className={styles.keyPos}>{p.pos}</span>
+                      <span className={styles.keyName}>{p.firstName} {p.lastName}</span>
+                      <span className={styles.keyBar}><span style={{ width: `${Math.max(0, Math.min(100, (p.ovr - 55) * 2.3))}%` }} /></span>
+                      <span className={`${styles.detailOvr} mono-num`}>{p.ovr}</span>
                     </div>
                   ))}
                 </div>
                 <button type="button" className={`${styles.startBtn} chevron-stripe`} onClick={start} disabled={starting}>
-                  {starting ? 'Starting…' : 'Start Career'}
+                  {starting ? 'Starting…' : 'Take the job'}
                 </button>
               </div>
             )}

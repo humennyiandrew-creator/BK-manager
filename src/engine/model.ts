@@ -47,6 +47,29 @@ export interface Player {
   loan?: { parent: string; until: string }; // on loan from another club
   potSeason?: number;             // POT change this season from performance (UI)
   minutesPromise?: { baselineMpg: number; checkDate: string; season: string }; // dynamic event follow-up
+  arc?: SeasonArc;                // rare breakout / collapse season in progress
+  arcHistory?: { season: string; kind: ArcKind; style: ArcStyle; delta: number; kept: number }[];
+  ovrTrack?: number[];            // weekly OVR this season (in-season trend line)
+}
+
+// ---------- season arcs: rare breakouts and collapses ----------
+
+export type ArcKind = 'breakout' | 'collapse';
+export type ArcStyle =
+  | 'shooter' | 'creator' | 'athlete' | 'stopper' | 'scorer' | 'allround'   // breakouts
+  | 'confidence' | 'body' | 'nagging' | 'focus';                            // collapses
+export interface SeasonArc {
+  season: string;
+  kind: ArcKind;
+  style: ArcStyle;
+  magnitude: number;              // target OVR change over the season (signed)
+  startWeek: number;              // progression week the arc starts showing
+  rampWeeks: number;              // weeks from start to full effect
+  applied: number;                // OVR change applied so far (signed)
+  revealed?: boolean;             // the league has noticed (news + user decision)
+  eventDone?: boolean;            // user decision event already raised
+  keep?: number;                  // ± adjustment to how much survives into next season
+  locked?: boolean;               // frozen at its current depth (user decision)
 }
 
 export interface Tactics {
@@ -67,6 +90,7 @@ export interface TeamState extends Team {
   tactics: Tactics;
   customRotation?: boolean;        // user-set depth chart: injuries only shuffle, never rebuild
   familiarity?: number;            // 0–100 how well the team knows its current offense/defense (practice + time)
+  chemistry?: number;              // 0–100 locker-room chemistry (weekly), a small on-court edge
   mleUsed?: boolean;               // mid-level exception used this season
   deadCap?: { season: string; amount: number }[]; // waived salary still on the cap
 }
@@ -166,6 +190,59 @@ export interface GameState {
   negotiations: Negotiation[];            // contract talks (user team), open + recent
   bids: TransferBid[];                    // European transfer market                     // pending + resolved log, newest first, kept to 60
   offseasonEventStage?: string;            // last offseason stage an event was rolled for
+  // ---- living world (optional: older saves fill these in lazily) ----
+  news?: NewsItem[];                       // league wire, newest first, capped
+  powerRankings?: PowerRankings;           // weekly power rankings per competition
+  matchObjectives?: MatchObjectiveSet;     // sponsor goals for the user's next game
+  objectiveLog?: { gameId: number; date: string; met: number; total: number; earned: number }[];
+  lockerRoom?: LockerRoom;                 // user team captain + team activities
+  weekly?: Record<string, WeeklyLine>;     // this week's per-player production (Player of the Week)
+}
+
+export interface WeeklyLine { g: number; score: number; pts: number; reb: number; ast: number }
+
+// ---------- living world: news wire, power rankings ----------
+
+export type NewsKind = 'breakout' | 'slump' | 'performance' | 'streak' | 'injury' | 'award' | 'rankings' | 'milestone' | 'other';
+export interface NewsItem {
+  id: number; date: string; kind: NewsKind;
+  headline: string; body?: string;
+  teamId?: string; playerId?: string;
+  tone?: 'good' | 'bad' | 'neutral';
+}
+export interface PowerRankings {
+  date: string;
+  /** competition id → team ids, best first */
+  ranks: Record<string, string[]>;
+  prev: Record<string, string[]>;
+}
+
+// ---------- sponsor match objectives ----------
+
+export type ObjectiveStat =
+  | 'win' | 'margin' | 'oppPts' | 'threes' | 'rebounds' | 'turnovers' | 'assists' | 'bench'
+  | 'playerPts' | 'playerReb' | 'playerAst' | 'steals' | 'blocks' | 'fgPct';
+export interface MatchObjective {
+  id: string;
+  sponsor: string;
+  stat: ObjectiveStat;
+  target: number;                  // threshold (≥ unless `under`)
+  under?: boolean;                 // met when value ≤ target
+  playerId?: string;
+  label: string;
+  reward: number;
+  hype: number;                    // fan hype on success
+  result?: { value: number; met: boolean };
+}
+export interface MatchObjectiveSet { gameId: number; list: MatchObjective[]; settled?: boolean }
+
+// ---------- locker room ----------
+
+export type TeamActivityId = 'dinner' | 'retreat' | 'playersMeeting' | 'community' | 'film';
+export interface LockerRoom {
+  captain?: string;                // player id
+  lastActivity?: Partial<Record<TeamActivityId, string>>; // activity → date last run
+  bond?: number;                   // −10..+10 temporary chemistry from activities, decays weekly
 }
 
 export type OffseasonStage = 'draft' | 'resign' | 'fa' | 'camp';

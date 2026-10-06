@@ -1,0 +1,115 @@
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.tab {
+  flex: 1;
+  background: transparent;
+  border: 1px solid var(--panel-border);
+  border-radius: 2px;
+  color: var(--text-muted);
+  font-size: 0.6rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.25rem 0;
+}
+
+.tabOn {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.empty {
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  padding: 0.4rem 0;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  padding: 0.35rem 0.3rem;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--panel-border);
+  color: var(--text);
+  text-align: left;
+}
+
+.row:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.mine {
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.rank {
+  width: 1rem;
+  font-weight: 900;
+  font-style: italic;
+  color: var(--text-dim);
+}
+
+.row:first-of-type .rank {
+  color: #e3a32e;
+}
+
+.face {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--panel-alt);
+  flex-shrink: 0;
+}
+
+.who {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.team {
+  font-size: 0.6rem;
+  font-weight: 800;
+  color: var(--text-dim);
+  letter-spacing: 0.06em;
+}
+
+.line {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem 1.2rem;
+}
+
+.blockTitle {
+  font-size: 0.66rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  margin-bottom: 0.3rem;
+}

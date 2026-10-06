@@ -11,8 +11,11 @@ import type { PbpLine, Snapshot } from '../../engine/sim/live';
 import { lineupProfile, offenseFit, defenseFit } from '../../engine/playbook/fit';
 import BkImage from '../components/BkImage';
 import BipolarBar from '../components/BipolarBar';
-import CountUp from '../components/CountUp';
 import { COURT_W, COURT_H, colorDist, drawBall, drawBallTrail, drawCourt, drawPlayer, drawScreen, fitCourt } from '../court';
+import { FlowChart, ShotChart } from '../components/match/MatchCharts';
+import { IntensityControl, MomentumMeter, RunBanner, TeamTalkPicker, WinBar } from '../components/match/MatchHud';
+import { PostgameReport, PregamePreview, objectiveStatusFn } from '../components/match/MatchReport';
+import { formatMoneyShort } from '../format';
 import { play, startCrowd, stopCrowd, crowdIntensity } from '../sound';
 import styles from './MatchScreen.module.css';
 
@@ -89,7 +92,8 @@ function fmtClock(sec: number): string {
 }
 const periodLabel = (p: number) => (p <= 4 ? `Q${p}` : `OT${p - 4}`);
 
-type RightTab = 'pbp' | 'box' | 'tactics' | 'lineup';
+type RightTab = 'pbp' | 'box' | 'flow' | 'shots' | 'tactics' | 'lineup';
+const RIGHT_TABS: Record<RightTab, string> = { pbp: 'Feed', box: 'Box', flow: 'Flow', shots: 'Shots', tactics: 'Tactics', lineup: 'Lineup' };
 
 export default function MatchScreen() {
   const s = useGameState();
@@ -197,7 +201,8 @@ export default function MatchScreen() {
         const glowTs = scorerGlowRef.current.get(p.id);
         const glow = glowTs ? Math.max(0, 1 - (now - glowTs) / 650) : 0;
         if (glowTs && glow <= 0) scorerGlowRef.current.delete(p.id);
-        drawPlayer(ctx, { x: p.x, y: p.y, label: p.jersey, sub: p.name, energy: p.energy, fouls: p.fouls, fill: fillOf(p.side), hasBall: p.ball, glow });
+        const heat = p.streak >= 3 ? 1 : p.streak <= -4 ? -1 : 0;
+        drawPlayer(ctx, { x: p.x, y: p.y, label: p.jersey, sub: p.name, energy: p.energy, fouls: p.fouls, fill: fillOf(p.side), hasBall: p.ball, glow, heat, pulse: (Math.sin(now / 160) + 1) / 2 });
       }
       if (snap.state !== 'pregame') {
         const trail = ballTrailRef.current;
@@ -225,7 +230,12 @@ export default function MatchScreen() {
   const userTeamState = s.teams[s.userTeamId];
   const userSideObj: Side = userSide === 0 ? match.H : match.A;
   const snap: Snapshot = match.snapshot();
-  const maxTo = snap.period >= 3 ? 4 : 7;
+  const maxTo = match.maxTimeouts();
+  const objectives = s.matchObjectives?.gameId === game.id ? s.matchObjectives.list : null;
+  const objStatus = objectiveStatusFn(match, userSide);
+  const homeColor = home.colors.primary;
+  const awayColor = colorDist(home.colors.primary, away.colors.primary) < 60 ? away.colors.secondary : away.colors.primary;
+  const sides = { homeColor, awayColor, homeAbbr: home.abbr, awayAbbr: away.abbr };
 
   function handleTipOff() { startCrowd(); match!.start(); }
   function handleQuickSim() {
@@ -250,27 +260,47 @@ export default function MatchScreen() {
   return (
     <div className={styles.wrap}>
       <Scoreboard s={s} game={game} snap={snap} home={home} away={away} maxTo={maxTo} />
+      <div className={styles.hud}>
+        <div className={styles.hudObjectives}>
+          {objectives ? objectives.map((o) => {
+            const st = objStatus(o);
+            return (
+              <span key={o.id} className={`${styles.objChip} ${styles[`obj_${st.status}`]}`} title={`${o.sponsor} · ${formatMoneyShort(o.reward)}`}>
+                <span className={styles.objMark}>{st.status === 'met' ? '✓' : st.status === 'failed' ? '✗' : '◆'}</span>
+                {o.label}
+                <b className="mono-num">{o.stat === 'win' ? '' : o.stat === 'fgPct' ? `${st.value}%` : st.value}</b>
+              </span>
+            );
+          }) : <span className={styles.hudMuted}>No sponsor objectives for this game</span>}
+        </div>
+        <MomentumMeter value={snap.momentum} {...sides} />
+        <WinBar wp={snap.winProb} {...sides} />
+      </div>
 
       <div className={styles.main}>
         <div className={styles.courtWrap}>
           <canvas ref={canvasRef} />
+          {snap.state === 'live' && <RunBanner run={snap.run} abbr={snap.run ? (snap.run.side === 0 ? home.abbr : away.abbr) : ''} color={snap.run?.side === 0 ? homeColor : awayColor} />}
           {snap.state === 'pregame' && (
-            <Overlay>
-              <div className={styles.pregameRow}>
-                <TeamBig team={home} />
-                <span className={styles.vs}>VS</span>
-                <TeamBig team={away} />
-              </div>
-              <div className={styles.overlayBtns}>
-                <button className={styles.primaryBtn} onClick={handleTipOff}>Tip-Off</button>
-                <button className={styles.secondaryBtn} onClick={handleQuickSim}>Quick Sim</button>
-              </div>
+            <Overlay wide>
+              <PregamePreview
+                match={match}
+                objectives={objectives}
+                header={null}
+                actions={(
+                  <div className={styles.overlayBtns}>
+                    <button className={styles.primaryBtn} onClick={handleTipOff}>Tip-Off</button>
+                    <button className={styles.secondaryBtn} onClick={handleQuickSim}>Quick Sim</button>
+                  </div>
+                )}
+              />
             </Overlay>
           )}
           {snap.state === 'timeout' && (
-            <Overlay>
-              <div className={styles.overlayTitle}>{(snap.pbp.at(-1)?.text ?? 'TIMEOUT').toUpperCase()}</div>
-              <div className={styles.overlayHint}>Adjust Tactics or Lineup, then resume.</div>
+            <Overlay wide>
+              <div className={styles.overlayTitle}>{([...snap.pbp].reverse().find((l) => l.text.startsWith('Timeout'))?.text ?? 'Timeout').toUpperCase()}</div>
+              <div className={styles.overlayHint}>Give the huddle a message, adjust Tactics or Lineup, then resume.</div>
+              <TeamTalkPicker used={match.talkUsed[userSide]} active={snap.talk[userSide]} onPick={(t) => { match!.teamTalk(userSide, t); setTick((x) => x + 1); }} />
               <button className={styles.primaryBtn} onClick={() => match!.resume()}>Resume</button>
             </Overlay>
           )}
@@ -283,30 +313,31 @@ export default function MatchScreen() {
           )}
           {snap.state === 'final' && (
             <Overlay wide>
-              <div className={styles.overlayTitle}>
-                FINAL — {home.abbr} <CountUp value={snap.score[0]} /> · <CountUp value={snap.score[1]} /> {away.abbr}
-              </div>
-              <LineScore snap={snap} home={home} away={away} />
-              <div className={styles.topPerfRow}>
-                <TopPerformers side={match.H} />
-                <TopPerformers side={match.A} />
-              </div>
-              <button className={styles.primaryBtn} onClick={handleContinueFinal}>Continue</button>
+              <PostgameReport
+                s={s}
+                match={match}
+                userSide={userSide}
+                objectives={objectives}
+                lineScore={<LineScore snap={snap} home={home} away={away} />}
+                actions={<button className={styles.primaryBtn} onClick={handleContinueFinal}>Continue</button>}
+              />
             </Overlay>
           )}
         </div>
 
         <div className={styles.rightPanel}>
           <div className={styles.tabsRow}>
-            {(['pbp', 'box', 'tactics', 'lineup'] as RightTab[]).map((t) => (
+            {(Object.keys(RIGHT_TABS) as RightTab[]).map((t) => (
               <button key={t} className={t === rightTab ? `${styles.tab} ${styles.tabActive}` : styles.tab} onClick={() => setRightTab(t)}>
-                {{ pbp: 'Play-by-Play', box: 'Box Score', tactics: 'Tactics', lineup: 'Lineup' }[t]}
+                {RIGHT_TABS[t]}
               </button>
             ))}
           </div>
           <div className={styles.tabBody}>
             {rightTab === 'pbp' && <PbpTab pbp={snap.pbp} home={home.colors.primary} away={away.colors.primary} />}
             {rightTab === 'box' && <BoxTab home={match.H} away={match.A} homeAbbr={home.abbr} awayAbbr={away.abbr} />}
+            {rightTab === 'flow' && <FlowChart flow={match.flow} rules={match.rules} {...sides} />}
+            {rightTab === 'shots' && <ShotChart shots={match.shots} homeAbbr={home.abbr} awayAbbr={away.abbr} nameOf={(id) => s.players[id]?.lastName ?? '?'} />}
             {rightTab === 'tactics' && (
               <TacticsTab
                 tactics={userTeamState.tactics}
@@ -352,6 +383,7 @@ export default function MatchScreen() {
             className={styles.speedSlider}
           />
         </div>
+        <IntensityControl value={snap.intensity[userSide]} onChange={(v) => { match!.setIntensity(userSide, v); setTick((x) => x + 1); }} disabled={snap.state === 'final'} />
         <button className={styles.controlBtn} onClick={() => match!.requestTimeout(userSide)} disabled={snap.timeouts[userSide] <= 0 || snap.state !== 'live'}>
           Timeout ({snap.timeouts[userSide]})
         </button>
@@ -405,15 +437,6 @@ function TeamScore({ team, score, bonus, timeouts, maxTo, possession, align }: a
   );
 }
 
-function TeamBig({ team }: { team: any }) {
-  return (
-    <div className={styles.teamBig}>
-      <BkImage path={team.logo} alt={team.abbr} className={styles.teamBigLogo} />
-      <div className={styles.teamBigName}>{team.city} {team.name}</div>
-    </div>
-  );
-}
-
 function LineScore({ snap, home, away }: { snap: Snapshot; home: any; away: any }) {
   const periods = snap.state === 'break' ? snap.period - 1 : snap.period;
   const rows: [number, number][] = [];
@@ -435,21 +458,6 @@ function LineScore({ snap, home, away }: { snap: Snapshot; home: any; away: any 
         <tr><td>{away.abbr}</td>{rows.map((r, i) => <td key={i}>{r[1]}</td>)}<td>{snap.score[1]}</td></tr>
       </tbody>
     </table>
-  );
-}
-
-function TopPerformers({ side }: { side: Side }) {
-  const top = [...side.roster].sort((a, b) => b.line.pts - a.line.pts).slice(0, 3);
-  return (
-    <div className={`${styles.topPerfCol} stagger`}>
-      <div className={styles.topPerfTeam}>{side.team.abbr}</div>
-      {top.map((sp) => (
-        <div key={sp.p.id} className={styles.topPerfRow2}>
-          <span>{sp.p.lastName}</span>
-          <span>{sp.line.pts} pts · {sp.line.orb + sp.line.drb} reb · {sp.line.ast} ast</span>
-        </div>
-      ))}
-    </div>
   );
 }
 

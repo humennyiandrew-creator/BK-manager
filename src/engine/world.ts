@@ -17,6 +17,7 @@ import { buildRoundRobin } from './schedule';
 import { euroSalary } from './euro';
 import { genPlayer } from './gen';
 import { hashString, mulberry32 } from './rng';
+import { rollSeasonArcs } from './arcs';
 
 export const MAX_STANDARD = 15;
 export const MAX_TWO_WAY = 3;
@@ -63,15 +64,7 @@ export function newGame(teams: Team[], raw: RawPlayer[], userTeamId: string, see
   }
 
   const season = `${seasonYear}-${String((seasonYear + 1) % 100).padStart(2, '0')}`;
-  const all = Object.values(teamStates);
-  const games: Game[] = [];
-  for (const lg of leagueIds) {
-    const list = all.filter((t) => (t.league ?? 'NBA') === lg);
-    if (list.length < 4) continue;
-    const def = leagueOf(lg);
-    if (lg === 'NBA') games.push(...buildSchedule(list, seasonYear, seed, games.length + 1));
-    else games.push(...buildRoundRobin(list, lg, `${seasonYear}-${String(def.start.month).padStart(2, '0')}-${String(def.start.day).padStart(2, '0')}`, def.gameDays, seed, games.length + 10_001));
-  }
+  const games = buildSeasonGames(Object.values(teamStates), seasonYear, seed, 1);
   const user = teamStates[userTeamId];
   const userComp = teamStates[userTeamId].league ?? 'NBA';
   const regularEnd = games.filter((g) => (g.comp ?? 'NBA') === userComp).reduce((m, g) => (g.date > m ? g.date : m), '');
@@ -83,7 +76,7 @@ export function newGame(teams: Team[], raw: RawPlayer[], userTeamId: string, see
       subject: `Welcome to the ${user.city} ${user.name}`,
       body: `The board welcomes you as head coach for the ${season} season. Opening night is ${games.find((g) => g.home === userTeamId || g.away === userTeamId)?.date}.`,
     }],
-    nextId: games.length + 2,
+    nextId: games.reduce((m, g) => Math.max(m, g.id), 0) + 2, // above every game id (other leagues number from 10k+)
     staff: [], facilities: {}, finance: undefined as unknown as GameState['finance'], board: undefined as unknown as GameState['board'],
     training: Object.fromEntries(teams.map((t) => [t.id, defaultTraining()])),
     picks: [], tradeOffers: [], transactions: [], draftClass: [], draftOrder: [],
@@ -97,7 +90,21 @@ export function newGame(teams: Team[], raw: RawPlayer[], userTeamId: string, see
   initFinances(s);
   initBoard(s);
   initPicks(s);
+  rollSeasonArcs(s);
   return s;
+}
+
+/** Every competition's regular season: the NBA's 82-game schedule plus each other league's round robin. */
+export function buildSeasonGames(teams: TeamState[], seasonYear: number, seed: number, firstId: number): Game[] {
+  const games: Game[] = [];
+  for (const lg of [...new Set(teams.map((t) => (t.league ?? 'NBA') as LeagueId))]) {
+    const list = teams.filter((t) => (t.league ?? 'NBA') === lg);
+    if (list.length < 4) continue;
+    const def = leagueOf(lg);
+    if (lg === 'NBA') games.push(...buildSchedule(list, seasonYear, seed, firstId + games.length));
+    else games.push(...buildRoundRobin(list, lg, `${seasonYear}-${String(def.start.month).padStart(2, '0')}-${String(def.start.day).padStart(2, '0')}`, def.gameDays, seed, firstId + games.length + 10_000));
+  }
+  return games;
 }
 
 /** Preseason camp rosters run 16–25. Keep 15 standard + 3 two-way, cut the rest to free agency. */

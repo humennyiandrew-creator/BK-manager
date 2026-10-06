@@ -552,3 +552,69 @@
     border-bottom: 1px solid var(--panel-border);
   }
 }
+
+/* ---- season arcs ---- */
+
+.arcRow {
+  display: flex;
+  justify-content: center;
+  margin-top: -0.2rem;
+}
+
+.seasonTrend {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.trendDelta {
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.arcCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-top: 0.6rem;
+  padding: 0.7rem 0.8rem;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid;
+}
+
+.arcUp {
+  border-left-color: var(--positive);
+  background: rgba(61, 220, 151, 0.07);
+}
+
+.arcDown {
+  border-left-color: var(--negative);
+  background: rgba(255, 77, 94, 0.07);
+}
+
+.arcCard > :first-child {
+  align-self: flex-start;
+}
+
+.arcTitle {
+  font-size: 1rem;
+  font-weight: 900;
+  font-style: italic;
+  text-transform: uppercase;
+}
+
+.arcHistory {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.6rem;
+}
+
+.arcHistRow {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr auto;
+  gap: 0.6rem;
+  font-size: 0.78rem;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid var(--panel-border);
+}

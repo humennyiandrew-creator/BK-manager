@@ -10,6 +10,7 @@ export const TAB_TITLES: Record<TabId, { title: string; subtitle: string }> = {
   squadHub: { title: 'Squad Hub', subtitle: 'Contracts and cap sheet' },
   training: { title: 'Training', subtitle: 'Practice plans' },
   playbook: { title: 'Playbook', subtitle: 'Tactics and set plays' },
+  locker: { title: 'Locker Room', subtitle: 'Chemistry, leadership and team activities' },
   transfers: { title: 'Transfers', subtitle: 'Trade and free agency' },
   draft: { title: 'Draft', subtitle: 'Prospect scouting' },
   staff: { title: 'Staff', subtitle: 'Coaching and front office' },
@@ -17,5 +18,6 @@ export const TAB_TITLES: Record<TabId, { title: string; subtitle: string }> = {
   board: { title: 'Board', subtitle: 'Ownership expectations' },
   finances: { title: 'Finances', subtitle: 'Budget and payroll' },
   standings: { title: 'Standings', subtitle: 'League table' },
+  league: { title: 'League Hub', subtitle: 'Power rankings, storylines and award races' },
   settings: { title: 'Settings', subtitle: 'Preferences' }
 };

@@ -4,6 +4,7 @@ import { create } from 'zustand';
 import type { Game, GameState } from '../../engine/model';
 import { LiveMatch } from '../../engine/sim/live';
 import { hashString } from '../../engine/rng';
+import { leagueOf } from '../../engine/leagues';
 
 interface MatchStore {
   match: LiveMatch | null;
@@ -28,7 +29,9 @@ export const useMatch = create<MatchStore>((set) => ({
   start: (s, game) => {
     const userSide: 0 | 1 = game.home === s.userTeamId ? 0 : 1;
     const seed = hashString(`${s.seed}|${game.id}`);
-    const match = new LiveMatch(s.teams[game.home], s.teams[game.away], s.players, seed, userSide);
+    // Each competition plays its own rules: EuroLeague games are 40-minute FIBA games, live too.
+    const league = leagueOf(game.comp ?? s.teams[game.home].league);
+    const match = new LiveMatch(s.teams[game.home], s.teams[game.away], s.players, seed, userSide, { ...league.rules, possSec: league.possSec });
     set({ match, game, speed: 5, paused: false, rev: 0 });
   },
   setSpeed: (speed) => set({ speed }),

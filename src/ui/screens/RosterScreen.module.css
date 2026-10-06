@@ -274,3 +274,9 @@
   padding: 0.25rem 0.4rem;
   border-bottom: 1px solid var(--panel-border);
 }
+
+.nameCell {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}

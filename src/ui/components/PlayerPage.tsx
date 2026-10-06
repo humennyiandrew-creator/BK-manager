@@ -23,6 +23,8 @@ import ConfirmDialog from './ConfirmDialog';
 import MeetingDialog from './MeetingDialog';
 import NegotiationModal from './NegotiationModal';
 import TeamBadge from './TeamBadge';
+import ArcBadge from './hub/ArcBadge';
+import { ARC_LABEL } from '../../engine/arcs';
 import { toast } from './Toasts';
 import { play } from '../sound';
 import styles from './PlayerPage.module.css';
@@ -164,6 +166,10 @@ export default function PlayerPage({ s, playerId, onClose }: Props) {
               ); })()}
             </div>
 
+            {!p.prospect && p.arc?.revealed && p.arc.season === s.season && (
+              <div className={styles.arcRow}><ArcBadge arc={p.arc} season={s.season} showLabel /></div>
+            )}
+
             {!p.prospect && (
               <div className={styles.moraleBlock}>
                 <div className={styles.moraleHead}>
@@ -210,7 +216,7 @@ export default function PlayerPage({ s, playerId, onClose }: Props) {
               {tab === 'attributes' && <AttributesTab s={s} p={p} scoutedRange={scouted?.range} />}
               {tab === 'season' && <SeasonTab s={s} p={p} />}
               {tab === 'career' && <CareerTab p={p} />}
-              {tab === 'development' && <DevelopmentTab p={p} />}
+              {tab === 'development' && <DevelopmentTab s={s} p={p} />}
               {tab === 'contract' && <ContractTab s={s} p={p} />}
             </div>
           </div>
@@ -368,6 +374,20 @@ function CareerTab({ p }: { p: Player }) {
           </div>
         </div>
       )}
+      {!!p.arcHistory?.length && (
+        <>
+          <div className={styles.sectionTitle}>Defining Seasons</div>
+          <div className={styles.arcHistory}>
+            {p.arcHistory.slice().reverse().map((h) => (
+              <div key={h.season} className={styles.arcHistRow}>
+                <span>{h.season}</span>
+                <span className={h.kind === 'breakout' ? styles.positive : styles.negative}>{h.kind === 'breakout' ? '▲ Breakout' : '▼ Slump'} · {ARC_LABEL[h.style]}</span>
+                <span className="mono-num">{h.delta > 0 ? '+' : ''}{h.delta} OVR, kept {h.kept > 0 ? '+' : ''}{h.kept}</span>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
       <div className={styles.sectionTitle}>History</div>
       {p.history.length === 0 && <div className={styles.empty}>No prior seasons on record.</div>}
       {p.history.length > 0 && (
@@ -387,9 +407,28 @@ function CareerTab({ p }: { p: Player }) {
   );
 }
 
-function DevelopmentTab({ p }: { p: Player }) {
+function DevelopmentTab({ s, p }: { s: GameState; p: Player }) {
+  const track = p.ovrTrack ?? [];
+  const delta = track.length > 1 ? track[track.length - 1] - track[0] : 0;
+  const arc = p.arc?.revealed && p.arc.season === s.season ? p.arc : undefined;
   return (
     <div className={styles.devWrap}>
+      <div className={styles.sectionTitle}>This Season</div>
+      <div className={styles.seasonTrend}>
+        {track.length > 1 ? <Sparkline values={track} width={220} height={40} color={delta > 0 ? 'var(--positive)' : delta < 0 ? 'var(--negative)' : 'var(--cyan)'} /> : <span className={styles.formText}>The trend line builds week by week once the season is under way.</span>}
+        {track.length > 1 && <span className={`${styles.trendDelta} ${delta > 0 ? styles.positive : delta < 0 ? styles.negative : ''}`}>{track[0]} → {track[track.length - 1]} ({delta > 0 ? '+' : ''}{delta})</span>}
+      </div>
+      {arc && (
+        <div className={`${styles.arcCard} ${arc.kind === 'breakout' ? styles.arcUp : styles.arcDown}`}>
+          <ArcBadge arc={arc} season={s.season} />
+          <span className={styles.arcTitle}>{ARC_LABEL[arc.style]}</span>
+          <span className={styles.formText}>
+            {arc.kind === 'breakout'
+              ? 'A rare breakout season. Young players usually keep all of it; veterans give some back over the summer.'
+              : arc.locked ? 'The slide has been stopped. He should recover part of it over the summer.' : 'A rare collapse. Young players often bounce back; for veterans it can be the start of the end.'}
+          </span>
+        </div>
+      )}
       <div className={styles.sectionTitle}>Form</div>
       <div className={styles.formRow}>
         {(() => { const f = formChip(p.form); return <span className={styles[f.variant]}>{f.icon} {(p.form ?? 0).toFixed(1)}</span>; })()}

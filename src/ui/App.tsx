@@ -1,9 +1,8 @@
 import { useEffect, useMemo, useRef, type CSSProperties } from 'react';
 import { useUI, type TabId } from './store/useUI';
 import { useGame, useGameState } from './store/useGame';
-import TopBar from './components/TopBar';
-import TabBar from './components/TabBar';
-import InfoStrip from './components/InfoStrip';
+import NavRail from './components/NavRail';
+import TeamHeader from './components/TeamHeader';
 import ContinueWidget from './components/ContinueWidget';
 import EventModal from './components/EventModal';
 import PlayerPage from './components/PlayerPage';
@@ -15,9 +14,7 @@ import MatchScreen from './screens/MatchScreen';
 import CareerSummary from './screens/CareerSummary';
 import BetweenJobsScreen from './screens/BetweenJobsScreen';
 import { SCREENS } from './screens';
-import { userGameToday, nextUserGame, opponentOf, daysUntil, userTeam } from './selectors';
-import { formatDate } from './format';
-import { offseasonStageLabel } from '../engine/offseason';
+import { userTeam } from './selectors';
 import { pendingUserEvent } from '../engine/events';
 import { computeAccent } from './accent';
 import { play } from './sound';
@@ -25,7 +22,7 @@ import styles from './App.module.css';
 
 /** Tabs that require an active job — show a "between jobs" empty state while unemployed. */
 const UNEMPLOYED_LOCKED = new Set<TabId>([
-  'transfers', 'training', 'playbook', 'squadHub', 'staff', 'facilities', 'board', 'finances', 'draft'
+  'transfers', 'training', 'playbook', 'squadHub', 'staff', 'facilities', 'board', 'finances', 'draft', 'locker'
 ]);
 
 /** Delegated button-sound listener, mounted once at the app root. */
@@ -69,6 +66,8 @@ function Shell() {
   const closeEvent = useUI((s) => s.closeEvent);
   const playerId = useUI((s) => s.playerId);
   const closePlayer = useUI((s) => s.closePlayer);
+  const navCollapsed = useUI((s) => s.navCollapsed);
+  const toggleNav = useUI((s) => s.toggleNav);
   const Screen = SCREENS[tab];
   const pending = s ? pendingUserEvent(s) : undefined;
   const seenPendingId = useRef<string | null>(null);
@@ -100,19 +99,12 @@ function Shell() {
     return <CareerSummary s={s} onBack={() => { reset(); setView('startMenu'); }} />;
   }
 
-  const today = userGameToday(s);
-  const next = today ?? nextUserGame(s);
-  const nextLabel = s.phase === 'offseason'
-    ? offseasonStageLabel(s)
-    : next
-    ? (() => {
-        const opp = opponentOf(s, next);
-        const d = daysUntil(s, next.date);
-        const side = next.home === s.userTeamId ? 'vs' : '@';
-        return d <= 0 ? `${side} ${opp.abbr} today` : `${side} ${opp.abbr} in ${d} day${d === 1 ? '' : 's'}`;
-      })()
-    : 'Season complete';
   const unread = s.messages.filter((m) => !m.read).length;
+  const badges: Partial<Record<TabId, number>> = {
+    messages: unread,
+    transfers: s.tradeOffers.length + s.bids.filter((b) => b.fromTeam === s.userTeamId && b.status === 'pending').length,
+    board: s.press?.pending ? 1 : 0,
+  };
 
   const accentStyle = {
     '--accent': accent.accent,
@@ -122,16 +114,15 @@ function Shell() {
 
   return (
     <div className={styles.shell} style={accentStyle}>
-      <TopBar continueSlot={<ContinueWidget s={s} busy={busy} onContinue={doContinue} />} />
-      <div className={styles.content}>
-        <ScreenTransition tabKey={tab}>
-          {s.manager.unemployed && UNEMPLOYED_LOCKED.has(tab) ? <BetweenJobsScreen tab={tab} /> : <Screen />}
-        </ScreenTransition>
+      <NavRail active={tab} onSelect={setTab} badges={badges} collapsed={navCollapsed} onToggle={toggleNav} />
+      <div className={styles.main}>
+        <TeamHeader s={s} continueSlot={<ContinueWidget s={s} busy={busy} onContinue={doContinue} />} />
+        <div className={styles.content}>
+          <ScreenTransition tabKey={tab}>
+            {s.manager.unemployed && UNEMPLOYED_LOCKED.has(tab) ? <BetweenJobsScreen tab={tab} /> : <Screen />}
+          </ScreenTransition>
+        </div>
       </div>
-      <div className={styles.infoRow}>
-        <InfoStrip nextGame={nextLabel} cash={s.finance.cash} date={formatDate(s.date)} />
-      </div>
-      <TabBar active={tab} onSelect={setTab} badges={{ messages: unread }} />
       {activeEventId && <EventModal s={s} eventId={activeEventId} onClose={closeEvent} />}
       {playerId && <PlayerPage s={s} playerId={playerId} onClose={closePlayer} />}
     </div>
