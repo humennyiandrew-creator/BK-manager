@@ -51,6 +51,7 @@ export interface SP {
   hurt?: boolean;       // injured during a live game: out for the night
   mood: number;         // shooting edge from morale and form, fixed for the game
   cap: number;          // tired legs: in-game recovery never gets him above where he started
+  effortSec?: number;   // live games: seconds on the floor weighted by effort (-1 conserve, +1 push)
 }
 
 export interface Side {
@@ -188,11 +189,18 @@ export function schemeFit(def: Side, off: Side): DefFit {
   return c.fit;
 }
 
+/** Final box line for one player. */
+export const boxLine = (sp: SP): BoxLine => ({
+  ...sp.line, min: Math.round(sp.sec / 6) / 10, gp: sp.sec > 0 ? 1 : 0,
+  ...(sp.effortSec && sp.sec ? { effort: +(sp.effortSec / sp.sec).toFixed(2) } : {}),
+});
+
 export function tickEnergy(s: Side, sec: number, drainMul = 1) {
   drainMul *= sideFit(s).fit.drainMul * (1 + intensityOf(s) * 0.5);
   for (const sp of s.roster) {
     if (s.court.includes(sp)) {
       sp.sec += sec;
+      if (intensityOf(s)) sp.effortSec = (sp.effortSec ?? 0) + sec * intensityOf(s);
       sp.energy = Math.max(0.05, sp.energy - sec * K.drain * drainMul * (1.6 - a(sp).stamina / 100) * (1 + (1 - sp.cap) * 0.8));
     } else sp.energy = Math.min(sp.cap, sp.energy + sec * K.recover);
   }
@@ -508,6 +516,6 @@ export function simGame(home: TeamState, away: TeamState, players: Record<string
     }
     periods.push([H.pts - start[0], A.pts - start[1]]);
   }
-  const box = (s: Side) => s.roster.map((sp) => ({ ...sp.line, min: Math.round(sp.sec / 6) / 10, gp: sp.sec > 0 ? 1 : 0 }));
+  const box = (s: Side) => s.roster.map(boxLine);
   return { home: H.pts, away: A.pts, periods, box: { home: box(H), away: box(A) } }; // caller strips box for non-user games
 }

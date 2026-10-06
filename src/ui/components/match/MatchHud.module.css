@@ -174,3 +174,15 @@
   font-size: 0.72rem;
   color: var(--positive);
 }
+
+.legs {
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.1rem 0.4rem;
+  border-radius: 2px;
+  background: var(--rail);
+}
+
+.legsFresh { color: var(--win); }
+.legsTiring { color: var(--warn); }
+.legsGassed { color: var(--loss); }

@@ -1,0 +1,205 @@
+.strip {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.5rem;
+  background: var(--slab);
+  border: 1px solid var(--seam-soft);
+  border-radius: var(--radius);
+}
+
+.five {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.4rem;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.45rem 0.55rem 0.4rem;
+  background: var(--slab-2);
+  border: 1px solid var(--seam-soft);
+  border-radius: var(--radius);
+  color: var(--chalk);
+  text-align: left;
+}
+
+.card:hover {
+  border-color: var(--chalk-3);
+}
+
+.selected,
+.selected:hover {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+
+.top {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.num {
+  font-size: 1.25rem;
+  color: var(--chalk-3);
+}
+
+.name {
+  flex: 1;
+  font-weight: 650;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pctLabel {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.25rem;
+  background: none !important;
+}
+
+.bar {
+  position: relative;
+  display: block;
+  height: 8px;
+  background: var(--rail);
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.bar > span {
+  display: block;
+  height: 100%;
+  transition: width 400ms linear;
+}
+
+.bar > i {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.fresh { background: var(--win); color: var(--win); }
+.tiring { background: var(--warn); color: var(--warn); }
+.gassed { background: var(--loss); color: var(--loss); }
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.75rem;
+  color: var(--chalk-3);
+}
+
+.fouls {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.fouls > i {
+  display: block;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--rail);
+}
+
+.fouls > i.foulOn { background: var(--chalk-2); }
+.fouls > i.foulHot { background: var(--loss); }
+
+.plus { color: var(--win); }
+.minus { color: var(--loss); }
+
+.warn {
+  margin-left: auto;
+  font-weight: 700;
+  color: var(--loss);
+}
+
+.tiringWord {
+  margin-left: auto;
+  font-weight: 650;
+  color: var(--warn);
+}
+
+.benchRow {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.benchLabel {
+  font-size: 0.78rem;
+  font-weight: 650;
+  color: var(--chalk-2);
+  min-width: 3.4rem;
+}
+
+.chip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 5.2rem;
+  padding: 0.25rem 0.45rem;
+  background: var(--slab-2);
+  border: 1px solid var(--seam-soft);
+  border-radius: var(--radius);
+  color: var(--chalk-2);
+  text-align: left;
+}
+
+.chip:disabled {
+  cursor: default;
+}
+
+.chipLive:not(:disabled) {
+  color: var(--chalk);
+  border-color: var(--seam);
+}
+
+.chipLive:not(:disabled):hover {
+  border-color: var(--accent);
+}
+
+.chipName {
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.chipBar {
+  display: block;
+  height: 4px;
+  background: var(--rail);
+}
+
+.chipBar > span {
+  display: block;
+  height: 100%;
+}
+
+.chipOut {
+  font-size: 0.7rem;
+  color: var(--loss);
+}
+
+.theirs {
+  margin-left: auto;
+  font-size: 0.78rem;
+  color: var(--chalk-3);
+}
+
+.theirs b {
+  background: none !important;
+  font-size: 0.9rem;
+}

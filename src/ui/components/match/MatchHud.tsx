@@ -44,16 +44,18 @@ export function RunBanner({ run, abbr, color }: { run: Run | null; abbr: string;
 }
 
 const MODES: { v: Intensity; label: string; hint: string }[] = [
-  { v: -1, label: 'Conserve', hint: 'Players save energy: slower drain, slightly worse execution.' },
+  { v: -1, label: 'Conserve', hint: 'Save the legs: energy drains half as fast and players carry less fatigue into the next game, but the team is a little less sharp.' },
   { v: 0, label: 'Balanced', hint: 'Normal effort.' },
-  { v: 1, label: 'Push', hint: 'Max effort: better shots and pressure, but energy drains ~35% faster.' },
+  { v: 1, label: 'Push', hint: 'Sharper on both ends, but energy drains 50% faster, injuries are likelier and players carry more fatigue into the next game. Tired players shoot, defend and handle the ball worse, so push in bursts.' },
 ];
 
-/** F1 Manager-style effort mode for the whole team (like fuel / ERS modes). */
-export function IntensityControl({ value, onChange, disabled }: { value: Intensity; onChange: (v: Intensity) => void; disabled?: boolean }) {
+/** Effort mode for the whole team, with the legs it is spending (like fuel modes in a racing manager). */
+export function IntensityControl({ value, onChange, disabled, legs }: { value: Intensity; onChange: (v: Intensity) => void; disabled?: boolean; legs?: number }) {
+  const tone = legs == null ? '' : legs >= 0.75 ? styles.legsFresh : legs >= 0.55 ? styles.legsTiring : styles.legsGassed;
   return (
     <div className={styles.modes}>
       <span className={styles.modesLabel}>Effort</span>
+      {legs != null && <span className={`${styles.legs} ${tone}`} title="Average energy of your five on the floor">Legs {Math.round(legs * 100)}%</span>}
       {MODES.map((m) => (
         <button
           key={m.v}

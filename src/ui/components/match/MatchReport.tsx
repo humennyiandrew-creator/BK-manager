@@ -4,6 +4,7 @@ import type { Side, SP } from '../../../engine/sim/fast';
 import type { LiveMatch } from '../../../engine/sim/live';
 import { SCHEMES, SYSTEMS } from '../../../engine/playbook/systems';
 import { gameScore } from '../../../engine/news';
+import { PLAN_LABEL } from '../../../engine/prep';
 import { objectiveStatus, objectiveValue, type ObjCtx } from '../../../engine/objectives';
 import BkImage from '../BkImage';
 import ObjectiveList from '../hub/ObjectiveList';
@@ -12,6 +13,13 @@ import styles from './MatchReport.module.css';
 
 const top8 = (s: Side) => [...s.roster].sort((a, b) => b.p.ratings.ovr - a.p.ratings.ovr).slice(0, 8);
 const avgOvr = (s: Side) => Math.round(top8(s).reduce((x, sp) => x + sp.p.ratings.ovr, 0) / Math.max(1, Math.min(8, s.roster.length)));
+const legs = (s: Side) => Math.round(top8(s).reduce((x, sp) => x + sp.cap, 0) / Math.max(1, Math.min(8, s.roster.length)) * 100);
+function planLine(s: Side, opp: Side): string | null {
+  const gp = s.team.gamePlan;
+  if (!gp || gp.opponent !== opp.team.id) return null;
+  const star = gp.plan === 'contain-star' && gp.star ? opp.roster.find((x) => x.p.id === gp.star)?.p.lastName : null;
+  return `${star ? `Contain ${star}` : PLAN_LABEL[gp.plan]}${gp.good ? '' : ' (a poor read)'}`;
+}
 const minutes = (sp: SP) => sp.sec / 60;
 
 /** Live/final objective context from the match's running box score. */
@@ -45,6 +53,11 @@ export function PregamePreview({ match, objectives, header, actions }: PreProps)
         <span><b className="mono-num">{avgOvr(s)}</b> Top-8 OVR</span>
         <span>{SYSTEMS[s.team.tactics.offense].name}</span>
         <span>{SCHEMES[s.team.tactics.defense].name}</span>
+      </div>
+      <div className={styles.preLegs}>
+        <span>Legs <b className={legs(s) >= 85 ? styles.legsOk : legs(s) >= 75 ? styles.legsMid : styles.legsLow}>{legs(s)}%</b></span>
+        {(() => { const tired = s.roster.filter((sp) => sp.cap < 0.78).sort((x, y) => x.cap - y.cap).slice(0, 3); return tired.length ? <span>Tired: {tired.map((sp) => `${sp.p.lastName} ${Math.round(sp.cap * 100)}%`).join(', ')}</span> : <span>Everyone fresh</span>; })()}
+        {(() => { const line = planLine(s, s === match.H ? match.A : match.H); return line ? <span>Plan: <b>{line}</b></span> : null; })()}
       </div>
       <div className={styles.preStars}>
         {top8(s).slice(0, 3).map((sp) => (

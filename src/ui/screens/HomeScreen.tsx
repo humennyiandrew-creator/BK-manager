@@ -25,6 +25,8 @@ import { addDays } from '../../engine/schedule';
 import { sessionOn } from '../../engine/training';
 import { cupLabel, momentOn } from '../../engine/calendar';
 import { TIER_LABEL, clubRival, tierOf } from '../../engine/rivalries';
+import { PLAN_LABEL } from '../../engine/prep';
+import { startEnergy } from '../../engine/sim/fast';
 import { formChip } from './RosterScreen';
 import styles from './HomeScreen.module.css';
 
@@ -181,6 +183,7 @@ function NextMatch({ s, g }: { s: GameState; g: Game }) {
         <span className={styles.oddsNum}>{100 - odds}%</span>
         <span className={styles.oddsLabel}>Win chance</span>
       </div>
+      <Freshness s={s} g={g} />
       <footer className={styles.mFoot}>
         <div className={styles.mObjectives}>
           <span className={styles.subhead}>Sponsor objectives</span>
@@ -193,6 +196,32 @@ function NextMatch({ s, g }: { s: GameState; g: Game }) {
         </div>
       </footer>
     </section>
+  );
+}
+
+/** Legs going into the game: starting energy of each top eight, back-to-backs, who is resting, and their plan. */
+function Freshness({ s, g }: { s: GameState; g: Game }) {
+  const us = userTeam(s), opp = opponentOf(s, g);
+  const legs = (id: string) => {
+    const top = s.teams[id].rotation.map((x) => s.players[x]).filter((p) => p && !p.injury && !p.resting).slice(0, 8);
+    return Math.round(top.reduce((a, p) => a + startEnergy(p), 0) / Math.max(1, top.length) * 100);
+  };
+  const b2b = (id: string) => s.games.some((x) => x.date === addDays(g.date, -1) && (x.home === id || x.away === id));
+  const resting = Object.values(s.players).filter((p) => p.teamId === us.id && p.resting);
+  const theirPlan = s.prep?.gameId === g.id ? s.prep.theirPlan : undefined;
+  const tone = (v: number) => (v >= 85 ? styles.fresh : v >= 75 ? styles.tiring : styles.gassed);
+  const side = (id: string, label: string) => {
+    const v = legs(id);
+    return <span className={styles.frSide}>{label} <b className={tone(v)}>{v}%</b>{b2b(id) && <span className={styles.frTag}>Back-to-back</span>}</span>;
+  };
+  return (
+    <div className={styles.fresh_row}>
+      <span className={styles.subhead}>Legs</span>
+      {side(us.id, us.abbr)}
+      {side(opp.id, opp.abbr)}
+      {resting.length > 0 && <span className={styles.frNote}>Resting: {resting.map((p) => p.lastName).join(', ')}</span>}
+      {theirPlan && <span className={styles.frNote}>Their plan: <b>{PLAN_LABEL[theirPlan]}</b></span>}
+    </div>
   );
 }
 

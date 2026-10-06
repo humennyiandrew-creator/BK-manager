@@ -100,7 +100,8 @@ export function applyResult(s: GameState, g: Game, res: GameResult) {
     const p = s.players[b.id];
     addLine(g.type === 'regular' || g.type === 'cup' ? p.season : p.playoffs, b);
     const loadMgmt = p.teamId && hasNode(s, p.teamId, 'analytics_loadMgmt');
-    p.fatigue = clamp((p.fatigue ?? 0) + b.min * 0.35 * (loadMgmt ? 0.85 : 1) * (p.teamId && hasSpec(s, p.teamId, 'loadMgmt') ? 0.9 : 1), 0, 100);
+    // Pushing in a live game leaves more in the legs the next day; conserving leaves less.
+    p.fatigue = clamp((p.fatigue ?? 0) + b.min * 0.35 * (1 + 0.25 * (b.effort ?? 0)) * (loadMgmt ? 0.85 : 1) * (p.teamId && hasSpec(s, p.teamId, 'loadMgmt') ? 0.9 : 1), 0, 100);
     // A live game already decided who got hurt on the floor; the quick sim rolls afterwards.
     const live = res.liveInjuries?.find((x) => x.id === p.id);
     const hurt = res.liveInjuries

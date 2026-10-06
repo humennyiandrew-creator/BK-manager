@@ -362,3 +362,20 @@
 .gB { background: #9ad94f; color: #142106; }
 .gC { background: #e3a32e; color: #211705; }
 .gD { background: var(--negative); color: #fff; }
+
+.preLegs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  margin-top: 0.45rem;
+  font-size: 0.78rem;
+  color: var(--chalk-2);
+}
+
+.preRight .preLegs {
+  align-items: flex-end;
+}
+
+.legsOk { color: var(--win); }
+.legsMid { color: var(--warn); }
+.legsLow { color: var(--loss); }

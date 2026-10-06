@@ -7,7 +7,7 @@ import { SCHEMES } from '../playbook/systems';
 import type { Role, Spot } from '../playbook/types';
 import { S } from '../playbook/plays';
 import {
-  NBA_RULES, commitEvent, decide, doSubs, drainFor, makeSide, possessionLength, sortCourt, tickEnergy,
+  NBA_RULES, boxLine, commitEvent, decide, doSubs, drainFor, makeSide, possessionLength, sortCourt, tickEnergy,
   type Ev, type Outcome, type Rules, type ShotType, type SP, type Side, type TalkBoost,
   lateDuration,
 } from './fast';
@@ -31,7 +31,7 @@ export const TALKS: Record<TeamTalk, { label: string; hint: string; boost: Omit<
 const TALK_POSSESSIONS = 12;
 
 /** Shot location in half-court feet (basket at x=5.25, y=25), whichever end it was taken at. */
-export interface ShotMark { side: 0 | 1; x: number; y: number; made: boolean; three: boolean; id: string; period: number }
+export interface ShotMark { side: 0 | 1; x: number; y: number; made: boolean; three: boolean; rim?: boolean; id: string; period: number; t?: number }
 export interface FlowPoint { t: number; margin: number; wp: number }
 export interface Run { side: 0 | 1; a: number; b: number }
 
@@ -127,6 +127,8 @@ export class LiveMatch {
 
   /** FIBA: 2 timeouts in the first half, 3 in the second. NBA: 7, capped at 4 after halftime. */
   get fiba() { return this.rules.periodSec === 600; }
+  /** Seconds of game time played so far. */
+  gameTime() { return this.elapsed; }
   maxTimeouts() { return this.fiba ? (this.period <= 2 ? 2 : 3) : this.period >= 3 ? 4 : 7; }
   setIntensity(side: 0 | 1, v: Intensity) { this.sideObj(side).intensity = v; }
   /** One team talk per timeout, only during that side's huddle. */
@@ -253,7 +255,7 @@ export class LiveMatch {
     const right = this.hoop(off).x > 47;
     this.shots.push({
       side: this.sideOf(off), x: right ? COURT.w - x : x, y: right ? COURT.h - y : y,
-      made: ev.made, three: ev.type === 'three', id: shooter.p.id, period: this.period,
+      made: ev.made, three: ev.type === 'three', rim: ev.type === 'rim', id: shooter.p.id, period: this.period, t: this.elapsed,
     });
     const cur = this.streaks.get(shooter.p.id) ?? 0;
     this.streaks.set(shooter.p.id, ev.made ? Math.max(0, cur) + 1 : Math.min(0, cur) - 1);
@@ -269,7 +271,7 @@ export class LiveMatch {
   }
 
   result(): GameResult {
-    const box = (s: Side) => s.roster.map((sp) => ({ ...sp.line, min: Math.round(sp.sec / 6) / 10, gp: sp.sec > 0 ? 1 : 0 }));
+    const box = (s: Side) => s.roster.map(boxLine);
     return { home: this.H.pts, away: this.A.pts, periods: this.periodScores, box: { home: box(this.H), away: box(this.A) }, liveInjuries: [...this.injuries] };
   }
 

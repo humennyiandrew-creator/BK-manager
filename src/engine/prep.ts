@@ -1,7 +1,9 @@
 // Opponent preparation for the user's next game: report + tactical plan.
 import type { GameState, OpponentPrep, PlanId } from './model';
 import { teamProfile } from './playbook/fit';
-import { SCHEMES } from './playbook/systems';
+import { SCHEMES, SYSTEMS } from './playbook/systems';
+import { PLAY_BY_ID } from './playbook/plays';
+import type { DefScheme, OffSystem } from './playbook/types';
 import { daysBetween } from './schedule';
 import { clamp } from './mgmt/market';
 
@@ -73,6 +75,11 @@ export function planMatches(s: GameState, plan: Plan, r: OppReport): boolean {
   return MATCH[plan](r);
 }
 
+export const PLAN_LABEL: Record<Plan, string> = {
+  'contain-star': 'Contain the star', 'take-away-three': 'Take away the three', 'protect-rim': 'Protect the rim',
+  'force-turnovers': 'Force turnovers', 'run-them': 'Run with them',
+};
+
 /** What each plan does on the night (applied by the game sim on top of your defensive scheme). */
 export const PLAN_EFFECT: Record<Plan, string> = {
   'contain-star': 'Their best player shoots less and worse; his teammates get slightly better looks.',
@@ -96,3 +103,17 @@ export function setPlan(s: GameState, plan: Plan): string | null {
 
 /** Whether the chosen plan reads the opponent correctly (for the UI). */
 export const planIsGoodRead = (s: GameState, plan: Plan) => !!s.prep && planMatches(s, plan, s.prep.report);
+
+/** How well each offensive system's plays match up with a defensive scheme: -1 (all weak) to +1 (all strong). */
+export function systemsVsScheme(scheme: DefScheme): { id: OffSystem; score: number }[] {
+  return (Object.keys(SYSTEMS) as OffSystem[]).map((id) => {
+    let sum = 0, w = 0;
+    for (const [pid, weight] of Object.entries(SYSTEMS[id].plays)) {
+      const play = PLAY_BY_ID[pid];
+      if (!play) continue;
+      sum += weight * (play.strongVs.includes(scheme) ? 1 : play.weakVs.includes(scheme) ? -1 : 0);
+      w += weight;
+    }
+    return { id, score: w ? sum / w : 0 };
+  }).sort((a, b) => b.score - a.score);
+}

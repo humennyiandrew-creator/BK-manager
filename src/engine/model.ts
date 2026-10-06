@@ -118,7 +118,11 @@ export interface GamePlan { opponent: string; plan: PlanId; good: boolean; star?
 
 export type GameType = 'regular' | 'playin' | 'playoff' | 'cup';
 
-export interface BoxLine extends StatLine { id: string; starter: boolean }
+export interface BoxLine extends StatLine {
+  id: string; starter: boolean;
+  /** Live games: average effort while on the floor, -1 (conserve) to 1 (push). Scales the fatigue the game leaves behind. */
+  effort?: number;
+}
 
 export interface GameResult {
   home: number; away: number;

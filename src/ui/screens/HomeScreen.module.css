@@ -426,6 +426,45 @@
   margin-top: 0.25rem;
 }
 
+.fresh_row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 1.1rem;
+  padding: 0.55rem 1.2rem;
+  border-top: 1px solid var(--seam-soft);
+  font-size: 0.74rem;
+  color: var(--chalk-2);
+}
+
+.fresh_row .subhead {
+  margin: 0;
+}
+
+.frSide b {
+  font-variant-numeric: tabular-nums;
+  margin-left: 0.2rem;
+}
+
+.frTag {
+  margin-left: 0.4rem;
+  padding: 0.05rem 0.35rem;
+  border: 1px solid var(--warn);
+  color: var(--warn);
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.frNote b {
+  color: var(--chalk);
+}
+
+.fresh { color: var(--win); }
+.tiring { color: var(--warn); }
+.gassed { color: var(--loss); }
+
 .mFoot {
   display: grid;
   grid-template-columns: 1fr auto;

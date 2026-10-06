@@ -17,6 +17,9 @@ import { FlowChart, ShotChart } from '../components/match/MatchCharts';
 import { IntensityControl, MomentumMeter, RunBanner, TeamTalkPicker, WinBar } from '../components/match/MatchHud';
 import { PostgameReport, PregamePreview, objectiveStatusFn } from '../components/match/MatchReport';
 import { formatMoneyShort } from '../format';
+import FloorStrip from '../components/match/FloorStrip';
+import Assistant from '../components/match/Assistant';
+import { assistantTips, type Tip } from '../match/assistant';
 import { onConcrete, teamInk, uniform } from '../components/shell/teamColors';
 import { computeAccent } from '../accent';
 import { play, startCrowd, stopCrowd, crowdIntensity } from '../sound';
@@ -232,6 +235,28 @@ export default function MatchScreen() {
   // Stop ambience if the player navigates away from the screen entirely.
   useEffect(() => () => stopCrowd(), []);
 
+  // Assistant coach: tips the user has waved off stay quiet for three game minutes.
+  const dismissedRef = useRef<Map<string, number>>(new Map());
+  const urgentSeenRef = useRef<Set<string>>(new Set());
+  const [pauseOnAlerts, setPauseOnAlerts] = useState(() => { try { return localStorage.getItem('bk-pause-alerts') !== '0'; } catch { return true; } });
+  const visibleTips = (): Tip[] => {
+    if (!match || !s) return [];
+    const snap = match.snapshot();
+    const now = match.gameTime();
+    return assistantTips(match, match.userSide ?? 0, snap, s.teams[s.userTeamId].tactics)
+      .filter((t) => { const d = dismissedRef.current.get(t.id); return d == null || now - d > 180; })
+      .slice(0, 3);
+  };
+  // A new urgent tip pauses the game if the user wants that (each one only once while it lasts).
+  useEffect(() => {
+    if (!match) return;
+    const urgent = visibleTips().filter((t) => t.tone === 'urgent').map((t) => t.id);
+    for (const id of [...urgentSeenRef.current]) if (!urgent.includes(id)) urgentSeenRef.current.delete(id);
+    const fresh = urgent.filter((id) => !urgentSeenRef.current.has(id));
+    fresh.forEach((id) => urgentSeenRef.current.add(id));
+    if (fresh.length && pauseOnAlerts && !paused && match.snapshot().state === 'live') setPaused(true);
+  });
+
   if (!s || !game || !match) return null;
 
   const home = s.teams[game.home], away = s.teams[game.away];
@@ -245,6 +270,18 @@ export default function MatchScreen() {
   const homeColor = home.colors.primary;
   const awayColor = colorDist(home.colors.primary, away.colors.primary) < 60 ? away.colors.secondary : away.colors.primary;
   const sides = { homeColor, awayColor, homeAbbr: home.abbr, awayAbbr: away.abbr };
+
+  const tips = visibleTips();
+  function actOnTip(t: Tip) {
+    const a = t.action;
+    if (a?.kind === 'sub') match!.sub(userSide, a.out, a.in);
+    else if (a?.kind === 'timeout') match!.requestTimeout(userSide);
+    else if (a?.kind === 'intensity') match!.setIntensity(userSide, a.v);
+    else if (a?.kind === 'tactic') handleTactic((tt) => { Object.assign(tt, a.patch); });
+    dismissedRef.current.set(t.id, match!.gameTime());
+    if (paused && snap.state === 'live') setPaused(false);
+    setTick((x) => x + 1);
+  }
 
   function handleTipOff() { startCrowd(); match!.start(); }
   function handleQuickSim() {
@@ -291,51 +328,58 @@ export default function MatchScreen() {
       </div>
 
       <div className={styles.main}>
-        <div className={styles.courtWrap}>
-          <canvas ref={canvasRef} />
-          {snap.state === 'live' && <RunBanner run={snap.run} abbr={snap.run ? (snap.run.side === 0 ? home.abbr : away.abbr) : ''} color={snap.run?.side === 0 ? homeColor : awayColor} />}
-          {snap.state === 'pregame' && (
-            <Overlay wide>
-              <PregamePreview
-                match={match}
-                objectives={objectives}
-                header={null}
-                actions={(
-                  <div className={styles.overlayBtns}>
-                    <button className={styles.primaryBtn} onClick={handleTipOff}>Tip off</button>
-                    <button className={styles.secondaryBtn} onClick={handleQuickSim}>Quick sim</button>
-                  </div>
-                )}
-              />
-            </Overlay>
-          )}
-          {snap.state === 'timeout' && (
-            <Overlay wide>
-              <div className={styles.overlayTitle}>{([...snap.pbp].reverse().find((l) => l.text.startsWith('Timeout'))?.text ?? 'Timeout').toUpperCase()}</div>
-              <div className={styles.overlayHint}>Give the huddle a message, adjust Tactics or Lineup, then resume.</div>
-              <TeamTalkPicker used={match.talkUsed[userSide]} active={snap.talk[userSide]} onPick={(t) => { match!.teamTalk(userSide, t); setTick((x) => x + 1); }} />
-              <button className={styles.primaryBtn} onClick={() => match!.resume()}>Resume</button>
-            </Overlay>
-          )}
-          {snap.state === 'break' && (
-            <Overlay>
-              <div className={styles.overlayTitle}>{snap.period <= 4 && snap.period === 3 ? 'Halftime' : `End of ${periodLabel(snap.period - 1)}`}</div>
-              <LineScore snap={snap} home={home} away={away} />
-              <button className={styles.primaryBtn} onClick={() => match!.resume()}>Resume now</button>
-            </Overlay>
-          )}
-          {snap.state === 'final' && (
-            <Overlay wide>
-              <PostgameReport
-                s={s}
-                match={match}
-                userSide={userSide}
-                objectives={objectives}
-                lineScore={<LineScore snap={snap} home={home} away={away} />}
-                actions={<button className={styles.primaryBtn} onClick={handleContinueFinal}>Continue</button>}
-              />
-            </Overlay>
-          )}
+        <div className={styles.courtCol}>
+          <div className={styles.courtWrap}>
+            <canvas ref={canvasRef} />
+            <Assistant tips={tips} onAct={actOnTip} onDismiss={(t) => { dismissedRef.current.set(t.id, match.gameTime()); setTick((x) => x + 1); }} />
+            {snap.state === 'live' && <RunBanner run={snap.run} abbr={snap.run ? (snap.run.side === 0 ? home.abbr : away.abbr) : ''} color={snap.run?.side === 0 ? homeColor : awayColor} />}
+            {snap.state === 'pregame' && (
+              <Overlay wide>
+                <PregamePreview
+                  match={match}
+                  objectives={objectives}
+                  header={null}
+                  actions={(
+                    <div className={styles.overlayBtns}>
+                      <button className={styles.primaryBtn} onClick={handleTipOff}>Tip off</button>
+                      <button className={styles.secondaryBtn} onClick={handleQuickSim}>Quick sim</button>
+                    </div>
+                  )}
+                />
+              </Overlay>
+            )}
+            {snap.state === 'timeout' && (
+              <Overlay wide>
+                <div className={styles.overlayTitle}>{([...snap.pbp].reverse().find((l) => l.text.startsWith('Timeout'))?.text ?? 'Timeout').toUpperCase()}</div>
+                <div className={styles.overlayHint}>Give the huddle a message, adjust Tactics or Lineup, then resume.</div>
+                <TeamTalkPicker used={match.talkUsed[userSide]} active={snap.talk[userSide]} onPick={(t) => { match!.teamTalk(userSide, t); setTick((x) => x + 1); }} />
+                <button className={styles.primaryBtn} onClick={() => match!.resume()}>Resume</button>
+              </Overlay>
+            )}
+            {snap.state === 'break' && (
+              <Overlay>
+                <div className={styles.overlayTitle}>{snap.period <= 4 && snap.period === 3 ? 'Halftime' : `End of ${periodLabel(snap.period - 1)}`}</div>
+                <LineScore snap={snap} home={home} away={away} />
+                <button className={styles.primaryBtn} onClick={() => match!.resume()}>Resume now</button>
+              </Overlay>
+            )}
+            {snap.state === 'final' && (
+              <Overlay wide>
+                <PostgameReport
+                  s={s}
+                  match={match}
+                  userSide={userSide}
+                  objectives={objectives}
+                  lineScore={<LineScore snap={snap} home={home} away={away} />}
+                  actions={<button className={styles.primaryBtn} onClick={handleContinueFinal}>Continue</button>}
+                />
+              </Overlay>
+            )}
+          </div>
+
+          <FloorStrip side={userSideObj} opp={userSide === 0 ? match.A : match.H} foulOut={match.rules.foulOut} subOut={subOut}
+            onPickCourt={(id) => setSubOut(subOut === id ? null : id)}
+            onPickBench={(id) => { if (subOut) { match!.sub(userSide, subOut, id); setSubOut(null); setTick((x) => x + 1); } }} />
         </div>
 
         <div className={styles.rightPanel}>
@@ -398,7 +442,10 @@ export default function MatchScreen() {
             className={styles.speedSlider}
           />
         </div>
-        <IntensityControl value={snap.intensity[userSide]} onChange={(v) => { match!.setIntensity(userSide, v); setTick((x) => x + 1); }} disabled={snap.state === 'final'} />
+        <IntensityControl value={snap.intensity[userSide]} legs={userSideObj.court.reduce((x, sp) => x + sp.energy, 0) / Math.max(1, userSideObj.court.length)} onChange={(v) => { match!.setIntensity(userSide, v); setTick((x) => x + 1); }} disabled={snap.state === 'final'} />
+        <label className={styles.alertToggle} title="Pause the game when the assistant coach has something urgent">
+          <input type="checkbox" checked={pauseOnAlerts} onChange={(e) => { setPauseOnAlerts(e.target.checked); try { localStorage.setItem('bk-pause-alerts', e.target.checked ? '1' : '0'); } catch { /* ignore */ } }} /> Pause for alerts
+        </label>
         <button className={styles.controlBtn} onClick={() => match!.requestTimeout(userSide)} disabled={snap.timeouts[userSide] <= 0 || snap.state !== 'live'}>
           Timeout ({snap.timeouts[userSide]})
         </button>

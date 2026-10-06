@@ -28,6 +28,8 @@ import { ARC_LABEL } from '../../engine/arcs';
 import { affiliateName, assign, canAssign, recall } from '../../engine/gleague';
 import { uniform } from './shell/teamColors';
 import { TIER_LABEL, playerRival, tierOf } from '../../engine/rivalries';
+import { setResting } from '../../engine/rest';
+import { startEnergy } from '../../engine/sim/fast';
 import { toast } from './Toasts';
 import { play } from '../sound';
 import styles from './PlayerPage.module.css';
@@ -190,6 +192,16 @@ export default function PlayerPage({ s, playerId, onClose }: Props) {
               </div>
             )}
 
+            {isUserPlayer && !p.prospect && !p.assigned && (() => { const e = startEnergy(p); return (
+              <div className={styles.moraleBlock}>
+                <div className={styles.moraleHead}>
+                  <span>Legs</span>
+                  <span className={styles[e >= 0.85 ? 'positive' : e >= 0.7 ? 'muted' : 'negative']}>{p.resting ? 'Resting next game' : `Starts games at ${Math.round(e * 100)}%`}</span>
+                </div>
+                <ProgressBar value={e * 100} variant={e >= 0.85 ? 'positive' : e >= 0.7 ? 'muted' : 'negative'} />
+              </div>
+            ); })()}
+
             {p.contract && !p.prospect && (
               <div className={styles.contractSummary}>
                 <div className={styles.contractRow}><span>Salary</span><span>{formatMoneyShort(salaryIn(p, s.season))}</span></div>
@@ -204,6 +216,7 @@ export default function PlayerPage({ s, playerId, onClose }: Props) {
                 <button type="button" className={styles.actionBtn} disabled={!meetOk} title={meetOk ? '1-on-1 meeting' : 'Met with him recently'} onClick={() => setMeetOpen(true)}>1-on-1</button>
                 <button type="button" className={styles.actionBtn} onClick={onProgram}>{p.program ? 'View programme' : 'Start programme'}</button>
                 <button type="button" className={styles.actionBtn} onClick={onNegotiate}>{negotiateEnabled ? negotiateLabel : 'Contract'}</button>
+                {!p.assigned && !p.injury && <button type="button" className={styles.actionBtn} title="Sit him out of the next game to bring his fatigue down" onClick={() => mutate((st) => { const e = setResting(st, p.id, !p.resting); toast(e ?? (p.resting ? `${p.lastName} will play` : `${p.lastName} will rest next game`), e ? 'error' : 'success'); })}>{p.resting ? 'Play next game' : 'Rest next game'}</button>}
                 {p.assigned
                   ? <button type="button" className={styles.actionBtn} onClick={() => mutate((st) => { const e = recall(st, p.id); toast(e ?? `${p.lastName} recalled`, e ? 'error' : 'success'); })}>Recall</button>
                   : canAssign(s, p) && <button type="button" className={styles.actionBtn} onClick={() => mutate((st) => { const e = assign(st, p.id); toast(e ?? `${p.lastName} sent to the ${affiliateName(st, st.userTeamId)}`, e ? 'error' : 'success'); })}>Send down</button>}
