@@ -11,11 +11,12 @@ import styles from './LeagueScreen.module.css';
 
 const FILTERS: { id: 'all' | NewsKind[]; label: string }[] = [
   { id: 'all', label: 'All' },
-  { id: ['breakout', 'slump'], label: 'Breakouts & slumps' },
-  { id: ['performance', 'award'], label: 'Big nights' },
-  { id: ['streak', 'rankings'], label: 'Streaks & rankings' },
+  { id: ['breakout', 'slump'], label: 'Breakouts and slumps' },
+  { id: ['performance'], label: 'Big nights' },
+  { id: ['streak', 'rankings', 'rivalry'], label: 'Streaks and rivalries' },
+  { id: ['cup', 'allstar', 'award'], label: 'Cup, All-Star and awards' },
   { id: ['injury'], label: 'Injuries' },
-  { id: ['other'], label: 'Trades' },
+  { id: ['trade', 'other'], label: 'Trades' },
 ];
 
 /** League Hub: power rankings, the league wire and the award races in one place. */

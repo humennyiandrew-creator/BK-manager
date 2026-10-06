@@ -15,6 +15,7 @@ import { offseasonStep } from './offseason';
 import { eventsDaily } from './events';
 import { settleMatchObjectives } from './objectives';
 import { newsAfterGame, newsInjury } from './news';
+import { cupAfterGame } from './calendar';
 
 // ---------- standings ----------
 
@@ -101,7 +102,7 @@ export function applyResult(s: GameState, g: Game, res: GameResult) {
   const injMul = { [g.home]: trainingEffects(s, g.home).injuryMul, [g.away]: trainingEffects(s, g.away).injuryMul };
   for (const b of [...res.box!.home, ...res.box!.away]) {
     const p = s.players[b.id];
-    addLine(g.type === 'regular' ? p.season : p.playoffs, b);
+    addLine(g.type === 'regular' || g.type === 'cup' ? p.season : p.playoffs, b);
     const loadMgmt = p.teamId && hasNode(s, p.teamId, 'analytics_loadMgmt');
     p.fatigue = clamp((p.fatigue ?? 0) + b.min * 0.35 * (loadMgmt ? 0.85 : 1), 0, 100);
     if (rollInjury(p, b.min, rng, (injMul[p.teamId!] ?? 1) * fatigueInjuryMul(p))) {
@@ -113,6 +114,7 @@ export function applyResult(s: GameState, g: Game, res: GameResult) {
     }
   }
   newsAfterGame(s, g, res);
+  cupAfterGame(s, g, res);
   g.result = isUser ? res : { home: res.home, away: res.away, periods: res.periods };
   if (isUser) {
     const us = g.home === s.userTeamId;

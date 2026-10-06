@@ -4,6 +4,7 @@ import Panel from '../components/Panel';
 import BkImage from '../components/BkImage';
 import { useGameState } from '../store/useGame';
 import type { Game } from '../../engine/model';
+import { momentOn } from '../../engine/calendar';
 import styles from './CalendarScreen.module.css';
 
 const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -77,6 +78,7 @@ export default function CalendarScreen() {
             return (
               <div key={i} className={isToday ? `${styles.cell} ${styles.cellToday}` : styles.cell}>
                 <span className={styles.dayNum}>{d}</span>
+                {(() => { const mo = momentOn(s, iso); return mo && !(mo === 'Cup night' && g) ? <span className={styles.moment}>{mo}</span> : null; })()}
                 {g && opp && (
                   <button
                     type="button"
@@ -85,7 +87,7 @@ export default function CalendarScreen() {
                     disabled={!played}
                   >
                     <BkImage path={opp.logo} alt={opp.abbr} className={styles.gameLogo} />
-                    <span className={styles.gameComp}>{g.comp ?? 'NBA'}</span>
+                    <span className={styles.gameComp}>{g.cup ? 'Cup' : g.comp ?? 'NBA'}</span>
                     <span className={styles.gameSide}>{home ? 'vs' : '@'} {opp.abbr}</span>
                     {played && (
                       <span className={won ? styles.gameWin : styles.gameLoss}>

@@ -1,5 +1,6 @@
 // Offseason loop: awards/history → lottery → draft → options + re-sign window → free agency → camp → new season.
 // Driven one step per "Continue" via offseasonStep(). Career ends after s.maxSeasons seasons.
+import { coachOfTheYear, setupCalendar } from './calendar';
 import type { Awards, GameState, Player, SeasonRecord } from './model';
 import { emptyLine } from './model';
 import { capNumbers, contractRows, isTwoWay, marketValue, minSalary, rosterOf, salaryIn, seasonLabel } from './cba';
@@ -31,16 +32,17 @@ const fullName = (p: Player) => `${p.firstName} ${p.lastName}`;
 
 // ---------- awards + season record ----------
 
-export function computeAwards(s: GameState): Awards {
-  const pct = new Map(standings(s).map((r) => [r.teamId, r.pct]));
-  const pool = Object.values(s.players).filter((p) => p.teamId && p.season.gp >= 50);
+export function computeAwards(s: GameState, comp?: string): Awards {
+  const pct = new Map(standings(s, undefined, comp).map((r) => [r.teamId, r.pct]));
+  const inComp = (p: Player) => !comp || (s.teams[p.teamId!]?.league ?? 'NBA') === comp;
+  const pool = Object.values(s.players).filter((p) => p.teamId && p.season.gp >= 50 && inComp(p));
   const pg = (p: Player, k: keyof Player['season']) => p.season[k] / p.season.gp;
   const impact = (p: Player) => pg(p, 'pts') + 0.5 * (pg(p, 'orb') + pg(p, 'drb')) + pg(p, 'ast') + 1.5 * (pg(p, 'stl') + pg(p, 'blk')) - pg(p, 'tov');
   const mvpScore = (p: Player) => impact(p) + (pct.get(p.teamId!) ?? 0.5) * 20;
   const byMvp = [...pool].filter((p) => p.season.gp >= 65).sort((a, b) => mvpScore(b) - mvpScore(a));
   const d = (p: Player) => 2 * (pg(p, 'stl') + pg(p, 'blk')) + 0.4 * pg(p, 'drb') + (p.ratings.attrs.helpD + p.ratings.attrs.perimeterD + p.ratings.attrs.interiorD) / 30 + (pct.get(p.teamId!) ?? 0.5) * 5;
   const best = (list: Player[], f: (p: Player) => number) => list.sort((a, b) => f(b) - f(a))[0]?.id ?? null;
-  const rookies = Object.values(s.players).filter((p) => p.teamId && p.yearsPro === 0 && p.season.gp >= 40);
+  const rookies = Object.values(s.players).filter((p) => p.teamId && p.yearsPro === 0 && p.season.gp >= 40 && inComp(p));
   const bench = pool.filter((p) => p.season.gs < p.season.gp / 2);
   const improved = pool.filter((p) => p.history[0] && p.history[0].gp >= 30);
   return {
@@ -66,7 +68,10 @@ function userResult(s: GameState): string {
 }
 
 function recordSeason(s: GameState) {
-  const awards = computeAwards(s);
+  // Awards night already ran when the NBA regular season ended; reuse it so the history matches what was announced.
+  const nbaUser = (s.teams[s.userTeamId].league ?? 'NBA') === 'NBA';
+  const night = nbaUser && s.calendar?.season === s.season ? s.calendar.awards?.result : undefined;
+  const awards = night ?? { ...computeAwards(s), coy: coachOfTheYear(s) };
   const conf = s.teams[s.userTeamId].conference;
   const table = standings(s, conf);
   const row = table.find((r) => r.teamId === s.userTeamId)!;
@@ -280,6 +285,7 @@ function newSeason(s: GameState) {
     tradeDeadline: `${Y + 1}-02-05`, regularEnd: s.games.filter((g) => (g.comp ?? 'NBA') === userComp).reduce((m, g) => (g.date > m ? g.date : m), ''),
     draft: `${Y + 1}-06-24`, freeAgency: `${Y + 1}-06-30`,
   };
+  setupCalendar(s);
   addPickYear(s, Y + 5);
   generateDraftClass(s, Y + 1);
   // Finances + board for the new season.

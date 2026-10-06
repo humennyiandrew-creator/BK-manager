@@ -165,31 +165,34 @@ export function buildPackage(s: GameState, team: string, need: number, incomingS
 
 // ---------- AI activity ----------
 
+/** AI ↔ AI: a contender buys a veteran from a rebuilding team. Returns the traded player when a deal goes through. */
+export function aiAiTrade(s: GameState, rng: Rng, ranks = strengthRanks(s)): { buyer: string; seller: string; playerId: string } | null {
+  const teams = Object.keys(s.teams).filter((t) => t !== s.userTeamId && (s.teams[t].league ?? 'NBA') === 'NBA');
+  const buyers = teams.filter((t) => modeOf(ranks.get(t)!) === 'contender');
+  const sellers = teams.filter((t) => modeOf(ranks.get(t)!) === 'rebuild');
+  if (!buyers.length || !sellers.length) return null;
+  const buyer = buyers[Math.floor(rng() * buyers.length)];
+  const seller = sellers[Math.floor(rng() * sellers.length)];
+  const targets = rosterOf(s, seller).filter((p) => p.ratings.ovr >= 74 && ageOf(p.birthDate, new Date(s.date)) >= 26 && !isTwoWay(p));
+  if (!targets.length) return null;
+  const t = targets[Math.floor(rng() * targets.length)];
+  const want: TradeSide = { players: [t.id], picks: [] };
+  const need = sideValue(s, want, 'rebuild', ranks) * 1.12;
+  const pkg = buildPackage(s, buyer, need, salaryIn(t, s.season), 'rebuild', [], rng, ranks);
+  if (pkg && !tradeLegal(s, buyer, seller, pkg, want) && evaluateTrade(s, seller, want, pkg).accept && evaluateTrade(s, buyer, pkg, want).margin > -need) {
+    executeTrade(s, buyer, seller, pkg, want);
+    return { buyer, seller, playerId: t.id };
+  }
+  return null;
+}
+
 export function aiTradeDaily(s: GameState) {
   const rng = mulberry32(hashString(`${s.seed}|trade|${s.date}`));
   s.tradeOffers = s.tradeOffers.filter((o) => o.expires >= s.date);
   const ranks = strengthRanks(s);
   const teams = Object.keys(s.teams).filter((t) => t !== s.userTeamId);
 
-  // AI ↔ AI: a contender buys a veteran from a rebuilding team.
-  if (rng() < 0.08) {
-    const buyers = teams.filter((t) => modeOf(ranks.get(t)!) === 'contender');
-    const sellers = teams.filter((t) => modeOf(ranks.get(t)!) === 'rebuild');
-    if (buyers.length && sellers.length) {
-      const buyer = buyers[Math.floor(rng() * buyers.length)];
-      const seller = sellers[Math.floor(rng() * sellers.length)];
-      const targets = rosterOf(s, seller).filter((p) => p.ratings.ovr >= 74 && ageOf(p.birthDate, new Date(s.date)) >= 26 && !isTwoWay(p));
-      if (targets.length) {
-        const t = targets[Math.floor(rng() * targets.length)];
-        const want: TradeSide = { players: [t.id], picks: [] };
-        const need = sideValue(s, want, 'rebuild', ranks) * 1.12;
-        const pkg = buildPackage(s, buyer, need, salaryIn(t, s.season), 'rebuild', [], rng, ranks);
-        if (pkg && !tradeLegal(s, buyer, seller, pkg, want) && evaluateTrade(s, seller, want, pkg).accept && evaluateTrade(s, buyer, pkg, want).margin > -need) {
-          executeTrade(s, buyer, seller, pkg, want);
-        }
-      }
-    }
-  }
+  if (rng() < 0.08) aiAiTrade(s, rng, ranks);
 
   // AI → user offer.
   if (rng() < 0.12 && s.tradeOffers.length < 3) {

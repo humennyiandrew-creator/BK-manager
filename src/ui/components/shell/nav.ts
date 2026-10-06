@@ -19,7 +19,10 @@ export const NAV_GROUPS: NavGroup[] = [
   { id: 'club', label: 'Club', items: [
     { id: 'staff', label: 'Staff' }, { id: 'facilities', label: 'Facilities' }, { id: 'finances', label: 'Finances' }, { id: 'board', label: 'Board and media' },
   ] },
-  { id: 'league', label: 'League', items: [{ id: 'standings', label: 'Standings' }, { id: 'league', label: 'League hub' }] },
+  { id: 'league', label: 'League', items: [
+    { id: 'standings', label: 'Standings' }, { id: 'league', label: 'League hub' },
+    { id: 'moments', label: 'Season moments', when: (s) => !!s.calendar?.cup },
+  ] },
   { id: 'career', label: 'Career', items: [{ id: 'career', label: 'Your career' }, { id: 'settings', label: 'Settings' }] },
 ];
 

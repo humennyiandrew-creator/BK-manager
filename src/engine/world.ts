@@ -10,6 +10,7 @@ import { initStaff } from './mgmt/staff';
 import { initFacilities } from './mgmt/facilities';
 import { initFinances } from './mgmt/finance';
 import { initBoard } from './mgmt/board';
+import { setupCalendar } from './calendar';
 import { defaultTraining } from './progression';
 import { initPicks } from './draft';
 import { LEAGUES, leagueOf, type LeagueId } from './leagues';
@@ -94,6 +95,7 @@ export function newGame(teams: Team[], raw: RawPlayer[], userTeamId: string, see
   initBoard(s);
   initPicks(s);
   gleagueOffseason(s);
+  setupCalendar(s);
   rollSeasonArcs(s);
   return s;
 }

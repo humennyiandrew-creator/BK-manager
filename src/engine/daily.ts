@@ -21,6 +21,7 @@ import { pressDaily } from './media';
 import { checkPromises } from './mgmt/board';
 import { sponsorsWeekly } from './sponsors';
 import { staffWeekly } from './mgmt/staff';
+import { calendarDaily } from './calendar';
 
 export function dailyUpdate(s: GameState, playedToday: Game[]) {
   for (const g of playedToday) if (g.home === s.userTeamId || g.away === s.userTeamId) boardAfterGame(s, g);
@@ -34,6 +35,7 @@ export function dailyUpdate(s: GameState, playedToday: Game[]) {
   prepDaily(s);
   buildMatchObjectives(s);
   if (s.phase === 'regular' && s.date <= s.keyDates.tradeDeadline) aiTradeDaily(s);
+  calendarDaily(s);
   freeAgencyDaily(s);
   euroTransferDaily(s);
   returnLoans(s);

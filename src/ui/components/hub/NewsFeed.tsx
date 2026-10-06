@@ -6,7 +6,8 @@ import styles from './NewsFeed.module.css';
 
 const KIND_LABEL: Record<NewsKind, string> = {
   breakout: 'Breakout', slump: 'Slump', performance: 'Big night', streak: 'Streak', injury: 'Injury',
-  award: 'Award', rankings: 'Rankings', milestone: 'Milestone', other: 'Wire',
+  award: 'Award', rankings: 'Rankings', milestone: 'Milestone', cup: 'NBA Cup', allstar: 'All-Star', trade: 'Trade',
+  rivalry: 'Rivalry', other: 'Wire',
 };
 
 const ago = (s: GameState, d: string) => {

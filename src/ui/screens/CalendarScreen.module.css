@@ -221,3 +221,11 @@
   color: var(--text);
   font-weight: 600;
 }
+
+.moment {
+  display: block;
+  margin: 0.15rem 0 0.2rem;
+  font-size: 0.75rem;
+  font-weight: 650;
+  color: var(--maple);
+}

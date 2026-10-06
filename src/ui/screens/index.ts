@@ -19,6 +19,7 @@ import SettingsScreen from './SettingsScreen';
 import LockerRoomScreen from './LockerRoomScreen';
 import LeagueScreen from './LeagueScreen';
 import GLeagueScreen from './GLeagueScreen';
+import MomentsScreen from './MomentsScreen';
 
 export const SCREENS: Record<TabId, ComponentType> = {
   home: HomeScreen,
@@ -39,5 +40,6 @@ export const SCREENS: Record<TabId, ComponentType> = {
   finances: FinancesScreen,
   standings: StandingsScreen,
   league: LeagueScreen,
+  moments: MomentsScreen,
   settings: SettingsScreen
 };

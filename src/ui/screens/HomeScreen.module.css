@@ -108,6 +108,27 @@
 }
 
 .hard { color: var(--warn); }
+
+.moment {
+  grid-column: 2;
+  font-size: 0.8rem;
+  font-weight: 650;
+  color: var(--maple);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cupTag {
+  margin-left: 0.15rem;
+  padding: 0 0.3rem;
+  border-radius: 2px;
+  background: var(--maple);
+  color: #15171a;
+  font-size: 0.68rem;
+  font-weight: 750;
+  line-height: 1.1rem;
+}
 .rest { color: var(--chalk-3); }
 
 .weekOff {

@@ -19,6 +19,7 @@ export const TAB_IDS = [
   'finances',
   'standings',
   'league',
+  'moments',
   'settings'
 ] as const;
 

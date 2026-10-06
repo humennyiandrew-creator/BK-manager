@@ -99,7 +99,7 @@ export interface TeamState extends Team {
   deadCap?: { season: string; amount: number }[]; // waived salary still on the cap
 }
 
-export type GameType = 'regular' | 'playin' | 'playoff';
+export type GameType = 'regular' | 'playin' | 'playoff' | 'cup';
 
 export interface BoxLine extends StatLine { id: string; starter: boolean }
 
@@ -116,6 +116,8 @@ export interface Game {
   comp?: string;        // competition id, default 'NBA'
   type: GameType;
   seriesId?: string;
+  /** NBA Cup: group games are regular-season games on Cup nights; knockout games are type 'cup'. */
+  cup?: { group?: string; round?: CupRound };
   result?: GameResult;
 }
 
@@ -196,6 +198,7 @@ export interface GameState {
   offseasonEventStage?: string;            // last offseason stage an event was rolled for
   // ---- living world (optional: older saves fill these in lazily) ----
   news?: NewsItem[];                       // league wire, newest first, capped
+  calendar?: SeasonCalendar;               // NBA Cup, All-Star weekend, deadline day, awards night
   powerRankings?: PowerRankings;           // weekly power rankings per competition
   matchObjectives?: MatchObjectiveSet;     // sponsor goals for the user's next game
   objectiveLog?: { gameId: number; date: string; met: number; total: number; earned: number }[];
@@ -207,7 +210,7 @@ export interface WeeklyLine { g: number; score: number; pts: number; reb: number
 
 // ---------- living world: news wire, power rankings ----------
 
-export type NewsKind = 'breakout' | 'slump' | 'performance' | 'streak' | 'injury' | 'award' | 'rankings' | 'milestone' | 'other';
+export type NewsKind = 'breakout' | 'slump' | 'performance' | 'streak' | 'injury' | 'award' | 'rankings' | 'milestone' | 'cup' | 'allstar' | 'trade' | 'rivalry' | 'other';
 export interface NewsItem {
   id: number; date: string; kind: NewsKind;
   headline: string; body?: string;
@@ -251,7 +254,7 @@ export interface LockerRoom {
 
 export type OffseasonStage = 'draft' | 'resign' | 'fa' | 'camp';
 
-export interface Awards { mvp: string; dpoy: string; roy: string | null; sixth: string | null; mip: string | null; allNba: string[] }
+export interface Awards { mvp: string; dpoy: string; roy: string | null; sixth: string | null; mip: string | null; allNba: string[]; coy?: string | null }
 export interface SeasonRecord {
   season: string;
   w: number; l: number; confRank: number;
@@ -444,4 +447,33 @@ export interface TransferBid {
   fromUser: boolean;                 // true when the user's club is buying
   note?: string;
   expires: string;
+}
+
+// ---------- season calendar ----------
+
+export type CupRound = 'qf' | 'sf' | 'final';
+export interface CupGroup { id: string; conf: 'East' | 'West'; teams: string[] }
+export interface CupTie { id: string; round: CupRound; conf: 'East' | 'West' | null; high: string; low: string; gameId: number; winner?: string }
+export interface CupState {
+  season: string;
+  groups: CupGroup[];
+  nights: string[];                        // group-stage dates
+  knockout: CupTie[];
+  champion?: string;
+  mvp?: string;
+}
+export interface AllStarState {
+  season: string;
+  selectionDate: string; breakStart: string; gameDate: string; breakEnd: string;
+  east?: string[]; west?: string[];        // first five are the starters
+  result?: { east: number; west: number; mvp: string; threes: string; dunk: string };
+}
+export interface SeasonCalendar {
+  season: string;
+  /** Expected win share per NBA team at the start of the season (for Coach of the Year). */
+  expected: Record<string, number>;
+  cup?: CupState;
+  allStar?: AllStarState;
+  deadline: { warned?: boolean; done?: boolean; trades?: number };
+  awards?: { date: string; result: Awards };
 }

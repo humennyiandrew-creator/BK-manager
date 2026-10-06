@@ -23,6 +23,7 @@ import { leagueOf } from '../../engine/leagues';
 import { objectiveLabel } from '../../engine/mgmt/board';
 import { addDays } from '../../engine/schedule';
 import { sessionOn } from '../../engine/training';
+import { cupLabel, momentOn } from '../../engine/calendar';
 import { formChip } from './RosterScreen';
 import styles from './HomeScreen.module.css';
 
@@ -60,6 +61,7 @@ function WeekStrip({ s }: { s: GameState }) {
             const g = gameOn(d);
             const opp = g ? s.teams[g.home === team.id ? g.away : g.home] : null;
             const session = !g ? sessionOn(s, team.id, d) : null;
+            const moment = momentOn(s, d);
             return (
               <button key={d} type="button" className={`${styles.day} ${i === 0 ? styles.today : ''} ${g ? styles.gameDay : ''}`} onClick={() => setTab(g ? 'calendar' : 'training')}>
                 <span className={styles.dow}>{i === 0 ? 'Today' : DOW[new Date(`${d}T00:00:00Z`).getUTCDay()]}</span>
@@ -68,8 +70,10 @@ function WeekStrip({ s }: { s: GameState }) {
                   <span className={styles.dayGame}>
                     <BkImage path={opp.logo} alt={opp.abbr} className={styles.dayLogo} />
                     {g!.home === team.id ? 'vs' : 'at'} {opp.abbr}
+                    {g!.cup && <span className={styles.cupTag}>Cup</span>}
                   </span>
-                ) : <span className={`${styles.session} ${session === 'rest' ? styles.rest : session === 'high' ? styles.hard : ''}`}>{SESSION[session!]}</span>}
+                ) : moment && moment !== 'Cup night' ? <span className={styles.moment}>{moment}</span>
+                  : <span className={`${styles.session} ${session === 'rest' ? styles.rest : session === 'high' ? styles.hard : ''}`}>{SESSION[session!]}</span>}
               </button>
             );
           })}
@@ -102,6 +106,8 @@ function preGameOdds(s: GameState, g: Game): number {
 }
 
 function gameLabel(s: GameState, g: Game): string {
+  const cup = cupLabel(g);
+  if (cup) return cup;
   if (g.type === 'regular') return `${leagueOf(g.comp ?? s.teams[g.home].league).short} regular season`;
   const se = s.series.find((x) => x.id === g.seriesId);
   if (!se) return g.type === 'playin' ? 'Play-in' : 'Playoffs';
