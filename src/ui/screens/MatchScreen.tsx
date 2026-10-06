@@ -7,7 +7,7 @@ import { SYSTEMS, SCHEMES } from '../../engine/playbook/systems';
 import { PLAYS } from '../../engine/playbook/plays';
 import type { OffSystem, DefScheme } from '../../engine/playbook/types';
 import { DEFAULT_LATE, type Side, type SP } from '../../engine/sim/fast';
-import type { LateGame } from '../../engine/model';
+import type { Game, GameState, LateGame, Tactics, TeamState } from '../../engine/model';
 import type { PbpLine, Snapshot } from '../../engine/sim/live';
 import { lineupProfile, offenseFit, defenseFit } from '../../engine/playbook/fit';
 import BkImage from '../components/BkImage';
@@ -358,7 +358,7 @@ export default function MatchScreen() {
                 court={userSideObj.court}
                 onOffense={(v: OffSystem) => handleTactic((t) => (t.offense = v))}
                 onDefense={(v: DefScheme) => handleTactic((t) => (t.defense = v))}
-                onSlider={(k: string, v: number) => handleTactic((t) => ((t as any)[k] = v))}
+                onSlider={(k: SliderKey, v: number) => handleTactic((t) => { t[k] = v; })}
                 onFocus={(v: string) => handleTactic((t) => (t.focusPlayer = v || null))}
                 onClutch={(v: string) => handleTactic((t) => (t.clutchPlay = v || null))}
                 onLate={(k: keyof LateGame, v: boolean | string | null) => handleTactic((t) => { t.late = { ...(t.late ?? DEFAULT_LATE), [k]: v }; })}
@@ -417,7 +417,11 @@ export default function MatchScreen() {
 
 // ---------- scoreboard ----------
 
-function Scoreboard({ s, game, snap, home, away, maxTo }: any) {
+type SliderKey = 'pace' | 'threeFocus' | 'crashGlass' | 'transition';
+
+interface ScoreboardProps { s: GameState; game: Game; snap: Snapshot; home: TeamState; away: TeamState; maxTo: number }
+
+function Scoreboard({ snap, home, away, maxTo }: ScoreboardProps) {
   const clockCls = snap.clock < 24 ? `${styles.sbClock} ${styles.clockRed}` : snap.clock < 60 ? `${styles.sbClock} ${styles.clockAmber}` : styles.sbClock;
   const shotUrgent = snap.state === 'live' && snap.shotClock <= 5;
   return (
@@ -434,7 +438,9 @@ function Scoreboard({ s, game, snap, home, away, maxTo }: any) {
   );
 }
 
-function TeamScore({ team, score, bonus, timeouts, maxTo, possession, align }: any) {
+interface TeamScoreProps { team: TeamState; score: number; bonus: boolean; timeouts: number; maxTo: number; possession: boolean; align: 'left' | 'right' }
+
+function TeamScore({ team, score, bonus, timeouts, maxTo, possession, align }: TeamScoreProps) {
   return (
     <div className={align === 'left' ? styles.sbTeam : `${styles.sbTeam} ${styles.sbTeamRight}`} style={{ '--side': onConcrete(team.colors.primary, team.colors.secondary) } as CSSProperties}>
       {align === 'left' && <BkImage path={team.logo} alt={team.abbr} className={styles.sbLogo} />}
@@ -456,7 +462,7 @@ function TeamScore({ team, score, bonus, timeouts, maxTo, possession, align }: a
   );
 }
 
-function LineScore({ snap, home, away }: { snap: Snapshot; home: any; away: any }) {
+function LineScore({ snap, home, away }: { snap: Snapshot; home: TeamState; away: TeamState }) {
   const periods = snap.state === 'break' ? snap.period - 1 : snap.period;
   const rows: [number, number][] = [];
   let prevH = 0, prevA = 0;
@@ -553,7 +559,23 @@ function BoxTable({ side, label }: { side: Side; label: string }) {
   );
 }
 
-function TacticsTab({ tactics, roster, court, onOffense, onDefense, onSlider, onFocus, onClutch, onLate, opponents, calledPlay, onCalledPlayChange, onCallPlay }: any) {
+interface TacticsTabProps {
+  tactics: Tactics;
+  roster: SP[];
+  court: SP[];
+  opponents: SP[];
+  onOffense: (v: OffSystem) => void;
+  onDefense: (v: DefScheme) => void;
+  onSlider: (k: SliderKey, v: number) => void;
+  onFocus: (v: string) => void;
+  onClutch: (v: string) => void;
+  onLate: (k: keyof LateGame, v: boolean | string | null) => void;
+  calledPlay: string;
+  onCalledPlayChange: (v: string) => void;
+  onCallPlay: () => void;
+}
+
+function TacticsTab({ tactics, roster, court, onOffense, onDefense, onSlider, onFocus, onClutch, onLate, opponents, calledPlay, onCalledPlayChange, onCallPlay }: TacticsTabProps) {
   const late: LateGame = tactics.late ?? DEFAULT_LATE;
   const five = (court as SP[]).map((sp) => sp.p);
   const fit = five.length === 5
