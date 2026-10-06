@@ -97,6 +97,7 @@ export interface TeamState extends Team {
   chemistry?: number;              // 0–100 locker-room chemistry (weekly), a small on-court edge
   mleUsed?: boolean;               // mid-level exception used this season
   deadCap?: { season: string; amount: number }[]; // waived salary still on the cap
+  coaching?: Coaching;             // derived from staff ratings and specialities
 }
 
 export type GameType = 'regular' | 'playin' | 'playoff' | 'cup';
@@ -277,6 +278,25 @@ export interface Staff {
   rating: number;        // 1–100
   age: number; salary: number; years: number;
   teamId: string | null;
+  spec?: StaffSpec;      // what this staffer is known for
+}
+
+export type StaffSpec =
+  | 'spacing' | 'pnr' | 'pace' | 'closer'              // offensive coordinator
+  | 'rimProtect' | 'perimeter' | 'pressure'            // defensive coordinator
+  | 'youth' | 'veteran' | 'skills'                     // player development
+  | 'prevention' | 'rehab' | 'recovery'                // medical
+  | 'draftEye' | 'intl' | 'proScout'                   // scouting
+  | 'shotQuality' | 'loadMgmt' | 'matchups';           // analytics
+
+/** Per-team coaching profile from the staff, read by the game sim (refreshed weekly and on hiring). */
+export interface Coaching {
+  off: number; def: number;                // general shot-making edge / suppression
+  three: number; rim: number;              // our shot quality by zone
+  oppThree: number; oppRim: number;        // what we take away from opponents
+  forceTo: number;                         // extra opponent turnover rate (fraction)
+  fastBreak: number;                       // extra transition chances
+  clutch: number;                          // late-game edge
 }
 
 export type FacilityId = 'training' | 'medical' | 'arena' | 'scouting' | 'analytics';

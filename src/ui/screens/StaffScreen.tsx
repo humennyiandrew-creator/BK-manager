@@ -5,7 +5,7 @@ import StatTile from '../components/StatTile';
 import ProgressBar from '../components/ProgressBar';
 import DataTable, { type DataTableColumn } from '../components/DataTable';
 import { useGameState, useGame } from '../store/useGame';
-import { ROLES, ROLE_LABEL, STAFF_BUDGET, hireStaff, fireStaff, staffCourses, enrollStaff, type StaffCourse } from '../../engine/mgmt/staff';
+import { ROLES, ROLE_LABEL, SPEC_INFO, STAFF_BUDGET, hireStaff, fireStaff, staffCourses, enrollStaff, type StaffCourse } from '../../engine/mgmt/staff';
 import type { Staff, StaffRole } from '../../engine/model';
 import { formatMoneyShort } from '../format';
 import { attrVariant } from '../attrGroups';
@@ -54,6 +54,7 @@ export default function StaffScreen() {
 
   const marketColumns: DataTableColumn<Staff>[] = [
     { key: 'name', header: 'Name', render: (st) => st.name },
+    { key: 'spec', header: 'Speciality', render: (st) => (st.spec ? <span className={styles.spec} title={SPEC_INFO[st.spec].desc}>{SPEC_INFO[st.spec].label}</span> : <span className={styles.specNone}>Generalist</span>), sortValue: (st) => (st.spec ? SPEC_INFO[st.spec].label : 'zzz') },
     { key: 'age', header: 'Age', align: 'right', render: (st) => st.age, sortValue: (st) => st.age },
     {
       key: 'rating', header: 'Rating', align: 'right', sortValue: (st) => st.rating, render: (st) => (
@@ -92,6 +93,7 @@ export default function StaffScreen() {
                     <div className={styles.roleInfo}>
                       <span className={styles.roleName}>{ROLE_LABEL[r]}</span>
                       <span className={styles.staffName}>{st ? st.name : 'Vacant'}</span>
+                      {st?.spec && <span className={styles.specLine}>{SPEC_INFO[st.spec].label}: {SPEC_INFO[st.spec].desc.toLowerCase()}</span>}
                     </div>
                     <ProgressBar value={st?.rating ?? 40} variant={attrVariant(st?.rating ?? 40)} className={styles.ratingBar} />
                     <span className={styles.ratingValue}>{st?.rating ?? 40}</span>

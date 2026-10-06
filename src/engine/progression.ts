@@ -2,7 +2,7 @@
 import type { GameState, Player, TrainingFocus, TrainingPlan } from './model';
 import { ageOf, type Attr } from './ratings';
 import { gauss, hashString, mulberry32, type Rng } from './rng';
-import { staffRating } from './mgmt/staff';
+import { devSpecMul, hasSpec, staffRating } from './mgmt/staff';
 import { facilityLevel, hasNode } from './mgmt/facilities';
 import { daysBetween } from './schedule';
 import { filmSessionsThisWeek, scheduleGrowthMul, scheduleInjuryMul } from './training';
@@ -29,7 +29,8 @@ export function trainingEffects(s: GameState, teamId: string): { growthMul: numb
   const i = plan.intensity - 1; // 0–4
   const dev = 0.85 + staffRating(s, teamId, 'development') / 333;
   const fac = 0.9 + facilityLevel(s, teamId, 'training') * 0.04;
-  const med = (1.1 - staffRating(s, teamId, 'medical') / 250) * (1.08 - facilityLevel(s, teamId, 'medical') * 0.03) * (hasNode(s, teamId, 'medical_sportsScience') ? 0.9 : 1);
+  const med = (1.1 - staffRating(s, teamId, 'medical') / 250) * (1.08 - facilityLevel(s, teamId, 'medical') * 0.03) * (hasNode(s, teamId, 'medical_sportsScience') ? 0.9 : 1)
+    * (hasSpec(s, teamId, 'prevention') ? 0.88 : 1);
   return {
     growthMul: (0.7 + 0.15 * i) * dev * fac,
     injuryMul: (0.8 + 0.1 * i) * med * scheduleInjuryMul(s, teamId),
@@ -161,6 +162,7 @@ export function progressionDaily(s: GameState) {
     const schedMul = scheduleGrowthMul(s, p.teamId) * fatigueGrowthMul(p);
     let growth = base > 0 ? base * e.growthMul * schedMul * minutesMul * work : base / Math.max(0.8, e.growthMul * 0.5 + 0.5);
     // A breakout season pauses age decline; a collapse pauses normal growth — the arc is the story.
+    growth *= devSpecMul(s, p.teamId, age, growth);
     if (arcActive(p, s.season, week)) growth = p.arc!.kind === 'breakout' ? Math.max(0, growth) : Math.min(0, growth);
     // Performance feeds back: overperformers grow a little faster and raise their ceiling, flops the reverse.
     const form = p.form ?? 0;

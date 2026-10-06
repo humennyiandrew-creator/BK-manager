@@ -66,6 +66,15 @@ export interface TalkBoost { left: number; edge: number; toMul: number; defEdge:
 
 const intensityOf = (s: Side) => s.intensity ?? 0;
 
+/** What the two coaching staffs add to a shot: coordinators, specialities, and the late-game playcaller. */
+function coachingEdge(off: Side, def: Side, type: ShotType, clutch: boolean): number {
+  const o = off.team.coaching, d = def.team.coaching;
+  if (!o && !d) return 0;
+  return (o?.off ?? 0) - (d?.def ?? 0)
+    + (type === 'three' ? (o?.three ?? 0) - (d?.oppThree ?? 0) : type === 'rim' ? (o?.rim ?? 0) - (d?.oppRim ?? 0) : 0)
+    + (clutch ? (o?.clutch ?? 0) : 0);
+}
+
 const a = (sp: SP) => sp.p.ratings.attrs;
 const avg = (list: SP[], f: (sp: SP) => number) => list.reduce((s, x) => s + f(x), 0) / list.length;
 const posRank = (sp: SP) => ({ PG: 0, SG: 1, SF: 2, PF: 3, C: 4 })[sp.p.positions[0] ?? 'SF'];
@@ -232,7 +241,7 @@ export function decide(off: Side, def: Side, rng: Rng, rules: Rules, ctx: Decide
   const t = off.team.tactics;
   const sys = SYSTEMS[t.offense];
   const sch = SCHEMES[def.team.tactics.defense];
-  const fastBreak = ctx.transition && rng() < 0.25 + t.transition / 250;
+  const fastBreak = ctx.transition && rng() < 0.25 + t.transition / 250 + (off.team.coaching?.fastBreak ?? 0);
   const play = choosePlay(off, rng, ctx);
   const usage = (sp: SP) => sp.p.ratings.tend.usage ** K.usgExp * fatigue(sp);
   const handler = pick(off.court, (x) => usage(x) * (a(x).ballHandle + a(x).passing) * (roleOf(off, x) === 1 ? 1.5 : 1), rng);
@@ -243,7 +252,7 @@ export function decide(off: Side, def: Side, rng: Rng, rules: Rules, ctx: Decide
   const pTo = K.toBase * sys.toMul * (1 + (sch.toMul - 1) * df.mul) * of.toMul
     * (1 + (62 - (a(handler).ballHandle + a(handler).passing) / 2) * 0.01)
     * (1 + (avg(def.court, (x) => a(x).steal) - 62) * 0.008)
-    * (1 + intensityOf(def) * 0.06) * (off.boost?.toMul ?? 1);
+    * (1 + intensityOf(def) * 0.06) * (off.boost?.toMul ?? 1) * (1 + (def.team.coaching?.forceTo ?? 0));
   if (rng() < pTo) {
     const by = pick(off.court, (x) => usage(x) * (130 - a(x).ballHandle), rng);
     const steal = rng() < K.stealShare ? pick(def.court, (x) => a(x).steal ** 2, rng) : null;
@@ -303,7 +312,8 @@ export function decide(off: Side, def: Side, rng: Rng, rules: Rules, ctx: Decide
     + of.edge + (type === 'rim' ? of.rimEdge : type === 'three' ? of.threeEdge : 0)
     + ((off.team.familiarity ?? 85) - 85) / 40 * 0.006
     + chemistryEdge(off.team.chemistry)
-    + intensityOf(off) * 0.012 - intensityOf(def) * 0.008 + (off.boost?.edge ?? 0) - (def.boost?.defEdge ?? 0);
+    + intensityOf(off) * 0.012 - intensityOf(def) * 0.008 + (off.boost?.edge ?? 0) - (def.boost?.defEdge ?? 0)
+    + coachingEdge(off, def, type, !!ctx.clutch);
   const pMake = shotProb(shooter, defender, protector, type, edge);
   const passers = off.court.filter((x) => x !== shooter);
   const assistBy = (): SP | null => (rng() < K.assist[type] * sys.assistMul

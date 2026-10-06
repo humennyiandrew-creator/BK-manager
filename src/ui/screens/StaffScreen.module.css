@@ -240,3 +240,20 @@
   font-size: 0.78rem;
   text-align: center;
 }
+
+.spec {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--maple);
+}
+
+.specNone {
+  font-size: 0.8rem;
+  color: var(--chalk-3);
+}
+
+.specLine {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--maple);
+}

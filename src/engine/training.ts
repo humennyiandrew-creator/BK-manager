@@ -1,4 +1,5 @@
 // Weekly training schedule: session effects, daily fatigue/familiarity ticks, tactic-change familiarity reset.
+import { hasSpec } from './mgmt/staff';
 import type { GameState, Session, TeamState } from './model';
 import { addDays } from './schedule';
 import { clamp } from './mgmt/market';
@@ -88,7 +89,7 @@ export function trainingDaily(s: GameState): void {
   for (const team of Object.values(s.teams)) {
     const session = sessionOn(s, team.id, s.date);
     const eff = SESSION_EFFECTS[session];
-    const recoveryBonus = hasNode(s, team.id, 'training_recoveryPool') ? 3 : 0;
+    const recoveryBonus = (hasNode(s, team.id, 'training_recoveryPool') ? 3 : 0) + (hasSpec(s, team.id, 'recovery') ? 2 : 0);
     const filmBonus = session === 'film' && hasNode(s, team.id, 'training_filmRoom') ? 2 : 0;
     team.familiarity = clamp((team.familiarity ?? 60) + 0.3 + eff.familiarity + filmBonus, 0, 100);
     const fatigueDelta = eff.fatigue - (NATURAL_RECOVERY + recoveryBonus);

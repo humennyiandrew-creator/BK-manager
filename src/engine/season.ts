@@ -11,6 +11,7 @@ import { boardOnPhase } from './mgmt/board';
 import { fatigueInjuryMul, trainingEffects } from './progression';
 import { clamp } from './mgmt/market';
 import { hasNode } from './mgmt/facilities';
+import { hasSpec } from './mgmt/staff';
 import { offseasonStep } from './offseason';
 import { eventsDaily } from './events';
 import { settleMatchObjectives } from './objectives';
@@ -105,8 +106,9 @@ export function applyResult(s: GameState, g: Game, res: GameResult) {
     const p = s.players[b.id];
     addLine(g.type === 'regular' || g.type === 'cup' ? p.season : p.playoffs, b);
     const loadMgmt = p.teamId && hasNode(s, p.teamId, 'analytics_loadMgmt');
-    p.fatigue = clamp((p.fatigue ?? 0) + b.min * 0.35 * (loadMgmt ? 0.85 : 1), 0, 100);
+    p.fatigue = clamp((p.fatigue ?? 0) + b.min * 0.35 * (loadMgmt ? 0.85 : 1) * (p.teamId && hasSpec(s, p.teamId, 'loadMgmt') ? 0.9 : 1), 0, 100);
     if (rollInjury(p, b.min, rng, (injMul[p.teamId!] ?? 1) * fatigueInjuryMul(p))) {
+      if (p.injury && hasSpec(s, p.teamId!, 'rehab')) p.injury.daysLeft = Math.max(1, Math.round(p.injury.daysLeft * 0.8));
       refreshRotation(s.teams[p.teamId!], s.players);
       newsInjury(s, p);
       if (p.teamId === s.userTeamId) {
