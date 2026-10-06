@@ -16,6 +16,7 @@ import { buildPrep, prepDaily } from './prep';
 import { buildMatchObjectives } from './objectives';
 import { newsDaily } from './news';
 import { chemistryWeekly } from './chemistry';
+import { gleagueWeekly } from './gleague';
 import { pressDaily } from './media';
 import { checkPromises } from './mgmt/board';
 import { sponsorsWeekly } from './sponsors';
@@ -40,6 +41,7 @@ export function dailyUpdate(s: GameState, playedToday: Game[]) {
   eventsDaily(s);
   newsDaily(s, playedToday);
   chemistryWeekly(s);
+  gleagueWeekly(s);
   pressDaily(s, playedToday);
   checkPromises(s);
   sponsorsWeekly(s);

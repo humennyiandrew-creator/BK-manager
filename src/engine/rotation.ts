@@ -5,7 +5,8 @@ import type { Position } from './types';
 const SLOTS: Position[][] = [['PG', 'SG'], ['SG', 'SF', 'PG'], ['SF', 'SG', 'PF'], ['PF', 'SF', 'C'], ['C', 'PF']];
 const MINUTES = [35, 33, 32, 31, 29, 24, 20, 16, 12, 8]; // sums 240
 
-export const available = (p: Player) => !p.injury;
+/** Healthy and with the big club (not on G League assignment). */
+export const available = (p: Player) => !p.injury && !p.assigned;
 
 /** Best starting five by slot fit, then bench by OVR. */
 export function autoRotation(players: Player[]): string[] {

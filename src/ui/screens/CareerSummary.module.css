@@ -91,3 +91,8 @@
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
+
+.endActions {
+  display: flex;
+  gap: 0.6rem;
+}

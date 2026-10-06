@@ -152,7 +152,9 @@ export function progressionDaily(s: GameState) {
     const e = eff.get(p.teamId)!;
     const plan = s.training[p.teamId] ?? defaultTraining();
     const age = ageOf(p.birthDate, new Date(s.date));
-    const mpg = p.season.gp ? p.season.min / p.season.gp : 0;
+    // On G League assignment he gets real minutes, just not in the NBA.
+    const glMpg = p.assigned && p.gl?.gp ? p.gl.min / p.gl.gp : p.assigned ? 26 : 0;
+    const mpg = p.assigned ? glMpg : p.season.gp ? p.season.min / p.season.gp : 0;
     const minutesMul = age <= 25 ? 0.85 + Math.min(1, mpg / 30) * 0.3 : 1;
     const work = 0.85 + p.ratings.personality.workEthic / 66;
     const base = annualExpected(age, p.ratings.ovr, p.ratings.pot) * IN_SEASON_SHARE / WEEKS;
@@ -186,7 +188,7 @@ export function progressionDaily(s: GameState) {
     // Stars expect ~35 mpg, rotation players ~20, the end of the bench a few minutes; no games yet = no complaint.
     const rec = record.get(p.teamId);
     const expectMin = 8 + clamp((p.ratings.ovr - 62) * 1.05, 0, 28);
-    const minutesTerm = rec?.gp ? clamp((mpg - expectMin) * 1.5, -25, 20) : 0;
+    const minutesTerm = p.assigned ? (p.ratings.ovr >= 74 ? -6 : 0) : rec?.gp ? clamp((mpg - expectMin) * 1.5, -25, 20) : 0;
     const winTerm = rec?.gp ? (rec.pct - 0.5) * 16 * Math.min(1, rec.gp / 10) : 0;
     const target = 62 + minutesTerm + winTerm - (e.fatigueMul - 1) * 40;
     p.morale = Math.round(Math.max(0, Math.min(100, p.morale + (target - p.morale) * 0.15)));

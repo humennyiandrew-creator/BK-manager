@@ -388,7 +388,6 @@
 
 .startBtn {
   position: relative;
-  margin-top: auto;
   background: var(--accent);
   color: var(--accent-contrast);
   border: none;
@@ -419,4 +418,33 @@
 
 .back:hover {
   color: var(--cyan);
+}
+
+.length {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: auto;
+}
+
+.lengthRow {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.3rem;
+}
+
+.lengthBtn {
+  background: var(--panel-alt);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.45rem 0;
+}
+
+.lengthOn {
+  border-color: var(--accent);
+  color: var(--text);
+  background: color-mix(in srgb, var(--accent) 14%, var(--panel-alt));
 }

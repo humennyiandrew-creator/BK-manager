@@ -20,6 +20,8 @@ function Stars({ n }: { n: number }) {
   );
 }
 
+const CAREER_LENGTHS = [{ n: 5, label: '5 seasons' }, { n: 10, label: '10 seasons' }, { n: 20, label: '20 seasons' }, { n: 0, label: 'Open-ended' }];
+
 const TIER: Record<number, string> = { 5: 'Contender', 4: 'Playoff team', 3: 'In the mix', 2: 'Rebuilding', 1: 'Long rebuild' };
 
 /** What ownership will ask for, by squad strength in its own league. */
@@ -61,6 +63,7 @@ export default function ChooseTeamScreen() {
   const [league, setLeague] = useState<'NBA' | 'EL'>('NBA');
   const [selected, setSelected] = useState<string | null>(null);
   const [starting, setStarting] = useState(false);
+  const [seasons, setSeasons] = useState(10);
 
   useEffect(() => {
     let cancelled = false;
@@ -101,7 +104,7 @@ export default function ChooseTeamScreen() {
   const start = async () => {
     if (!detail || starting) return;
     setStarting(true);
-    await startNew(detail.team.id, slot);
+    await startNew(detail.team.id, slot, seasons);
     setView('shell');
   };
 
@@ -185,6 +188,14 @@ export default function ChooseTeamScreen() {
                       <span className={`${styles.detailOvr} mono-num`}>{p.ovr}</span>
                     </div>
                   ))}
+                </div>
+                <div className={styles.length}>
+                  <span className={styles.keyHead}>Career length</span>
+                  <div className={styles.lengthRow}>
+                    {CAREER_LENGTHS.map((c) => (
+                      <button key={c.n} type="button" className={c.n === seasons ? `${styles.lengthBtn} ${styles.lengthOn}` : styles.lengthBtn} onClick={() => setSeasons(c.n)}>{c.label}</button>
+                    ))}
+                  </div>
                 </div>
                 <button type="button" className={`${styles.startBtn} chevron-stripe`} onClick={start} disabled={starting}>
                   {starting ? 'Starting…' : 'Take the job'}

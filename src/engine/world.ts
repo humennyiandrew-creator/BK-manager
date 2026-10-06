@@ -18,12 +18,15 @@ import { euroSalary } from './euro';
 import { genPlayer } from './gen';
 import { hashString, mulberry32 } from './rng';
 import { rollSeasonArcs } from './arcs';
+import { gleagueOffseason } from './gleague';
 
 export const MAX_STANDARD = 15;
 export const MAX_TWO_WAY = 3;
 const VET_MIN = 2_300_000;
 
-export function newGame(teams: Team[], raw: RawPlayer[], userTeamId: string, seed: number, seasonYear = 2026): GameState {
+export interface NewGameOpts { maxSeasons?: number } // 0 = open-ended career
+
+export function newGame(teams: Team[], raw: RawPlayer[], userTeamId: string, seed: number, seasonYear = 2026, opts: NewGameOpts = {}): GameState {
   // Ratings are z-scored inside each league's own pool, then shifted onto the NBA scale.
   const leagueIds = [...new Set(teams.map((t) => (t.league ?? 'NBA') as LeagueId))];
   const ratings = new Map<string, ReturnType<typeof buildRatings> extends Map<string, infer V> ? V : never>();
@@ -80,7 +83,7 @@ export function newGame(teams: Team[], raw: RawPlayer[], userTeamId: string, see
     staff: [], facilities: {}, finance: undefined as unknown as GameState['finance'], board: undefined as unknown as GameState['board'],
     training: Object.fromEntries(teams.map((t) => [t.id, defaultTraining()])),
     picks: [], tradeOffers: [], transactions: [], draftClass: [], draftOrder: [],
-    startYear: seasonYear, maxSeasons: 5, history: [], events: [], negotiations: [],
+    startYear: seasonYear, maxSeasons: opts.maxSeasons ?? 5, history: [], events: [], negotiations: [],
     scouting: { assignments: [], knowledge: {}, shortlist: [] }, promises: [], bids: [],
     manager: { name: 'Head Coach', reputation: 45, unemployed: false, hiredOn: `${seasonYear}-10-01`, salary: 2_500_000, contractYears: 3, hotSeat: 20, offers: [], history: [] },
     keyDates: { tradeDeadline: `${seasonYear + 1}-02-05`, regularEnd, draft: `${seasonYear + 1}-06-24`, freeAgency: `${seasonYear + 1}-06-30` },
@@ -90,6 +93,7 @@ export function newGame(teams: Team[], raw: RawPlayer[], userTeamId: string, see
   initFinances(s);
   initBoard(s);
   initPicks(s);
+  gleagueOffseason(s);
   rollSeasonArcs(s);
   return s;
 }

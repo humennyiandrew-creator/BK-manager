@@ -94,7 +94,7 @@ export function evaluateTrade(s: GameState, ai: string, aiGives: TradeSide, aiGe
 
 export function executeTrade(s: GameState, a: string, b: string, aGives: TradeSide, bGives: TradeSide) {
   const move = (side: TradeSide, to: string) => {
-    for (const id of side.players) s.players[id].teamId = to;
+    for (const id of side.players) { s.players[id].teamId = to; s.players[id].assigned = false; }
     for (const id of side.picks) s.picks.find((p) => p.id === id)!.owner = to;
   };
   move(aGives, b);

@@ -12,7 +12,7 @@ function playerName(s: GameState, id: string): string {
   return p ? `${p.firstName[0]}. ${p.lastName}` : '—';
 }
 
-export default function CareerSummary({ s, onBack }: { s: GameState; onBack: () => void }) {
+export default function CareerSummary({ s, onBack, onExtend }: { s: GameState; onBack: () => void; onExtend: () => void }) {
   const team = s.teams[s.userTeamId];
   const history = s.history;
   const titles = history.filter((h) => h.result === 'Champions').length;
@@ -39,7 +39,7 @@ export default function CareerSummary({ s, onBack }: { s: GameState; onBack: () 
         <BkImage path={team.logo} alt={team.name} className={styles.logo} />
         <div>
           <div className={styles.title}><span className={styles.slash}>// </span>{team.city} {team.name}</div>
-          <div className={styles.subtitle}>{s.startYear}–{s.startYear + s.maxSeasons} Career Summary</div>
+          <div className={styles.subtitle}>{s.startYear}–{s.startYear + s.history.length} Career Summary</div>
         </div>
       </div>
 
@@ -60,7 +60,10 @@ export default function CareerSummary({ s, onBack }: { s: GameState; onBack: () 
         <DataTable columns={columns} rows={history} rowKey={(r) => r.season} compact />
       </Panel>
 
-      <button type="button" className={styles.backBtn} onClick={onBack}>Back to Menu</button>
+      <div className={styles.endActions}>
+        <button type="button" className={styles.backBtn} onClick={onExtend}>Keep going: 5 more seasons</button>
+        <button type="button" className={styles.backBtn} onClick={onBack}>Back to Menu</button>
+      </div>
     </div>
   );
 }

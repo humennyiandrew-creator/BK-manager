@@ -7,13 +7,18 @@ import { simToEndOfSeason, standings } from '../season';
 import { simOffseason, expiring, resignAsk } from '../offseason';
 import { payroll, rosterOf, isTwoWay, capNumbers } from '../cba';
 
-it('plays a full 5-season career', () => {
+// Yield between seasons so a minute-long sim doesn't starve vitest's worker RPC.
+const breathe = () => new Promise((r) => setTimeout(r, 0));
+
+it('plays a full 5-season career', async () => {
   const s = newGame(teams as Team[], players as RawPlayer[], '1610612738', 21);
   const t0 = Date.now();
   for (let season = 0; season < 6 && !s.careerOver; season++) {
     simToEndOfSeason(s);
     expect(s.phase).toBe('offseason');
+    await breathe();
     simOffseason(s);
+    await breathe();
     const sizes = Object.keys(s.teams).map((t) => rosterOf(s, t).filter((p) => !isTwoWay(p)).length);
     const pays = Object.keys(s.teams).filter((t) => t !== s.userTeamId).map((t) => payroll(s, t) / 1e6);
     const rec = s.history[s.history.length - 1];

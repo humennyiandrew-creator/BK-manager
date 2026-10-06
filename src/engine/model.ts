@@ -36,6 +36,7 @@ export interface Player {
   prospect?: boolean;             // draft prospect (not yet in league)
   college?: string;
   retired?: boolean;
+  retiredSeason?: string;         // season he retired after (old retirees are pruned from saves)
   ovrHistory?: { season: string; ovr: number; pot: number }[];
   lastChange?: number;            // OVR change from last progression tick (UI arrows)
   prog?: number;                  // fractional OVR progress accumulator
@@ -50,6 +51,9 @@ export interface Player {
   arc?: SeasonArc;                // rare breakout / collapse season in progress
   arcHistory?: { season: string; kind: ArcKind; style: ArcStyle; delta: number; kept: number }[];
   ovrTrack?: number[];            // weekly OVR this season (in-season trend line)
+  assigned?: boolean;             // on the NBA roster but playing for the club's G League affiliate
+  affiliate?: string;             // unsigned G League player: parent NBA team id of his affiliate
+  gl?: { season: string; gp: number; min: number; pts: number; reb: number; ast: number }; // G League line
 }
 
 // ---------- season arcs: rare breakouts and collapses ----------
@@ -176,7 +180,7 @@ export interface GameState {
   keyDates: KeyDates;
   // ---- M7 career ----
   startYear: number;                       // first season of the career
-  maxSeasons: number;                      // career length cap (5)
+  maxSeasons: number;                      // career length in seasons; 0 = open-ended
   offseason?: { stage: OffseasonStage; faDay: number; waitingPick?: string };
   history: SeasonRecord[];                 // one per completed season
   careerOver?: boolean;

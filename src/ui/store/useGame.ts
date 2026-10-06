@@ -27,7 +27,7 @@ interface GameStore {
   busy: boolean;
   loadError: string | null;
   mutate: (fn: (s: GameState) => void) => void;
-  startNew: (teamId: string, slot: number) => Promise<void>;
+  startNew: (teamId: string, slot: number, maxSeasons?: number) => Promise<void>;
   load: (slot: number) => Promise<boolean>;
   save: () => Promise<void>;
   continue: () => void;
@@ -49,11 +49,11 @@ export const useGame = create<GameStore>((set, get) => ({
     set((st) => ({ s: st.s ? { ...st.s } : st.s, rev: st.rev + 1 }));
   },
 
-  startNew: async (teamId, slot) => {
+  startNew: async (teamId, slot, maxSeasons = 10) => {
     set({ busy: true });
     const { teams, players } = await loadLeagueData();
     const seed = Date.now() % 0x7fffffff;
-    const s = newGame(teams, players, teamId, seed);
+    const s = newGame(teams, players, teamId, seed, undefined, { maxSeasons });
     set({ s, slot, rev: 0, busy: false });
     await saveGame(slot, toSaveData(s));
   },

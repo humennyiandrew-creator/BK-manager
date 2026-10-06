@@ -103,6 +103,8 @@ export function completeTransfer(s: GameState, bid: TransferBid) {
   const p = s.players[bid.playerId];
   const from = bid.fromTeam, to = bid.toTeam;
   p.teamId = to;
+  p.assigned = false;
+  p.affiliate = undefined;
   p.contract = { salaries: contractRows(s.seasonYear + (s.phase === 'offseason' ? 1 : 0), bid.wage, bid.years), type: 'standard' };
   bid.status = 'completed';
   if (to === s.userTeamId && s.finance) { s.finance.cash -= bid.fee; s.finance.expense.operations += bid.fee; }
@@ -200,6 +202,7 @@ export function loanOut(s: GameState, playerId: string, toTeam: string): BidResu
   if (ageOf(p.birthDate, new Date(s.date)) > 24) return { ok: false, text: 'Only players 24 and under can be loaned' };
   if (rosterOf(s, toTeam).length >= leagueOf(s.teams[toTeam].league).maxRoster) return { ok: false, text: 'That club has no space' };
   p.teamId = toTeam;
+  p.assigned = false;
   p.loan = { parent: s.userTeamId, until: `${s.seasonYear + 1}-06-30` };
   refreshRotation(s.teams[s.userTeamId], s.players);
   refreshRotation(s.teams[toTeam], s.players);

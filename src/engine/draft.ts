@@ -89,6 +89,7 @@ export function makePick(s: GameState, pickId: string, playerId: string): string
   const year = pick.year;
   p.prospect = false;
   p.teamId = pick.owner;
+  p.affiliate = undefined;
   p.draft = { year, round: pick.round, pick: slot };
   p.contract = pick.round === 1
     ? { salaries: rookieScale(slot, year).salaries, type: 'rookie', option: { season: rookieScale(slot, year).salaries[2].season, kind: 'team' } }

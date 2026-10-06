@@ -10,7 +10,10 @@ import { addDays } from './schedule';
 import { buildSeasonGames } from './world';
 import { standings } from './season';
 import { addPickYear, aiPick, draftUntilUser, generateDraftClass, nextPick, runLottery } from './draft';
-import { askingPrice, expireContracts, freeAgents, offseasonMarketDay, releasePlayer } from './freeagency';
+import { askingPrice, expireContracts, freeAgents, isBudgetClub, offseasonMarketDay, releasePlayer, sign, signEuro } from './freeagency';
+import { genPlayer } from './gen';
+import { gleagueOffseason } from './gleague';
+import { leagueOf } from './leagues';
 import { annualProgression } from './progression';
 import { autoTactics } from './playbook/systems';
 import { LONG_TERM, objectiveByRank, objectiveLabel } from './mgmt/board';
@@ -153,6 +156,7 @@ function retirements(s: GameState) {
     if (rng() >= prob) continue;
     const was = p.teamId;
     p.retired = true;
+    p.retiredSeason = s.season;
     p.teamId = null;
     p.contract = null;
     if (was) refreshRotation(s.teams[was], s.players);
@@ -164,15 +168,78 @@ function retirements(s: GameState) {
 /** AI rosters: trim to 15 standard, fill to 13 with minimum deals. */
 function aiRosterFill(s: GameState) {
   const pool = freeAgents(s).sort((a, b) => b.ratings.ovr - a.ratings.ovr);
-  for (const t of Object.keys(s.teams)) {
+  // NBA teams fill first; European clubs then top up to 12 on European wages.
+  const order = Object.keys(s.teams).sort((a, b) => Number(isBudgetClub(s, a)) - Number(isBudgetClub(s, b)));
+  for (const t of order) {
     if (t === s.userTeamId) continue;
+    if (isBudgetClub(s, t)) {
+      const max = leagueOf(s.teams[t].league).maxRoster;
+      while (rosterOf(s, t).length > max) releasePlayer(s, rosterOf(s, t).sort((a, b) => a.ratings.ovr - b.ratings.ovr)[0].id);
+      while (rosterOf(s, t).length < 12 && pool.length) signEuro(s, t, pool.shift()!, s.seasonYear + 1);
+      continue;
+    }
     const std = () => rosterOf(s, t).filter((p) => !isTwoWay(p));
     while (std().length > 15) releasePlayer(s, std().sort((a, b) => a.ratings.ovr - b.ratings.ovr)[0].id);
     while (std().length < 13 && pool.length) {
       const p = pool.shift()!;
       p.teamId = t;
+      p.affiliate = undefined;
       p.contract = { salaries: contractRows(s.seasonYear + 1, minSalary(s.seasonYear + 1, p.yearsPro), 1), type: 'min' };
     }
+  }
+}
+
+/** Veterans coming back from overseas: keeps the free-agent pool worth browsing all season. */
+function overseasVeterans(s: GameState, n = 24) {
+  const rng = mulberry32(hashString(`${s.seed}|overseas|${s.season}`));
+  for (let i = 0; i < n; i++) {
+    const ovr = Math.round(64 + rng() * 9);
+    const age = 26 + Math.floor(rng() * 7);
+    const id = `vet-${s.season}-${i}`;
+    const p = genPlayer({ id, ovr, pot: ovr, age, asOf: `${s.seasonYear}-10-01`, rng });
+    p.prospect = false;
+    p.yearsPro = 2 + Math.floor(rng() * 6);
+    p.college = undefined;
+    s.players[id] = p;
+  }
+}
+
+/** The league won't let a club start a season short-handed: it signs minimum deals for you. */
+function ensureUserRoster(s: GameState) {
+  const team = s.teams[s.userTeamId];
+  if (!team || s.manager.unemployed) return;
+  const euro = isBudgetClub(s, team.id);
+  const min = euro ? 10 : 13;
+  const count = () => rosterOf(s, team.id).filter((p) => !isTwoWay(p)).length;
+  if (count() >= min) return;
+  const pool = freeAgents(s).sort((a, b) => b.ratings.ovr - a.ratings.ovr);
+  const added: string[] = [];
+  while (count() < min && pool.length) {
+    const p = pool.shift()!;
+    if (euro) signEuro(s, team.id, p, s.seasonYear);
+    else sign(s, team.id, p, minSalary(s.seasonYear, p.yearsPro), 1, false);
+    added.push(`${p.firstName} ${p.lastName} (${p.ratings.ovr})`);
+  }
+  if (added.length) msg(s, 'League Office', 'Roster minimum enforced', `${team.name} were below the ${min}-player minimum, so the league signed: ${added.join(', ')}. Replace them any time.`, 'trade');
+}
+
+/** Keep long careers light: trim old logs and forget retirees nobody will look up again. */
+function pruneOld(s: GameState) {
+  s.messages = s.messages.slice(0, 600);
+  s.transactions = s.transactions.slice(0, 800);
+  const keep = new Set<string>();
+  for (const h of s.history) {
+    const a = h.awards;
+    [a.mvp, a.dpoy, a.roy, a.sixth, a.mip, ...a.allNba, h.topScorer.id].forEach((id) => id && keep.add(id));
+  }
+  for (const x of [...s.bids, ...s.negotiations, ...s.events, ...(s.news ?? [])]) if (x.playerId) keep.add(x.playerId);
+  for (const o of s.tradeOffers) [...o.give.players, ...o.get.players].forEach((id) => keep.add(id));
+  const userAbbr = s.teams[s.userTeamId]?.abbr;
+  for (const p of Object.values(s.players)) {
+    if (!p.retired || !p.retiredSeason || keep.has(p.id)) continue;
+    if (s.seasonYear - Number(p.retiredSeason.slice(0, 4)) < 3) continue;
+    if (p.history.some((h) => h.team === userAbbr)) continue;
+    delete s.players[p.id];
   }
 }
 
@@ -223,10 +290,27 @@ function newSeason(s: GameState) {
   s.board.confidence = Math.round(s.board.confidence * 0.8 + 60 * 0.2);
   for (const st of s.staff) if (st.teamId && --st.years <= 0) st.years = 2; // auto-renew
   msg(s, 'Board of Directors', `${label} season objective`, `The board expects: ${objectiveLabel(s.board.objective)}.`, 'board');
+  overseasVeterans(s);
+  ensureUserRoster(s);
+  pruneOld(s);
   rollSeasonArcs(s);
 }
 
 // ---------- driver ----------
+
+function openDraft(s: GameState) {
+  if (!s.draftOrder.length) runLottery(s);
+  s.date = s.keyDates.draft;
+  s.offseason = { stage: 'draft', faDay: 0 };
+}
+
+/** "Keep going" from the career summary: more seasons, picking up the summer where it stopped. */
+export function extendCareer(s: GameState, seasons: number) {
+  if (!s.careerOver) return;
+  s.maxSeasons = seasons > 0 ? s.maxSeasons + seasons : 0;
+  s.careerOver = false;
+  openDraft(s);
+}
 
 export function offseasonStageLabel(s: GameState): string {
   if (s.careerOver) return 'Career complete';
@@ -246,14 +330,12 @@ export function offseasonStep(s: GameState) {
   managerDaily(s);
   if (!s.offseason) {
     recordSeason(s);
-    if (s.seasonYear - s.startYear + 1 >= s.maxSeasons) {
+    if (s.maxSeasons > 0 && s.seasonYear - s.startYear + 1 >= s.maxSeasons) {
       s.careerOver = true;
       msg(s, 'Board of Directors', 'Career complete', `Your ${s.maxSeasons}-season tenure is over. Thank you, coach.`, 'board');
       return;
     }
-    if (!s.draftOrder.length) runLottery(s);
-    s.date = s.keyDates.draft;
-    s.offseason = { stage: 'draft', faDay: 0 };
+    openDraft(s);
     return;
   }
   const o = s.offseason;
@@ -301,6 +383,7 @@ export function offseasonStep(s: GameState) {
       annualProgression(s);
       retirements(s);
       aiRosterFill(s);
+      gleagueOffseason(s);
       newSeason(s);
       return;
     }

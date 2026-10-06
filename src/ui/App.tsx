@@ -16,6 +16,7 @@ import BetweenJobsScreen from './screens/BetweenJobsScreen';
 import { SCREENS } from './screens';
 import { userTeam } from './selectors';
 import { pendingUserEvent } from '../engine/events';
+import { extendCareer } from '../engine/offseason';
 import { computeAccent } from './accent';
 import { play } from './sound';
 import styles from './App.module.css';
@@ -60,6 +61,7 @@ function Shell() {
   const busy = useGame((g) => g.busy);
   const doContinue = useGame((g) => g.continue);
   const reset = useGame((g) => g.reset);
+  const mutate = useGame((g) => g.mutate);
   const setView = useUI((s) => s.setView);
   const activeEventId = useUI((s) => s.activeEventId);
   const openEvent = useUI((s) => s.openEvent);
@@ -96,7 +98,7 @@ function Shell() {
   if (!s) return null;
 
   if (s.careerOver) {
-    return <CareerSummary s={s} onBack={() => { reset(); setView('startMenu'); }} />;
+    return <CareerSummary s={s} onBack={() => { reset(); setView('startMenu'); }} onExtend={() => mutate((st) => extendCareer(st, 5))} />;
   }
 
   const unread = s.messages.filter((m) => !m.read).length;

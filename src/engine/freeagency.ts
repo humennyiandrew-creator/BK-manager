@@ -5,8 +5,29 @@ import { ageOf } from './ratings';
 import { hashString, mulberry32 } from './rng';
 import { refreshRotation } from './rotation';
 import { daysBetween } from './schedule';
+import { euroBudget, euroSalary, euroWage } from './euro';
+import { leagueOf } from './leagues';
 
 export const freeAgents = (s: GameState) => Object.values(s.players).filter((p) => !p.teamId && !p.prospect && !p.retired);
+
+/** European clubs pay wages against a board budget; NBA teams work the salary cap. */
+export const isBudgetClub = (s: GameState, teamId: string) => leagueOf(s.teams[teamId]?.league).economy === 'budget';
+
+/** Wage budget a European club still has free for `season`. */
+export function euroRoom(s: GameState, teamId: string, season: string): number {
+  return euroBudget(s, teamId) - rosterOf(s, teamId).reduce((x, q) => x + salaryIn(q, season), 0);
+}
+
+/** A European club signs a free agent on European wages (never the NBA scale). */
+export function signEuro(s: GameState, teamId: string, p: Player, startYear: number) {
+  p.teamId = teamId;
+  p.affiliate = undefined;
+  p.assigned = false;
+  p.contract = euroSalary(p, startYear);
+  refreshRotation(s.teams[teamId], s.players);
+  const c = p.contract;
+  s.transactions.unshift({ date: s.date, kind: 'sign', text: `${s.teams[teamId].abbr} sign ${p.firstName} ${p.lastName} (${c.salaries.length}y, $${(c.salaries[0].amount / 1e6).toFixed(2)}M)`, teams: [teamId] });
+}
 
 /** What the player wants. In-season the ask decays the longer he stays unsigned. */
 export function askingPrice(s: GameState, p: Player): { amount: number; years: number } {
@@ -21,6 +42,8 @@ export function askingPrice(s: GameState, p: Player): { amount: number; years: n
 export function sign(s: GameState, teamId: string, p: Player, amount: number, years: number, twoWay: boolean) {
   const startYear = s.phase === 'offseason' ? s.seasonYear + 1 : s.seasonYear;
   p.teamId = teamId;
+  p.affiliate = undefined;
+  p.assigned = false;
   p.contract = { salaries: contractRows(startYear, amount, years), type: twoWay ? 'two-way' : amount <= minSalary(s.seasonYear, p.yearsPro) * 1.001 ? 'min' : 'standard' };
   refreshRotation(s.teams[teamId], s.players);
   const text = `${s.teams[teamId].abbr} sign ${p.firstName} ${p.lastName} (${years}y, $${(amount / 1e6).toFixed(1)}M${twoWay ? ', two-way' : ''})`;
@@ -53,6 +76,7 @@ export function releasePlayer(s: GameState, pid: string): string | null {
   }
   s.transactions.unshift({ date: s.date, kind: 'release', text: `${team.abbr} waive ${p.firstName} ${p.lastName}`, teams: [team.id] });
   p.teamId = null;
+  p.assigned = false;
   p.contract = null;
   refreshRotation(team, s.players);
   return null;
@@ -69,8 +93,18 @@ export function freeAgencyDaily(s: GameState) {
     if (t === s.userTeamId || !pool.length) continue;
     const roster = rosters.get(t)!.filter((p) => !isTwoWay(p));
     const healthy = roster.filter((p) => !p.injury || p.injury.daysLeft < 10).length;
+    if (isBudgetClub(s, t)) {
+      if (roster.length >= 13 || (roster.length >= 12 && healthy >= 11)) continue;
+      const room = euroRoom(s, t, s.season);
+      const p = pool.find((x) => euroWage(x.ratings.ovr, ageOf(x.birthDate, new Date(s.date))) <= room);
+      if (p) { pool.splice(pool.indexOf(p), 1); signEuro(s, t, p, s.seasonYear); }
+      continue;
+    }
     if (roster.length >= 15 || (roster.length >= 14 && healthy >= 12)) continue;
-    const p = pool.shift()!;
+    // Call up from our own affiliate when he's about as good as anyone out there.
+    const own = pool.find((x) => x.affiliate === t && x.ratings.ovr >= pool[0].ratings.ovr - 3);
+    const p = own ?? pool[0];
+    pool.splice(pool.indexOf(p), 1);
     const amt = minSalary(s.seasonYear, p.yearsPro);
     if (!signingCheck(s, t, p, amt).reason) sign(s, t, p, amt, 1, false);
   }
@@ -86,9 +120,16 @@ export function expireContracts(s: GameState) {
     .filter((p) => p.teamId && p.teamId !== s.userTeamId && !p.retired && p.contract && !p.contract.salaries.some((x) => x.season >= next))
     .sort((a, b) => b.ratings.ovr - a.ratings.ovr); // best players get first claim on the budget
   for (const p of exp) {
+    const age = ageOf(p.birthDate, new Date(s.date));
+    if (isBudgetClub(s, p.teamId!)) {
+      // European clubs keep useful players if the wage budget allows, on European money.
+      const c = euroSalary(p, s.seasonYear + 1);
+      if (p.ratings.ovr >= 64 && age <= 33 && euroRoom(s, p.teamId!, next) >= c.salaries[0].amount) p.contract = c;
+      else { p.teamId = null; p.contract = null; }
+      continue;
+    }
     // AI re-signs good players with Bird rights while staying under the second apron; others walk.
     const ask = askingPrice(s, p);
-    const age = ageOf(p.birthDate, new Date(s.date));
     const keep = p.ratings.ovr >= 72 && age <= 33 && payroll(s, p.teamId!, next) + ask.amount <= apron2;
     if (keep) p.contract = { ...p.contract!, salaries: contractRows(s.seasonYear + 1, ask.amount, ask.years), type: 'standard' };
     else { p.teamId = null; p.contract = null; }
@@ -100,9 +141,20 @@ export function offseasonMarketDay(s: GameState, day: number) {
   const rng = mulberry32(hashString(`${s.seed}|ofa|${s.season}|${day}`));
   const next = seasonLabel(s.seasonYear + 1);
   const pool = freeAgents(s).sort((a, b) => b.ratings.ovr - a.ratings.ovr);
-  const teams = Object.keys(s.teams).filter((t) => t !== s.userTeamId).sort(() => rng() - 0.5);
+  // NBA teams get first call each day; European clubs pick from what is left, on European wages.
+  const shuffled = Object.keys(s.teams).filter((t) => t !== s.userTeamId).sort(() => rng() - 0.5);
+  const teams = [...shuffled.filter((t) => !isBudgetClub(s, t)), ...shuffled.filter((t) => isBudgetClub(s, t))];
   const cap = capNumbers(s.seasonYear + 1);
   for (const t of teams) {
+    if (isBudgetClub(s, t)) {
+      if (rosterOf(s, t).length >= leagueOf(s.teams[t].league).maxRoster - 1) continue;
+      const room = euroRoom(s, t, next);
+      const target = pool.find((p) => euroWage(p.ratings.ovr, ageOf(p.birthDate, new Date(s.date))) <= room);
+      if (!target) continue;
+      pool.splice(pool.indexOf(target), 1);
+      signEuro(s, t, target, s.seasonYear + 1);
+      continue;
+    }
     const roster = rosterOf(s, t).filter((p) => !isTwoWay(p));
     if (roster.length >= 15) continue;
     const room = cap.cap - payroll(s, t, next);
