@@ -4,7 +4,7 @@ import type { GameEvent, GameState, Player } from './model';
 import { hashString, mulberry32 } from './rng';
 import { addDays } from './schedule';
 import { clamp } from './mgmt/market';
-import { ROLE_LABEL } from './mgmt/staff';
+import { ROLE_LABEL, STAFF_SALARY_CEILING } from './mgmt/staff';
 import { applyArcChoice, arcEventDraft, pendingArcDecision } from './arcs';
 import { applyStoryChoice, storyDraft } from './storylines';
 
@@ -173,7 +173,8 @@ const CATALOGUE: Candidate[] = [
   {
     weight: 2, offseasonOk: true,
     build: (s) => {
-      const top = s.staff.filter((x) => x.teamId === s.userTeamId).sort((a, b) => b.rating - a.rating)[0];
+      // Rivals chase staff who are still underpaid for their level; a well-paid star coordinator is not a target.
+      const top = s.staff.filter((x) => x.teamId === s.userTeamId && x.salary < STAFF_SALARY_CEILING * 0.85).sort((a, b) => b.rating - a.rating)[0];
       if (!top) return null;
       return {
         type: 'staff-poach', staffId: top.id,
@@ -439,7 +440,7 @@ function applyEffect(s: GameState, ev: GameEvent, choiceId: string): string {
       const st = ev.staffId ? s.staff.find((x) => x.id === ev.staffId) : undefined;
       if (!st) return 'No change.';
       if (choiceId === 'counter') {
-        const raise = Math.round((st.salary * 0.3) / 10_000) * 10_000;
+        const raise = Math.round(Math.min(st.salary * 0.3, Math.max(0, STAFF_SALARY_CEILING - st.salary)) / 10_000) * 10_000;
         st.salary += raise;
         s.finance.cash -= raise;
         s.finance.expense.staff += raise;

@@ -95,7 +95,7 @@ export function financeDaily(s: GameState, playedToday: Game[]): void {
     f.expense.operations += opsDaily;
     f.cash -= opsDaily;
 
-    const tvDaily = 230_000_000 / 365;
+    const tvDaily = 210_000_000 / 365;
     f.revenue.tv += tvDaily;
     f.cash += tvDaily;
 

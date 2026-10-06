@@ -21,7 +21,7 @@ export const K = {
   stealShare: 0.56,
   nsFoul: 0.085,
   threeMul: 0.86,
-  base: { rim: 0.66, mid: 0.428, three: 0.314 },
+  base: { rim: 0.65, mid: 0.42, three: 0.311 },
   skill: { rim: 0.0065, mid: 0.006, three: 0.0036 },
   def: { rim: 0.004, mid: 0.003, three: 0.002 },
   block: { rim: 0.095, mid: 0.025, three: 0.008 },
@@ -33,7 +33,7 @@ export const K = {
   create: 0.0022,
   offIQ: 0.0015,
   help: 0.003,
-  usgExp: 1.0,      // shot share ∝ usage, so stars land near real usage rates (1.6 gave them ~55% of shots)
+  usgExp: 0.92,     // shot share ∝ usage^0.92: stars near real usage rates without 45-point seasons (1.6 gave them ~55% of shots)
   drain: 0.00085,
   recover: 0.0016,
   playFocus: 0.35,  // how strongly play options steer shooter choice (mild: plays shape shots, not one man's usage)

@@ -174,9 +174,11 @@ export function progressionDaily(s: GameState) {
     if (p.ovrTrack.length > 40) p.ovrTrack.shift();
     const filmN = filmSessionsThisWeek(s, p.teamId);
     if (filmN > 0) {
-      const bump = filmN * 0.15;
-      p.ratings.attrs.offIQ = Math.min(99, p.ratings.attrs.offIQ + bump);
-      p.ratings.attrs.helpD = Math.min(99, p.ratings.attrs.helpD + bump);
+      // Film helps most where a player still has things to learn; it tails off towards the high 80s.
+      const headroom = (v: number) => Math.max(0, Math.min(1, (88 - v) / 26));
+      const a = p.ratings.attrs;
+      a.offIQ = Math.min(99, a.offIQ + filmN * 0.06 * headroom(a.offIQ));
+      a.helpD = Math.min(99, a.helpD + filmN * 0.06 * headroom(a.helpD));
     }
     const potStep = form * (age <= 25 ? 0.12 : 0.05);
     const room = 6 - Math.abs(p.potSeason ?? 0); // max ±6 POT per season from form

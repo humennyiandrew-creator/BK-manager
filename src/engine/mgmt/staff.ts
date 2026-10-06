@@ -91,6 +91,8 @@ export function staffRating(s: GameState, teamId: string, role: StaffRole): numb
 }
 
 export const STAFF_BUDGET = 18_000_000;
+/** The most any single staffer earns (counter-offers stop here). */
+export const STAFF_SALARY_CEILING = 5_000_000;
 
 function msg(s: GameState, subject: string, body: string) {
   s.messages.unshift({ id: s.nextId++, date: s.date, from: 'Front Office', subject, body, read: false, kind: 'staff' });
