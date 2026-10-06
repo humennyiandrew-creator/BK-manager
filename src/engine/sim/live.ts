@@ -102,6 +102,7 @@ export class LiveMatch {
   private foulCall: [boolean, boolean] = [false, false]; // "foul now" for the next defensive possession
   private injuries: { id: string; name: string; days: number }[] = [];
   private injuryStop = false;
+  private surgeFrom = -1;                          // a timeout wipes the slate for momentum
 
   constructor(home: TeamState, away: TeamState, players: Record<string, Player>, seed: number, userSide: 0 | 1 | null, rules = NBA_RULES) {
     this.rules = rules;
@@ -217,12 +218,13 @@ export class LiveMatch {
   }
 
   /** Biggest run still going: one side scoring 8+ while the other manages 2 or fewer. */
-  currentRun(): Run | null {
+  currentRun(since = -1): Run | null {
     let best: Run | null = null;
     for (const side of [0, 1] as const) {
       let a = 0, b = 0;
       for (let i = this.scoreLog.length - 1; i >= 0; i--) {
         const e = this.scoreLog[i];
+        if (e.t <= since) break;
         if (e.side === side) a += e.pts;
         else if (b + e.pts > 2) break;
         else b += e.pts;
@@ -423,7 +425,7 @@ export class LiveMatch {
   /** Knocks and tweaks on the floor: same per-minute rate as the post-game roll, now it happens mid-game. */
   private rollInjuries(dur: number) {
     for (const s of [this.H, this.A]) for (const sp of s.court) {
-      if (sp.hurt || this.rng() >= injuryRatePerMinute(sp.p) * (dur / 60) * (1.6 - sp.energy * 0.6)) continue;
+      if (sp.hurt || this.rng() >= injuryRatePerMinute(sp.p) * (dur / 60) * (1.6 - sp.energy * 0.6) * (s.intensity === 1 ? 1.4 : 1)) continue;
       const inj = rollInjuryType(this.rng);
       sp.hurt = true;
       this.injuries.push({ id: sp.p.id, name: inj.name, days: inj.days });
@@ -458,7 +460,9 @@ export class LiveMatch {
       this.timeouts[i]--;
       this.run = [0, 0];
       this.talkUsed = [false, false];
-      for (const s of [this.H, this.A]) s.court.forEach((sp) => (sp.energy = Math.min(1, sp.energy + 0.06)));
+      for (const s of [this.H, this.A]) s.court.forEach((sp) => (sp.energy = Math.min(sp.cap, sp.energy + 0.1)));
+      this.H.surge = this.A.surge = 0;
+      this.surgeFrom = this.elapsed;
       this.log(i, 'info', `Timeout ${this.sideObj(i).team.abbr}`);
       this.state = 'timeout';
       // The other bench uses the stoppage too.
@@ -472,6 +476,10 @@ export class LiveMatch {
       if (s.boost && --s.boost.left <= 0) s.boost = undefined;
     }
     this.flow.push({ t: this.elapsed, margin: this.H.pts - this.A.pts, wp: this.winProb() });
+    // A team on a run plays with the crowd behind it until someone calls a timeout.
+    const run = this.currentRun(this.surgeFrom);
+    this.H.surge = run?.side === 0 ? 0.008 : 0;
+    this.A.surge = run?.side === 1 ? 0.008 : 0;
 
     const prev = this.o;
     let dur = Math.min(this.clock, possessionLength(off, def, prev ? { ...prev, keep: this.prevKeep, transition: this.prevTransition, event: this.prevEvent } : null, this.rng, this.rules));
@@ -687,7 +695,7 @@ export class LiveMatch {
     this.clock = this.period <= this.rules.periods ? this.rules.periodSec : this.rules.otSec;
     this.H.fouls = this.A.fouls = 0;
     if (this.period === 3) this.timeouts = this.fiba ? [3, 3] : [Math.min(this.timeouts[0], 4), Math.min(this.timeouts[1], 4)];
-    for (const s of [this.H, this.A]) s.roster.forEach((sp) => (sp.energy = Math.min(1, sp.energy + (this.period === 3 ? 0.35 : 0.18))));
+    for (const s of [this.H, this.A]) s.roster.forEach((sp) => (sp.energy = Math.min(sp.cap, sp.energy + (this.period === 3 ? 0.35 : 0.18))));
     // Q2/Q3 to tip loser, Q4 to tip winner; OT alternates from Q4.
     const loser = this.tipWinner === this.H ? this.A : this.H;
     this.off = this.period === 2 || this.period === 3 ? loser : this.period % 2 === 0 ? this.tipWinner : loser;

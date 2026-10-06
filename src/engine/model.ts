@@ -41,6 +41,7 @@ export interface Player {
   lastChange?: number;            // OVR change from last progression tick (UI arrows)
   prog?: number;                  // fractional OVR progress accumulator
   form?: number;                  // performance vs rating expectation, −3..+3 (weekly)
+  resting?: boolean;              // sits out his team's next game (load management)
   fatigue?: number;               // 0–100 accumulated load; lowers starting energy in games
   devPlan?: Attr;                 // individual development target attribute
   program?: DevProgram;           // active development programme
@@ -108,7 +109,12 @@ export interface TeamState extends Team {
   mleUsed?: boolean;               // mid-level exception used this season
   deadCap?: { season: string; amount: number }[]; // waived salary still on the cap
   coaching?: Coaching;             // derived from staff ratings and specialities
+  gamePlan?: GamePlan;             // tonight's game plan against one opponent (cleared after the game)
 }
+
+export type PlanId = 'contain-star' | 'take-away-three' | 'protect-rim' | 'force-turnovers' | 'run-them';
+/** A game plan in force for one game: `good` is whether it reads the opponent correctly (full effect) or not (half). */
+export interface GamePlan { opponent: string; plan: PlanId; good: boolean; star?: string; gameId?: number }
 
 export type GameType = 'regular' | 'playin' | 'playoff' | 'cup';
 
@@ -418,7 +424,9 @@ export interface OpponentPrep {
   gameId: number;
   opponent: string;
   report: { pace: number; threeRate: number; rimRate: number; star: string; scheme: string; weakness: string };
-  plan: 'contain-star' | 'take-away-three' | 'protect-rim' | 'force-turnovers' | 'run-them' | null;
+  plan: PlanId | null;
+  /** What the opponent's bench has planned for us (AI coaches prepare too). */
+  theirPlan?: PlanId;
   prepared: boolean;                    // set when the user reviews + picks a plan before the game
 }
 

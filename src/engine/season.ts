@@ -13,6 +13,7 @@ import { clamp } from './mgmt/market';
 import { hasNode } from './mgmt/facilities';
 import { hasSpec } from './mgmt/staff';
 import { injuryRatePerMinute, rollInjuryType } from './injuries';
+import { aiLoadManagement, clearRest } from './rest';
 import { offseasonStep } from './offseason';
 import { eventsDaily } from './events';
 import { settleMatchObjectives } from './objectives';
@@ -127,6 +128,7 @@ export function applyResult(s: GameState, g: Game, res: GameResult) {
     settleMatchObjectives(s, g, res);
   }
   if (g.seriesId) updateSeries(s, g);
+  clearRest(s, g);
 }
 
 export function playGame(s: GameState, g: Game) {
@@ -245,6 +247,7 @@ export function advanceDay(s: GameState, skipUserGame = false) {
   if (s.phase === 'preseason' && s.games.some((g) => g.date === s.date)) s.phase = 'regular';
   const phaseBefore = s.phase;
   const played: Game[] = [];
+  aiLoadManagement(s, s.games.filter((g) => g.date === s.date && !g.result));
   for (const g of s.games) {
     if (g.date !== s.date) continue;
     if (g.result) { played.push(g); continue; } // user's live game already applied today

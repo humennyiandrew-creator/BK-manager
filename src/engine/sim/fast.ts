@@ -1,6 +1,6 @@
 // Possession core. decide() rolls a possession into events (pure w.r.t. stats), commit() books them.
 // Fast sim = decide+commit in a loop. Live sim = decide, animate, commit each event on its beat.
-import type { BoxLine, GameResult, LateGame, Player, TeamState } from '../model';
+import type { BoxLine, GameResult, LateGame, PlanId, Player, TeamState } from '../model';
 import { emptyLine } from '../model';
 import { gauss, type Rng } from '../rng';
 import { available } from '../rotation';
@@ -49,6 +49,8 @@ export interface SP {
   target: number;       // target minutes
   sec: number;          // seconds played
   hurt?: boolean;       // injured during a live game: out for the night
+  mood: number;         // shooting edge from morale and form, fixed for the game
+  cap: number;          // tired legs: in-game recovery never gets him above where he started
 }
 
 export interface Side {
@@ -60,6 +62,7 @@ export interface Side {
   home: boolean;
   intensity?: -1 | 0 | 1;  // live coaching: conserve / balanced / push (fast sim leaves it neutral)
   boost?: TalkBoost;       // live coaching: timeout team-talk effect for the next few possessions
+  surge?: number;          // live: momentum edge while on a scoring run (a timeout breaks it)
 }
 
 /** Temporary effect of a timeout team talk; `left` counts possessions (both ends). */
@@ -92,7 +95,7 @@ export function makeSide(team: TeamState, players: Record<string, Player>, home:
   const roster = team.rotation
     .map((id) => players[id])
     .filter((p) => p && available(p))
-    .map((p) => ({ p, line: { ...emptyLine(), id: p.id, starter: false }, energy: 1 - (p.fatigue ?? 0) / 250, target: team.minutes[p.id] ?? 0, sec: 0 }));
+    .map((p) => ({ p, line: { ...emptyLine(), id: p.id, starter: false }, energy: startEnergy(p), target: team.minutes[p.id] ?? 0, sec: 0, mood: moodEdge(p), cap: startEnergy(p) }));
   const court = roster.slice(0, 5);
   court.forEach((sp) => (sp.line.starter = true, sp.line.gs = 1));
   return { team, roster, court: sortCourt(court), pts: 0, fouls: 0, home };
@@ -100,6 +103,21 @@ export function makeSide(team: TeamState, players: Record<string, Player>, home:
 
 export const sortCourt = (c: SP[]) => c.sort((x, y) => posRank(x) - posRank(y));
 const fatigue = (sp: SP) => 0.9 + 0.1 * sp.energy;
+
+/** Legs coming into the game: fatigue from minutes, back-to-backs and hard practice carries over. */
+export const startEnergy = (p: Player) => Math.max(0.45, 1 - (p.fatigue ?? 0) / 200);
+
+/** 0 while a player has 75% energy or more, rising to 1 when he is gassed (30% or less). */
+export const tiredness = (sp: SP) => Math.min(1, Math.max(0, (0.75 - sp.energy) / 0.45));
+
+/** Happy, in-form players play a little above themselves; unhappy or slumping ones a little below. */
+export const moodEdge = (p: Player) => Math.max(-1, Math.min(1, (p.morale - 60) / 40)) * 0.006 + Math.max(-3, Math.min(3, p.form ?? 0)) * 0.0025;
+
+/** Strength of a game plan aimed at `opp`: 1 for a good read, 0.5 for a poor one, 0 if none. */
+const planOn = (side: Side, opp: Side, id: PlanId) => {
+  const gp = side.team.gamePlan;
+  return gp && gp.plan === id && gp.opponent === opp.team.id ? (gp.good ? 1 : 0.5) : 0;
+};
 
 // ---------- substitutions ----------
 
@@ -171,12 +189,12 @@ export function schemeFit(def: Side, off: Side): DefFit {
 }
 
 export function tickEnergy(s: Side, sec: number, drainMul = 1) {
-  drainMul *= sideFit(s).fit.drainMul * (1 + intensityOf(s) * 0.35);
+  drainMul *= sideFit(s).fit.drainMul * (1 + intensityOf(s) * 0.5);
   for (const sp of s.roster) {
     if (s.court.includes(sp)) {
       sp.sec += sec;
-      sp.energy = Math.max(0.05, sp.energy - sec * K.drain * drainMul * (1.6 - a(sp).stamina / 100));
-    } else sp.energy = Math.min(1, sp.energy + sec * K.recover);
+      sp.energy = Math.max(0.05, sp.energy - sec * K.drain * drainMul * (1.6 - a(sp).stamina / 100) * (1 + (1 - sp.cap) * 0.8));
+    } else sp.energy = Math.min(sp.cap, sp.energy + sec * K.recover);
   }
 }
 
@@ -240,9 +258,11 @@ function reboundEvent(off: Side, def: Side, rng: Rng): Ev & { k: 'reb' } {
   const t = off.team.tactics;
   void t;
   const pOrb = K.orb + SCHEMES[def.team.tactics.defense].orbAllowed + sideFit(off).fit.orbAdd
-    + (avg(off.court, (x) => a(x).offRebound) - avg(def.court, (x) => a(x).defRebound)) * 0.004;
-  if (rng() < pOrb) return { k: 'reb', by: pick(off.court, (x) => a(x).offRebound ** 2 * (posRank(x) + 2), rng), off: true };
-  return { k: 'reb', by: rng() > 0.11 ? pick(def.court, (x) => a(x).defRebound ** 2 * (posRank(x) + 2), rng) : null, off: false };
+    + (avg(off.court, (x) => a(x).offRebound) - avg(def.court, (x) => a(x).defRebound)) * 0.004
+    + (avg(def.court, tiredness) - avg(off.court, tiredness)) * 0.04;
+  const legs = (x: SP) => 1 - 0.5 * tiredness(x);
+  if (rng() < pOrb) return { k: 'reb', by: pick(off.court, (x) => a(x).offRebound ** 2 * (posRank(x) + 2) * legs(x), rng), off: true };
+  return { k: 'reb', by: rng() > 0.11 ? pick(def.court, (x) => a(x).defRebound ** 2 * (posRank(x) + 2) * legs(x), rng) : null, off: false };
 }
 
 /** Team-level shot quality: creation by the handler vs opponent help defense. */
@@ -256,16 +276,20 @@ export function shotProb(sp: SP, defender: SP, protector: SP, type: ShotType, ed
   const skill = type === 'rim' ? (a(sp).layup + a(sp).closeShot + a(sp).dunk) / 3 : type === 'mid' ? a(sp).midRange : a(sp).threePoint;
   const d = type === 'rim' ? (a(protector).interiorD + a(defender).interiorD) / 2 : a(defender).perimeterD;
   const p = K.base[type] + (skill - 62) * K.skill[type] - (d - 62) * K.def[type] + edge;
-  return Math.min(0.92, Math.max(0.1, p * fatigue(sp)));
+  return Math.min(0.92, Math.max(0.1, p * (1 - 0.15 * tiredness(sp))));
 }
 
 export function decide(off: Side, def: Side, rng: Rng, rules: Rules, ctx: DecideCtx): Outcome {
   const t = off.team.tactics;
   const sys = SYSTEMS[t.offense];
   const sch = SCHEMES[def.team.tactics.defense];
-  const fastBreak = ctx.transition && rng() < 0.25 + t.transition / 250 + (off.team.coaching?.fastBreak ?? 0);
+  const fastBreak = ctx.transition && rng() < 0.25 + t.transition / 250 + (off.team.coaching?.fastBreak ?? 0) + 0.12 * planOn(off, def, 'run-them');
   const play = choosePlay(off, rng, ctx);
-  const usage = (sp: SP) => sp.p.ratings.tend.usage ** K.usgExp * fatigue(sp);
+  // Their game plan: contain our star, take away the three, protect the rim, force turnovers; ours: run them.
+  const containK = planOn(def, off, 'contain-star'), threeK = planOn(def, off, 'take-away-three'), rimK = planOn(def, off, 'protect-rim');
+  const pressK = planOn(def, off, 'force-turnovers'), runK = planOn(off, def, 'run-them');
+  const star = containK ? def.team.gamePlan!.star : undefined;
+  const usage = (sp: SP) => sp.p.ratings.tend.usage ** K.usgExp * fatigue(sp) * (sp.p.id === star ? 1 - 0.25 * containK : 1);
   const handler = pick(off.court, (x) => usage(x) * (a(x).ballHandle + a(x).passing) * (roleOf(off, x) === 1 ? 1.5 : 1), rng);
   const out = (events: Ev[], keep: boolean, transition: boolean, event: string): Outcome => ({ play, handler, events, keep, transition, event });
 
@@ -300,7 +324,8 @@ export function decide(off: Side, def: Side, rng: Rng, rules: Rules, ctx: Decide
   const pTo = K.toBase * sys.toMul * (1 + (sch.toMul - 1) * df.mul) * of.toMul
     * (1 + (62 - (a(handler).ballHandle + a(handler).passing) / 2) * 0.01)
     * (1 + (avg(def.court, (x) => a(x).steal) - 62) * 0.008)
-    * (1 + intensityOf(def) * 0.06) * (off.boost?.toMul ?? 1) * (1 + (def.team.coaching?.forceTo ?? 0));
+    * (1 + intensityOf(def) * 0.06) * (off.boost?.toMul ?? 1) * (1 + (def.team.coaching?.forceTo ?? 0))
+    * (1 + 0.5 * tiredness(handler)) * (1 + 0.11 * pressK) * (1 + 0.04 * runK);
   if (rng() < pTo) {
     const by = pick(off.court, (x) => usage(x) * (130 - a(x).ballHandle), rng);
     const steal = rng() < K.stealShare ? pick(def.court, (x) => a(x).steal ** 2, rng) : null;
@@ -308,7 +333,7 @@ export function decide(off: Side, def: Side, rng: Rng, rules: Rules, ctx: Decide
   }
 
   // Non-shooting foul
-  if (!fastBreak && rng() < K.nsFoul * sch.foulMul) {
+  if (!fastBreak && rng() < K.nsFoul * sch.foulMul * (1 + 0.1 * pressK)) {
     const by = pick(def.court, (x) => 100 - a(x).perimeterD / 2, rng);
     const ev: Ev[] = [{ k: 'foul', by, on: handler, shooting: false }];
     if (def.fouls + 1 >= rules.bonusAt) {
@@ -346,8 +371,8 @@ export function decide(off: Side, def: Side, rng: Rng, rules: Rules, ctx: Decide
   else if (myOpts.length && rng() < K.playShot) type = pick(myOpts, (o) => o.weight, rng).shot;
   else {
     const tn = shooter.p.ratings.tend;
-    const threeP = Math.min(0.88, tn.threeRate * K.threeMul * sys.threeMul * sch.threeRateMul * (1 + (t.threeFocus - 50) / 100));
-    type = rng() < threeP ? 'three' : rng() < Math.min(0.95, tn.rimRate * sch.rimRateMul) ? 'rim' : 'mid';
+    const threeP = Math.min(0.88, tn.threeRate * K.threeMul * sys.threeMul * sch.threeRateMul * (1 + (t.threeFocus - 50) / 100) * (1 - 0.15 * threeK));
+    type = rng() < threeP ? 'three' : rng() < Math.min(0.95, tn.rimRate * sch.rimRateMul * (1 - 0.15 * rimK)) ? 'rim' : 'mid';
   }
 
   const defender = def.court[off.court.indexOf(shooter)] ?? def.court[0];
@@ -360,8 +385,14 @@ export function decide(off: Side, def: Side, rng: Rng, rules: Rules, ctx: Decide
     + of.edge + (type === 'rim' ? of.rimEdge : type === 'three' ? of.threeEdge : 0)
     + ((off.team.familiarity ?? 85) - 85) / 40 * 0.006
     + chemistryEdge(off.team.chemistry)
-    + intensityOf(off) * 0.012 - intensityOf(def) * 0.008 + (off.boost?.edge ?? 0) - (def.boost?.defEdge ?? 0)
-    + coachingEdge(off, def, type, !!ctx.clutch);
+    + intensityOf(off) * 0.009 - intensityOf(def) * 0.007 + (off.boost?.edge ?? 0) - (def.boost?.defEdge ?? 0)
+    + coachingEdge(off, def, type, !!ctx.clutch)
+    // Tired defenders give up better looks; mood and momentum ride along.
+    + 0.045 * (type === 'rim' ? (tiredness(defender) + tiredness(protector)) / 2 : tiredness(defender))
+    + shooter.mood + (off.surge ?? 0)
+    // Game plans: the cost of selling out on one thing is a little more of another.
+    + (shooter.p.id === star ? -0.04 * containK : containK ? 0.003 : 0)
+    + (type === 'three' ? -0.012 * threeK + 0.005 * rimK : type === 'rim' ? -0.015 * rimK + 0.006 * threeK : 0);
   const pMake = shotProb(shooter, defender, protector, type, edge);
   const passers = off.court.filter((x) => x !== shooter);
   const assistBy = (): SP | null => (rng() < K.assist[type] * sys.assistMul
@@ -398,7 +429,7 @@ export function decide(off: Side, def: Side, rng: Rng, rules: Rules, ctx: Decide
   }
   const reb = reboundEvent(off, def, rng);
   return out([{ k: 'shot', by: shooter, type, made: false, defender, block: null, assist: null, fastBreak }, reb],
-    reb.off, !reb.off && rng() < 0.18 + of.oppTransition, reb.off ? 'orb' : 'drb');
+    reb.off, !reb.off && rng() < 0.18 + of.oppTransition + 0.1 * planOn(def, off, 'run-them'), reb.off ? 'orb' : 'drb');
 }
 
 // ---------- commit ----------
@@ -455,7 +486,7 @@ export function simGame(home: TeamState, away: TeamState, players: Record<string
     let clock = period <= rules.periods ? rules.periodSec : rules.otSec;
     const start: [number, number] = [H.pts, A.pts];
     H.fouls = A.fouls = 0;
-    if (period > 1) for (const s of [H, A]) s.roster.forEach((sp) => (sp.energy = Math.min(1, sp.energy + (period === 3 ? 0.35 : 0.18))));
+    if (period > 1) for (const s of [H, A]) s.roster.forEach((sp) => (sp.energy = Math.min(sp.cap, sp.energy + (period === 3 ? 0.35 : 0.18))));
     if (period > 1) off = period % 2 === 0 ? (off === H ? A : H) : off;
     let prev: Outcome | null = null;
     while (clock > 0) {
