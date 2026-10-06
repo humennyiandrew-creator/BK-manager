@@ -294,7 +294,7 @@ export default function SquadHubScreen() {
   const activeTab = showResign ? tab : tab === 'resign' ? 'cap' : tab;
 
   const railItems: SideRailItem<Tab>[] = [
-    { id: 'cap', label: isEuro ? 'Wage Sheet' : 'Cap Sheet', icon: IconFinances },
+    { id: 'cap', label: isEuro ? 'Wage sheet' : 'Cap sheet', icon: IconFinances },
     ...(showResign ? [{ id: 'resign' as const, label: 'Re-sign', icon: IconTransfers, badge: expiring(s, s.userTeamId).length }] : []),
     { id: 'ext', label: 'Extensions', icon: IconSquadHub, badge: extensionEligible(s).length }
   ];

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, type CSSProperties } from 'react';
 import type { Attr } from '../../engine/ratings';
 import type { GameState, Player } from '../../engine/model';
 import { ageOf } from '../../engine/ratings';
@@ -26,6 +26,7 @@ import TeamBadge from './TeamBadge';
 import ArcBadge from './hub/ArcBadge';
 import { ARC_LABEL } from '../../engine/arcs';
 import { affiliateName, assign, canAssign, recall } from '../../engine/gleague';
+import { uniform } from './shell/teamColors';
 import { toast } from './Toasts';
 import { play } from '../sound';
 import styles from './PlayerPage.module.css';
@@ -89,6 +90,10 @@ export default function PlayerPage({ s, playerId, onClose }: Props) {
   if (!p) return null;
 
   const team = p.teamId ? s.teams[p.teamId] : null;
+
+  const kit = team ? uniform(team.colors.primary, team.colors.secondary) : null;
+
+  const jersey = (kit ? { '--pteam': kit.team, '--pteam-2': kit.trim, '--pink': kit.ink } : {}) as CSSProperties;
   const age = Math.floor(ageOf(p.birthDate, new Date(s.date)));
   const isUserPlayer = p.teamId === s.userTeamId;
   const isFa = !p.teamId && !p.prospect;
@@ -132,14 +137,14 @@ export default function PlayerPage({ s, playerId, onClose }: Props) {
 
         <div className={styles.body}>
           <div className={styles.leftCol}>
-            <div className={styles.slab}>
-              <span className={styles.jerseyWatermark}>{p.jersey}</span>
+            <div className={styles.slab} style={jersey}>
+              <span className={`${styles.jerseyWatermark} numeral`}>{p.jersey}</span>
               <div className={styles.photoWrap}>
                 {p.face ? <BkImage path={p.face} alt={p.lastName} className={styles.photo} /> : <Silhouette className={styles.photo} />}
               </div>
               <div className={styles.nameBlock}>
                 <span className={styles.firstName}>{p.firstName}</span>
-                <span className={styles.lastName}>{p.lastName}</span>
+                <span className={`${styles.lastName} wordmark`}>{p.lastName}</span>
               </div>
               <div className={styles.metaLine}>
                 {p.positions.join('/')}, {age}y, {heightFtIn(p.heightCm)}, {p.weightKg}kg, {p.country}
@@ -195,7 +200,7 @@ export default function PlayerPage({ s, playerId, onClose }: Props) {
             {isUserPlayer && (
               <div className={styles.actions}>
                 <button type="button" className={styles.actionBtn} disabled={!meetOk} title={meetOk ? '1-on-1 meeting' : 'Met with him recently'} onClick={() => setMeetOpen(true)}>1-on-1</button>
-                <button type="button" className={styles.actionBtn} onClick={onProgram}>{p.program ? 'View Programme' : 'Start Programme'}</button>
+                <button type="button" className={styles.actionBtn} onClick={onProgram}>{p.program ? 'View programme' : 'Start programme'}</button>
                 <button type="button" className={styles.actionBtn} onClick={onNegotiate}>{negotiateEnabled ? negotiateLabel : 'Contract'}</button>
                 {p.assigned
                   ? <button type="button" className={styles.actionBtn} onClick={() => mutate((st) => { const e = recall(st, p.id); toast(e ?? `${p.lastName} recalled`, e ? 'error' : 'success'); })}>Recall</button>

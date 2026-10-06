@@ -26,18 +26,18 @@ const TYPE_ICON: Record<string, typeof IconMessages> = {
 };
 
 const TYPE_LABEL: Record<string, string> = {
-  'trade-request': 'Trade Request',
-  'locker-fight': 'Locker Room',
+  'trade-request': 'Trade request',
+  'locker-fight': 'Locker room',
   'off-court-incident': 'Off-Court Incident',
-  'breakout-hype': 'Breakout Performance',
-  'injury-setback': 'Injury Update',
-  'contract-holdout': 'Contract Situation',
+  'breakout-hype': 'Breakout performance',
+  'injury-setback': 'Injury update',
+  'contract-holdout': 'Contract situation',
   'staff-poach': 'Front Office',
   'owner-demands': 'Ownership',
   'media-controversy': 'Media',
-  'fan-protest': 'Fan Relations',
+  'fan-protest': 'Fan relations',
   'sponsor-offer': 'Sponsorship',
-  'youth-ask': 'Player Development',
+  'youth-ask': 'Player development',
   'veteran-mentor': 'Mentorship',
   'illness-outbreak': 'Medical',
   'charity-event': 'Community'

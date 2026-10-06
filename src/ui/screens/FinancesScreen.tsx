@@ -16,8 +16,8 @@ import { bookThemeNight, signSponsor, sponsorOffers, THEME_NIGHT_CAP } from '../
 import { formatMoney, formatMoneyShort } from '../format';
 import styles from './FinancesScreen.module.css';
 
-const REVENUE_LABEL: Record<RevenueCat, string> = { tickets: 'Tickets', tv: 'TV / Media', merch: 'Merchandise', sponsors: 'Sponsors', playoffs: 'Playoff Gate' };
-const EXPENSE_LABEL: Record<ExpenseCat, string> = { salaries: 'Player Salaries', staff: 'Staff Salaries', facilities: 'Facilities', tax: 'Luxury Tax', operations: 'Operations' };
+const REVENUE_LABEL: Record<RevenueCat, string> = { tickets: 'Tickets', tv: 'TV / Media', merch: 'Merchandise', sponsors: 'Sponsors', playoffs: 'Playoff gate' };
+const EXPENSE_LABEL: Record<ExpenseCat, string> = { salaries: 'Player salaries', staff: 'Staff salaries', facilities: 'Facilities', tax: 'Luxury tax', operations: 'Operations' };
 
 function projectedAttendance(s: GameState, ticketPrice: number): number {
   const team = s.teams[s.userTeamId];

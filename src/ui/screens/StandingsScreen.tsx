@@ -239,7 +239,7 @@ export default function StandingsScreen() {
   const activeTab = railItems.some((r) => r.id === tab) ? tab : railItems[0].id;
 
   const panelTitle = activeTab === 'Bracket'
-    ? 'Postseason Bracket'
+    ? 'Postseason bracket'
     : activeTab === 'Table'
     ? 'EuroLeague Table'
     : `${activeTab}ern Conference`;

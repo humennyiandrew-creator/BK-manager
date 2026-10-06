@@ -11,7 +11,7 @@ import styles from './ScoutingTab.module.css';
 
 interface Props { s: GameState; mutate: (fn: (s: GameState) => void) => void }
 
-const KIND_LABEL: Record<ScoutTargetKind, string> = { region: 'Region', college: 'College/Club', player: 'Prospect', opponent: 'Opponent Team' };
+const KIND_LABEL: Record<ScoutTargetKind, string> = { region: 'Region', college: 'College/Club', player: 'Prospect', opponent: 'Opponent team' };
 
 export default function ScoutingTab({ s, mutate }: Props) {
   const teamId = s.userTeamId;

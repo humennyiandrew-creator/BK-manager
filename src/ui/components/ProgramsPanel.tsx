@@ -45,7 +45,7 @@ export default function ProgramsPanel({ s, mutate }: Props) {
         );
       })}
       <button type="button" className={styles.startBtn} disabled={atCap} onClick={() => setPickerId(eligible[0]?.id ?? null)}>
-        {atCap ? 'Max 3 active programmes' : 'Start Programme'}
+        {atCap ? 'Max 3 active programmes' : 'Start programme'}
       </button>
 
       {pickerId !== null && (

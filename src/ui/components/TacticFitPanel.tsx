@@ -128,7 +128,7 @@ export default function TacticFitPanel() {
           </div>
           {(['threeFocus', 'crashGlass', 'pace'] as const).map((k) => (
             <div key={k} className={styles.draftSlider}>
-              <label>{k === 'threeFocus' ? 'Shot Profile' : k === 'crashGlass' ? 'Crash Glass' : 'Pace'}</label>
+              <label>{k === 'threeFocus' ? 'Shot profile' : k === 'crashGlass' ? 'Crash glass' : 'Pace'}</label>
               <input type="range" min={0} max={100} value={active[k]} onChange={(e) => edit((t) => (t[k] = Number(e.target.value)))} />
               <span>{active[k]}</span>
             </div>
@@ -137,7 +137,7 @@ export default function TacticFitPanel() {
 
         <div className={styles.btnRow}>
           <button className={styles.btn} onClick={handleSuggest}>Suggest</button>
-          <button className={styles.btn} onClick={handleLab} disabled={labBusy}>{labBusy ? 'Simulating…' : 'Tactic Lab'}</button>
+          <button className={styles.btn} onClick={handleLab} disabled={labBusy}>{labBusy ? 'Simulating…' : 'Tactic lab'}</button>
           <button className={styles.btnPrimary} onClick={handleApply} disabled={!dirty}>Apply</button>
           <button className={styles.btn} onClick={handleReset} disabled={!dirty}>Reset</button>
         </div>

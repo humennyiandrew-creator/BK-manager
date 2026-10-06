@@ -12,7 +12,7 @@ import styles from './NegotiationModal.module.css';
 
 type Mutate = (fn: (s: GameState) => void) => void;
 
-const KIND_LABEL: Record<NegKind, string> = { fa: 'Free Agency', resign: 'Re-Sign', extension: 'Extension' };
+const KIND_LABEL: Record<NegKind, string> = { fa: 'Free agency', resign: 'Re-sign', extension: 'Extension' };
 
 export default function NegotiationModal({ s, mutate, playerId, kind, onClose }: { s: GameState; mutate: Mutate; playerId: string; kind: NegKind; onClose: () => void }) {
   const p = s.players[playerId];

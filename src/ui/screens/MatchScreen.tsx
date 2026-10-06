@@ -569,7 +569,7 @@ function TacticsTab({ tactics, roster, court, onOffense, onDefense, onSlider, on
       </div>
       {(['pace', 'threeFocus', 'crashGlass', 'transition'] as const).map((k) => (
         <div key={k} className={styles.sliderRow}>
-          <label>{k === 'threeFocus' ? '3PT Focus' : k === 'crashGlass' ? 'Crash Glass' : k[0].toUpperCase() + k.slice(1)}</label>
+          <label>{k === 'threeFocus' ? '3pt focus' : k === 'crashGlass' ? 'Crash glass' : k[0].toUpperCase() + k.slice(1)}</label>
           <input type="range" min={0} max={100} value={tactics[k]} onChange={(e) => onSlider(k, Number(e.target.value))} />
           <span>{tactics[k]}</span>
         </div>
