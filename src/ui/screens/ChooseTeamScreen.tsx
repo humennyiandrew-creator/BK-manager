@@ -2,20 +2,17 @@ import { useEffect, useState, type CSSProperties } from 'react';
 import { useUI } from '../store/useUI';
 import { useGame } from '../store/useGame';
 import BkImage from '../components/BkImage';
-import Panel from '../components/Panel';
 import { loadLeagueData } from '../loadData';
 import { buildTeamPreviews, type TeamPreview } from '../teamPreview';
 import { computeAccent } from '../accent';
+import { uniform } from '../components/shell/teamColors';
 import styles from './ChooseTeamScreen.module.css';
 
-function Stars({ n }: { n: number }) {
+/** Squad strength as five short bars rather than stars. */
+function Strength({ n }: { n: number }) {
   return (
-    <span className={styles.stars}>
-      {Array.from({ length: 5 }, (_, i) => (
-        <span key={i} className={i < n ? styles.starOn : styles.starOff}>
-          &#9733;
-        </span>
-      ))}
+    <span className={styles.strength} title={`${n} of 5`}>
+      {Array.from({ length: 5 }, (_, i) => <i key={i} className={i < n ? styles.barOn : undefined} />)}
     </span>
   );
 }
@@ -30,27 +27,21 @@ function expectation(p: TeamPreview): string {
   return share <= 0.14 ? 'Win the title' : share <= 0.34 ? 'Go deep in the playoffs' : share <= 0.6 ? 'Make the playoffs' : 'Develop the youth';
 }
 
-function TeamRow({ preview, selected, onSelect }: { preview: TeamPreview; selected: boolean; onSelect: () => void }) {
+/** One crest patch on the wall. */
+function Patch({ preview, selected, onSelect }: { preview: TeamPreview; selected: boolean; onSelect: () => void }) {
   const { team, stars } = preview;
+  const u = uniform(team.colors.primary, team.colors.secondary);
   return (
-    <button type="button" className={selected ? `${styles.team} ${styles.teamSelected}` : styles.team} onClick={onSelect}>
-      <BkImage path={team.logo} alt={team.name} className={styles.logo} />
-      <span className={styles.teamInfo}>
-        <span className={styles.name}>{team.city} {team.name}</span>
-        <Stars n={stars} />
-      </span>
-    </button>
-  );
-}
-
-function ClubCard({ preview, selected, onSelect }: { preview: TeamPreview; selected: boolean; onSelect: () => void }) {
-  const { team, stars } = preview;
-  return (
-    <button type="button" className={selected ? `${styles.club} ${styles.clubSelected}` : styles.club} onClick={onSelect}>
-      <BkImage path={team.logo} alt={team.name} className={styles.clubLogo} />
-      <span className={styles.clubName}>{team.name}</span>
-      <span className={styles.clubCountry}>{team.country}</span>
-      <Stars n={stars} />
+    <button
+      type="button"
+      className={selected ? `${styles.patchBtn} ${styles.patchOn}` : styles.patchBtn}
+      style={{ '--team': u.team, '--team-2': u.trim } as CSSProperties}
+      onClick={onSelect}
+      data-sound-hover
+    >
+      <span className={styles.patch}><BkImage path={team.logo} alt={team.name} className={styles.patchCrest} /></span>
+      <span className={styles.patchName}>{team.name}</span>
+      <Strength n={stars} />
     </button>
   );
 }
@@ -79,27 +70,25 @@ export default function ChooseTeamScreen() {
   if (!previews) {
     return (
       <div className={styles.wrap}>
-        <div className={styles.loadingLayout}>
-          <div className={`${styles.loadingPanel} shimmer`} />
-          <div className={`${styles.loadingPanel} shimmer`} />
-          <div className={`${styles.loadingPanel} shimmer`} />
-        </div>
+        <div className={styles.loading}>Loading the league…</div>
       </div>
     );
   }
 
+  const byName = (a: TeamPreview, b: TeamPreview) => a.team.name.localeCompare(b.team.name);
   const nbaPreviews = previews.filter((p) => (p.team.league ?? 'NBA') === 'NBA');
-  const elPreviews = previews.filter((p) => p.team.league === 'EL').sort((a, b) => a.team.name.localeCompare(b.team.name));
-  const east = nbaPreviews.filter((p) => p.team.conference === 'East').sort((a, b) => a.team.name.localeCompare(b.team.name));
-  const west = nbaPreviews.filter((p) => p.team.conference === 'West').sort((a, b) => a.team.name.localeCompare(b.team.name));
+  const groups = league === 'NBA'
+    ? [
+      { title: 'Eastern Conference', list: nbaPreviews.filter((p) => p.team.conference === 'East').sort(byName) },
+      { title: 'Western Conference', list: nbaPreviews.filter((p) => p.team.conference === 'West').sort(byName) },
+    ]
+    : [{ title: 'EuroLeague', list: previews.filter((p) => p.team.league === 'EL').sort(byName) }];
+  const hasEl = previews.some((p) => p.team.league === 'EL');
   const detail = previews.find((p) => p.team.id === selected) ?? null;
   const slot = pendingSlot ?? 1;
-  const detailAccent = computeAccent(detail?.team.colors.primary, detail?.team.colors.secondary);
-  const detailStyle = {
-    '--accent': detailAccent.accent,
-    '--accent-2': detailAccent.accent2,
-    '--accent-contrast': detailAccent.accentContrast
-  } as CSSProperties;
+  const u = detail ? uniform(detail.team.colors.primary, detail.team.colors.secondary) : null;
+  const accent = computeAccent(detail?.team.colors.primary, detail?.team.colors.secondary);
+  const detailStyle = (u ? { '--team': u.team, '--team-2': u.trim, '--team-ink': u.ink, '--accent': accent.accent } : {}) as CSSProperties;
 
   const start = async () => {
     if (!detail || starting) return;
@@ -110,18 +99,16 @@ export default function ChooseTeamScreen() {
 
   return (
     <div className={styles.wrap}>
-      <button type="button" className={styles.back} onClick={() => setView('startMenu')}>
-        &#8592; Back
-      </button>
-      <div className={styles.titleRow}>
-        <div className={styles.title}><span className={styles.slash}>// </span>CHOOSE YOUR TEAM</div>
-        {elPreviews.length > 0 && (
+      <header className={styles.top}>
+        <button type="button" className={styles.back} onClick={() => setView('startMenu')}>Back</button>
+        <h1 className={`${styles.title} wordmark`}>Choose your club</h1>
+        {hasEl && (
           <div className={styles.leagueSwitch}>
             {(['NBA', 'EL'] as const).map((lg) => (
               <button
                 key={lg}
                 type="button"
-                className={lg === league ? `${styles.leagueBtn} ${styles.leagueBtnActive}` : styles.leagueBtn}
+                className={lg === league ? `${styles.leagueBtn} ${styles.leagueOn}` : styles.leagueBtn}
                 onClick={() => { setLeague(lg); setSelected(null); }}
               >
                 {lg === 'NBA' ? 'NBA' : 'EuroLeague'}
@@ -129,81 +116,65 @@ export default function ChooseTeamScreen() {
             ))}
           </div>
         )}
-      </div>
-      <div className={league === 'NBA' ? styles.layout : styles.layoutEl}>
-        {league === 'NBA' ? (
-          <>
-            <Panel title="Eastern Conference" className={styles.confPanel} flush>
-              <div className={styles.list}>
-                {east.map((p) => (
-                  <TeamRow key={p.team.id} preview={p} selected={p.team.id === selected} onSelect={() => setSelected(p.team.id)} />
-                ))}
+      </header>
+
+      <div className={styles.layout}>
+        <div className={styles.wall}>
+          {groups.map((g) => (
+            <section key={g.title} className={styles.group}>
+              <h2 className={styles.groupTitle}>{g.title}</h2>
+              <div className={styles.patches}>
+                {g.list.map((p) => <Patch key={p.team.id} preview={p} selected={p.team.id === selected} onSelect={() => setSelected(p.team.id)} />)}
               </div>
-            </Panel>
-            <Panel title="Western Conference" className={styles.confPanel} flush>
-              <div className={styles.list}>
-                {west.map((p) => (
-                  <TeamRow key={p.team.id} preview={p} selected={p.team.id === selected} onSelect={() => setSelected(p.team.id)} />
-                ))}
-              </div>
-            </Panel>
-          </>
-        ) : (
-          <Panel title="EuroLeague Clubs" className={styles.elPanel} flush>
-            <div className={styles.elGrid}>
-              {elPreviews.map((p) => (
-                <ClubCard key={p.team.id} preview={p} selected={p.team.id === selected} onSelect={() => setSelected(p.team.id)} />
-              ))}
-            </div>
-          </Panel>
-        )}
-        <div className={styles.detailPanel} style={detailStyle}>
-          <Panel title="Team detail" className={styles.detailPanelInner}>
-            {!detail && <div className={styles.empty}>Select a team</div>}
-            {detail && (
-              <div className={styles.detail}>
-                <div className={styles.hero} style={{ '--team': detail.team.colors.primary } as CSSProperties}>
-                  <BkImage path={detail.team.logo} alt="" className={styles.heroWatermark} />
-                  <BkImage path={detail.team.logo} alt={detail.team.name} className={styles.detailLogo} />
-                  <div className={styles.heroText}>
-                    <span className={styles.heroCity}>{detail.team.city}</span>
-                    <span className={styles.heroName}>{detail.team.name}</span>
-                    <span className={styles.heroTier}><Stars n={detail.stars} /> {TIER[detail.stars]}</span>
-                  </div>
-                </div>
-                <div className={styles.facts}>
-                  <div><span>Board expects</span><b>{expectation(detail)}</b></div>
-                  <div><span>Squad strength</span><b className="mono-num">#{detail.rank} of {detail.leagueSize}</b></div>
-                  <div><span>{detail.team.league === 'EL' ? 'Country' : 'Conference'}</span><b>{detail.team.league === 'EL' ? detail.team.country : `${detail.team.conference}, ${detail.team.division}`}</b></div>
-                  <div><span>Arena</span><b className="mono-num">{detail.team.arenaCapacity.toLocaleString()} seats</b></div>
-                </div>
-                <div className={styles.keyHead}>Key players</div>
-                <div className={styles.detailPlayers}>
-                  {detail.topPlayers.map((p) => (
-                    <div key={p.id} className={styles.detailPlayer}>
-                      <BkImage path={p.face} alt={p.lastName} className={styles.keyFace} />
-                      <span className={styles.keyPos}>{p.pos}</span>
-                      <span className={styles.keyName}>{p.firstName} {p.lastName}</span>
-                      <span className={styles.keyBar}><span style={{ width: `${Math.max(0, Math.min(100, (p.ovr - 55) * 2.3))}%` }} /></span>
-                      <span className={`${styles.detailOvr} mono-num`}>{p.ovr}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className={styles.length}>
-                  <span className={styles.keyHead}>Career length</span>
-                  <div className={styles.lengthRow}>
-                    {CAREER_LENGTHS.map((c) => (
-                      <button key={c.n} type="button" className={c.n === seasons ? `${styles.lengthBtn} ${styles.lengthOn}` : styles.lengthBtn} onClick={() => setSeasons(c.n)}>{c.label}</button>
-                    ))}
-                  </div>
-                </div>
-                <button type="button" className={`${styles.startBtn} chevron-stripe`} onClick={start} disabled={starting}>
-                  {starting ? 'Starting…' : 'Take the job'}
-                </button>
-              </div>
-            )}
-          </Panel>
+            </section>
+          ))}
         </div>
+
+        <aside className={styles.preview} style={detailStyle}>
+          <div className={styles.pBand}>
+            <span className={styles.pPatch}>{detail && <BkImage path={detail.team.logo} alt={detail.team.name} className={styles.pCrest} />}</span>
+            <span className={styles.pText}>
+              <span className={styles.pCity}>{detail ? detail.team.city || detail.team.country : 'No club selected'}</span>
+              <span className={`${styles.pName} wordmark`}>{detail ? detail.team.name : 'Pick a crest'}</span>
+            </span>
+          </div>
+          <div className={styles.pTrim} />
+          {detail ? (
+            <div className={styles.pBody}>
+              <div className={styles.pTier}><Strength n={detail.stars} /> {TIER[detail.stars]}</div>
+              <dl className={styles.facts}>
+                <div><dt>Board expects</dt><dd>{expectation(detail)}</dd></div>
+                <div><dt>Squad strength</dt><dd>{detail.rank} of {detail.leagueSize}</dd></div>
+                <div><dt>{detail.team.league === 'EL' ? 'Country' : 'Conference'}</dt><dd>{detail.team.league === 'EL' ? detail.team.country : `${detail.team.conference}, ${detail.team.division}`}</dd></div>
+                <div><dt>Arena</dt><dd>{detail.team.arenaCapacity.toLocaleString()} seats</dd></div>
+              </dl>
+              <div className={styles.sub}>Key players</div>
+              <div className={styles.players}>
+                {detail.topPlayers.map((p) => (
+                  <div key={p.id} className={styles.player}>
+                    <BkImage path={p.face} alt={p.lastName} className={styles.face} />
+                    <span className={styles.pWho}>
+                      <span className={styles.pPlayer}>{p.firstName} {p.lastName}</span>
+                      <span className={styles.pPos}>{p.pos}</span>
+                    </span>
+                    <span className={`${styles.pOvr} numeral`}>{p.ovr}</span>
+                  </div>
+                ))}
+              </div>
+              <div className={styles.sub}>Career length</div>
+              <div className={styles.lengthRow}>
+                {CAREER_LENGTHS.map((c) => (
+                  <button key={c.n} type="button" className={c.n === seasons ? `${styles.lengthBtn} ${styles.lengthOn}` : styles.lengthBtn} onClick={() => setSeasons(c.n)}>{c.label}</button>
+                ))}
+              </div>
+              <button type="button" className={styles.startBtn} onClick={start} disabled={starting} data-sound="confirm">
+                {starting ? 'Starting…' : 'Take the job'}
+              </button>
+            </div>
+          ) : (
+            <div className={styles.pEmpty}>Every club on the wall is hiring. Pick one to see the squad, the arena and what the board expects.</div>
+          )}
+        </aside>
       </div>
     </div>
   );

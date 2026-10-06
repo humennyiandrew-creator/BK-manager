@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { useGame, useGameState } from '../store/useGame';
 import { useMatch } from '../store/useMatch';
 import { useUI } from '../store/useUI';
@@ -16,6 +16,7 @@ import { FlowChart, ShotChart } from '../components/match/MatchCharts';
 import { IntensityControl, MomentumMeter, RunBanner, TeamTalkPicker, WinBar } from '../components/match/MatchHud';
 import { PostgameReport, PregamePreview, objectiveStatusFn } from '../components/match/MatchReport';
 import { formatMoneyShort } from '../format';
+import { onConcrete, teamInk } from '../components/shell/teamColors';
 import { play, startCrowd, stopCrowd, crowdIntensity } from '../sound';
 import styles from './MatchScreen.module.css';
 
@@ -128,7 +129,12 @@ export default function MatchScreen() {
     const homeColor = home.colors.primary;
     const awayColor = colorDist(home.colors.primary, away.colors.primary) < 60 ? away.colors.secondary : away.colors.primary;
     const fillOf = (side: 0 | 1) => (side === 0 ? homeColor : awayColor);
+    const inkOf = (side: 0 | 1) => teamInk(fillOf(side));
     const matchH = match.H, matchA = match.A;
+    // The home floor: keys and centre circle in the home colours, crest at centre court.
+    const logo = new Image();
+    logo.src = `bkdata://${home.logo}`;
+    const homeKey = hexAlpha(homeColor, 0.82), awayKey = hexAlpha(awayColor, 0.82);
 
     pbpLenRef.current = 0;
     swishCountRef.current = 0;
@@ -190,9 +196,10 @@ export default function MatchScreen() {
       // Home attacks the right basket in periods 1-2, the left basket from period 3 on (post-halftime end swap).
       // drawCourt's `home` tint paints the left end and `away` paints the right end, so swap the colors to match.
       const homeAttacksRight = snap.period <= 2;
-      drawCourt(ctx, 'full', homeAttacksRight
-        ? { home: hexAlpha(awayColor, 0.08), away: hexAlpha(homeColor, 0.08) }
-        : { home: hexAlpha(homeColor, 0.08), away: hexAlpha(awayColor, 0.08) });
+      drawCourt(ctx, 'full', {
+        surface: 'hardwood', centre: hexAlpha(homeColor, 0.85), logo,
+        ...(homeAttacksRight ? { home: awayKey, away: homeKey } : { home: homeKey, away: awayKey }),
+      });
       for (const [aId, bId] of snap.screens) {
         const a = snap.players.find((p) => p.id === aId), b = snap.players.find((p) => p.id === bId);
         if (a && b) drawScreen(ctx, a.x, a.y, b.x, b.y);
@@ -202,7 +209,7 @@ export default function MatchScreen() {
         const glow = glowTs ? Math.max(0, 1 - (now - glowTs) / 650) : 0;
         if (glowTs && glow <= 0) scorerGlowRef.current.delete(p.id);
         const heat = p.streak >= 3 ? 1 : p.streak <= -4 ? -1 : 0;
-        drawPlayer(ctx, { x: p.x, y: p.y, label: p.jersey, sub: p.name, energy: p.energy, fouls: p.fouls, fill: fillOf(p.side), hasBall: p.ball, glow, heat, pulse: (Math.sin(now / 160) + 1) / 2 });
+        drawPlayer(ctx, { x: p.x, y: p.y, label: p.jersey, sub: p.name, energy: p.energy, fouls: p.fouls, fill: fillOf(p.side), ink: inkOf(p.side), hasBall: p.ball, glow, heat, pulse: (Math.sin(now / 160) + 1) / 2 });
       }
       if (snap.state !== 'pregame') {
         const trail = ballTrailRef.current;
@@ -265,8 +272,8 @@ export default function MatchScreen() {
           {objectives ? objectives.map((o) => {
             const st = objStatus(o);
             return (
-              <span key={o.id} className={`${styles.objChip} ${styles[`obj_${st.status}`]}`} title={`${o.sponsor} · ${formatMoneyShort(o.reward)}`}>
-                <span className={styles.objMark}>{st.status === 'met' ? '✓' : st.status === 'failed' ? '✗' : '◆'}</span>
+              <span key={o.id} className={`${styles.objChip} ${styles[`obj_${st.status}`]}`} title={`${o.sponsor}, ${formatMoneyShort(o.reward)}`}>
+                <span className={styles.objMark} aria-hidden="true" />
                 {o.label}
                 <b className="mono-num">{o.stat === 'win' ? '' : o.stat === 'fgPct' ? `${st.value}%` : st.value}</b>
               </span>
@@ -289,7 +296,7 @@ export default function MatchScreen() {
                 header={null}
                 actions={(
                   <div className={styles.overlayBtns}>
-                    <button className={styles.primaryBtn} onClick={handleTipOff}>Tip-Off</button>
+                    <button className={styles.primaryBtn} onClick={handleTipOff}>Tip off</button>
                     <button className={styles.secondaryBtn} onClick={handleQuickSim}>Quick sim</button>
                   </div>
                 )}
@@ -416,22 +423,21 @@ function Scoreboard({ s, game, snap, home, away, maxTo }: any) {
 
 function TeamScore({ team, score, bonus, timeouts, maxTo, possession, align }: any) {
   return (
-    <div className={align === 'left' ? styles.sbTeam : `${styles.sbTeam} ${styles.sbTeamRight}`}>
+    <div className={align === 'left' ? styles.sbTeam : `${styles.sbTeam} ${styles.sbTeamRight}`} style={{ '--side': onConcrete(team.colors.primary, team.colors.secondary) } as CSSProperties}>
       {align === 'left' && <BkImage path={team.logo} alt={team.abbr} className={styles.sbLogo} />}
       <div className={styles.sbTeamInfo}>
         <div className={styles.sbAbbrRow}>
-          {possession && align === 'left' && <span className={styles.sbArrow}>▶</span>}
-          <span className={styles.sbAbbr}>{team.abbr}</span>
-          {possession && align === 'right' && <span className={styles.sbArrow}>◀</span>}
+          <span className={`${styles.sbAbbr} wordmark`}>{team.name}</span>
+          {possession && <span className={styles.sbArrow} aria-label="Possession" />}
         </div>
         <div className={styles.sbPipsRow}>
           {Array.from({ length: maxTo }).map((_, i) => (
             <span key={i} className={i < timeouts ? styles.pip : `${styles.pip} ${styles.pipEmpty}`} />
           ))}
-          {bonus && <span className={styles.bonusTag}>BONUS</span>}
+          {bonus && <span className={styles.bonusTag}>Bonus</span>}
         </div>
       </div>
-      <span key={score} className={`${styles.sbScore} ${styles.sbScorePop}`} style={{ '--flash-color': team.colors.primary } as any}>{score}</span>
+      <span key={score} className={`${styles.sbScore} ${styles.sbScorePop}`}>{score}</span>
       {align === 'right' && <BkImage path={team.logo} alt={team.abbr} className={styles.sbLogo} />}
     </div>
   );

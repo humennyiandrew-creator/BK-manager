@@ -7,19 +7,20 @@ import type { Team } from '../../engine/types';
 import BkImage from '../components/BkImage';
 import Preferences from '../components/Preferences';
 import { formatDate } from '../format';
+import { uniform } from '../components/shell/teamColors';
 import styles from './StartMenuScreen.module.css';
 
 type Mode = 'menu' | 'load' | 'newSlot' | 'settings';
 
-const WHATS_NEW: { tag: string; title: string; text: string }[] = [
-  { tag: 'Players', title: 'Breakout & collapse seasons', text: 'Every year a handful of players come out of nowhere — or fall apart. Rare, unpredictable, and you decide how to handle it.' },
-  { tag: 'Matchday', title: 'Sponsor objectives', text: 'Partners set goals for every game: threes, rebounds, a big night from your star. Hit them for cash and fan hype.' },
-  { tag: 'Club', title: 'Locker room', text: 'Team chemistry, a captain, and activities from team dinners to retreats. A happy room plays better.' },
-  { tag: 'League', title: 'League hub', text: 'Weekly power rankings, award races, player of the week and a live news wire from around the league.' },
-  { tag: 'Live', title: 'Coach on the sideline', text: 'Push or conserve energy, timeout team talks, momentum, win probability and a live shot chart.' },
+const WHATS_NEW: { title: string; text: string }[] = [
+  { title: 'Your club, your colours', text: 'The whole interface now wears your uniform, from the crest patch to the collar trim.' },
+  { title: 'G League affiliates', text: 'Send young players down for minutes, call up the affiliate’s best, hand out two-way deals.' },
+  { title: 'Longer careers', text: 'Five, ten, twenty seasons or open-ended, with free agency and the draft keeping every roster full.' },
+  { title: 'Breakout and collapse seasons', text: 'Every year a few players come out of nowhere, or fall apart. Rare, and yours to handle.' },
+  { title: 'Sponsor objectives', text: 'Partners set goals for every game. Hit them for cash and fan hype.' },
 ];
 
-/** Title screen: F1 Manager-style full-bleed menu with a continue card, what's new, and a team logo marquee. */
+/** Title screen: an empty arena at night, your crest on centre court, and the menu. */
 export default function StartMenuScreen() {
   const setView = useUI((s) => s.setView);
   const setPendingSlot = useUI((s) => s.setPendingSlot);
@@ -40,7 +41,9 @@ export default function StartMenuScreen() {
   }, []);
 
   const latest = useMemo(() => [...saves].sort((a, b) => b.savedAt.localeCompare(a.savedAt))[0], [saves]);
+  const latestTeam = latest?.teamId ? teams.find((t) => t.id === latest.teamId) : undefined;
   const saveFor = (slot: number) => saves.find((s) => s.slot === slot);
+  const metaLine = (sv: SaveMeta) => [sv.season, sv.record?.replace('-', '–'), formatDate(sv.date)].filter(Boolean).join(', ');
 
   const pickSlot = (slot: number) => {
     if (saveFor(slot)) { setConfirmSlot(slot); return; }
@@ -60,123 +63,121 @@ export default function StartMenuScreen() {
     if (ok) setView('shell');
   };
 
-  const items: { id: string; label: string; sub: string; onClick: () => void; disabled?: boolean; active?: boolean }[] = [
-    { id: 'continue', label: 'Continue', sub: latest ? `${latest.teamName} · ${formatDate(latest.date)}` : 'No career in progress', onClick: () => latest && doLoad(latest.slot), disabled: !latest },
-    { id: 'new', label: 'New career', sub: 'NBA or EuroLeague — pick your club', onClick: () => setMode('newSlot'), active: mode === 'newSlot' },
-    { id: 'load', label: 'Load career', sub: `${saves.length} saved career${saves.length === 1 ? '' : 's'}`, onClick: () => setMode('load'), active: mode === 'load' },
-    { id: 'settings', label: 'Settings', sub: 'Audio and display', onClick: () => setMode('settings'), active: mode === 'settings' },
-    { id: 'quit', label: 'Quit', sub: 'Back to the desktop', onClick: () => window.close() },
+  const items: { id: Mode | 'continue' | 'quit'; label: string; onClick: () => void; disabled?: boolean }[] = [
+    { id: 'continue', label: 'Continue', onClick: () => latest && doLoad(latest.slot), disabled: !latest },
+    { id: 'newSlot', label: 'New career', onClick: () => setMode('newSlot') },
+    { id: 'load', label: 'Load career', onClick: () => setMode('load') },
+    { id: 'settings', label: 'Settings', onClick: () => setMode('settings') },
+    { id: 'quit', label: 'Quit', onClick: () => window.close() },
   ];
 
-  const marquee = teams.length ? [...teams, ...teams] : [];
+  const u = latestTeam ? uniform(latestTeam.colors.primary, latestTeam.colors.secondary) : latest?.color ? uniform(latest.color, '#eceae4') : null;
+  const plate = u ? ({ '--team': u.team, '--team-2': u.trim, '--team-ink': u.ink } as CSSProperties) : undefined;
 
   return (
-    <div className={styles.wrap} style={{ '--card-color': latest?.color ?? 'var(--accent)' } as CSSProperties}>
-      <div className={styles.bg} aria-hidden="true">
-        <div className={styles.spot} />
-        <div className={styles.floor}>
-          <svg viewBox="0 0 94 50" className={styles.court} preserveAspectRatio="none">
-            <rect x="0.3" y="0.3" width="93.4" height="49.4" />
-            <line x1="47" y1="0" x2="47" y2="50" />
-            <circle cx="47" cy="25" r="6" />
-            <circle cx="47" cy="25" r="2" />
-            {[false, true].map((flip) => (
-              <g key={String(flip)} transform={flip ? 'translate(94 0) scale(-1 1)' : undefined}>
-                <rect x="0" y="17" width="19" height="16" />
-                <circle cx="19" cy="25" r="6" />
-                <path d="M0 3 H14 A23.75 23.75 0 0 1 14 47 H0" />
-                <circle cx="5.25" cy="25" r="0.75" />
-              </g>
-            ))}
-          </svg>
+    <div className={styles.wrap} style={plate}>
+      <div className={styles.arena} aria-hidden="true">
+        <div className={styles.lights} />
+        <div className={styles.floorWrap}>
+          <div className={styles.floor}>
+            <svg viewBox="0 0 94 50" className={styles.court} preserveAspectRatio="none">
+              <rect x="0.3" y="0.3" width="93.4" height="49.4" />
+              <line x1="47" y1="0" x2="47" y2="50" />
+              <circle cx="47" cy="25" r="6" />
+              {[false, true].map((flip) => (
+                <g key={String(flip)} transform={flip ? 'translate(94 0) scale(-1 1)' : undefined}>
+                  <rect x="0" y="17" width="19" height="16" className={styles.paint} />
+                  <circle cx="19" cy="25" r="6" />
+                  <path d="M0 3 H14 A23.75 23.75 0 0 1 14 47 H0" />
+                  <circle cx="5.25" cy="25" r="0.75" />
+                </g>
+              ))}
+            </svg>
+            {(latestTeam?.logo ?? latest?.logo) && <BkImage path={(latestTeam?.logo ?? latest?.logo)!} alt="" className={styles.centreLogo} />}
+          </div>
         </div>
-        <div className={styles.streaks}><span /><span /><span /></div>
-        <div className={styles.watermark}>BK</div>
       </div>
 
       <div className={styles.left}>
         <div className={styles.brand}>
-          <div className={styles.logo}><span className={styles.slash}>//</span> BK <span className={styles.accent}>MANAGER</span></div>
-          <div className={styles.tagline}>Basketball management · NBA &amp; EuroLeague</div>
+          <div className={`${styles.logo} wordmark`}>BK <span>Manager</span></div>
+          <div className={styles.tagline}>Basketball management for the NBA and EuroLeague</div>
         </div>
-        <nav className={`${styles.menu} stagger`}>
-          {items.map((it, i) => (
+        <nav className={styles.menu}>
+          {items.map((it) => (
             <button
               key={it.id}
               type="button"
-              className={`${styles.item} ${it.active ? styles.itemActive : ''}`}
+              className={`${styles.item} ${mode === it.id ? styles.itemActive : ''}`}
               onClick={it.onClick}
               disabled={it.disabled || loadingSlot != null}
               data-sound-hover
               data-sound={it.id === 'continue' ? 'confirm' : undefined}
             >
-              <span className={`${styles.idx} mono-num`}>{String(i + 1).padStart(2, '0')}</span>
-              <span className={styles.itemText}>
-                <span className={styles.itemLabel}>{it.id === 'continue' && loadingSlot != null ? 'Loading…' : it.label}</span>
-                <span className={styles.itemSub}>{it.sub}</span>
-              </span>
-              <span className={styles.itemArrow}>›</span>
+              {it.id === 'continue' && loadingSlot != null ? 'Loading…' : it.label}
             </button>
           ))}
         </nav>
         {loadError && <div className={styles.error}>{loadError}</div>}
+        <div className={styles.build}>Alpha build</div>
       </div>
 
       <div className={styles.right}>
         {mode === 'menu' && (
           <>
             {latest ? (
-              <button type="button" className={`${styles.card} ${styles.continueCard}`} onClick={() => doLoad(latest.slot)} disabled={loadingSlot != null} data-sound="confirm">
-                <span className={styles.cardKicker}>Continue career</span>
-                <div className={styles.contBody}>
-                  {latest.logo ? <BkImage path={latest.logo} alt={latest.teamName} className={styles.contLogo} /> : <div className={styles.contLogo} />}
-                  <div className={styles.contText}>
-                    <span className={styles.contTeam}>{latest.teamName}</span>
-                    <span className={styles.contMeta}>
-                      {latest.season && <span>{latest.season}</span>}
-                      {latest.record && <span className="mono-num">{latest.record}</span>}
-                      <span>{formatDate(latest.date)}</span>
-                    </span>
-                  </div>
-                </div>
-                <span className={styles.contGo}>{loadingSlot === latest.slot ? 'Loading…' : 'Resume ▶'}</span>
+              <button type="button" className={styles.plate} onClick={() => doLoad(latest.slot)} disabled={loadingSlot != null} data-sound="confirm">
+                <span className={styles.plateBand}>
+                  <span className={styles.platePatch}>{latest.logo ? <BkImage path={latest.logo} alt={latest.teamName} className={styles.plateCrest} /> : null}</span>
+                  <span className={styles.plateText}>
+                    <span className={styles.plateKicker}>Continue career</span>
+                    <span className={`${styles.plateTeam} wordmark`}>{latestTeam?.name ?? latest.teamName}</span>
+                  </span>
+                </span>
+                <span className={styles.plateTrim} />
+                <span className={styles.plateFoot}>
+                  <span className={styles.plateMeta}>{metaLine(latest)}</span>
+                  <span className={styles.plateGo}>{loadingSlot === latest.slot ? 'Loading…' : 'Resume'}</span>
+                </span>
               </button>
             ) : (
-              <button type="button" className={`${styles.card} ${styles.continueCard}`} onClick={() => setMode('newSlot')}>
-                <span className={styles.cardKicker}>Start your career</span>
-                <div className={styles.contText}>
-                  <span className={styles.contTeam}>Take the job</span>
-                  <span className={styles.contMeta}><span>50 clubs · two leagues · five seasons to build a legacy</span></span>
-                </div>
-                <span className={styles.contGo}>New career ▶</span>
+              <button type="button" className={styles.plate} onClick={() => setMode('newSlot')}>
+                <span className={styles.plateBand}>
+                  <span className={styles.plateText}>
+                    <span className={styles.plateKicker}>Start your career</span>
+                    <span className={`${styles.plateTeam} wordmark`}>Take the job</span>
+                  </span>
+                </span>
+                <span className={styles.plateTrim} />
+                <span className={styles.plateFoot}>
+                  <span className={styles.plateMeta}>Fifty clubs in two leagues</span>
+                  <span className={styles.plateGo}>New career</span>
+                </span>
               </button>
             )}
-            <div className={styles.card}>
-              <span className={styles.cardKicker}>What's new</span>
-              <div className={styles.news}>
-                {WHATS_NEW.map((n) => (
-                  <div key={n.title} className={styles.newsItem}>
-                    <span className={styles.newsTag}>{n.tag}</span>
-                    <span className={styles.newsTitle}>{n.title}</span>
-                    <span className={styles.newsText}>{n.text}</span>
-                  </div>
-                ))}
-              </div>
+            <div className={styles.news}>
+              <span className={styles.newsHead}>New in this build</span>
+              {WHATS_NEW.map((n) => (
+                <div key={n.title} className={styles.newsItem}>
+                  <span className={styles.newsTitle}>{n.title}</span>
+                  <span className={styles.newsText}>{n.text}</span>
+                </div>
+              ))}
             </div>
           </>
         )}
 
         {mode === 'newSlot' && (
-          <div className={`${styles.card} ${styles.drawer} slide-in-right`}>
-            <span className={styles.cardKicker}>New career — choose a save slot</span>
+          <div className={styles.drawer}>
+            <span className={styles.drawerHead}>New career: choose a save slot</span>
             {[1, 2, 3, 4, 5].map((slot) => {
               const save = saveFor(slot);
               return (
                 <div key={slot} className={styles.slot}>
-                  <span className={`${styles.slotNum} mono-num`}>{slot}</span>
+                  <span className={`${styles.slotNum} numeral`}>{slot}</span>
                   <div className={styles.slotText}>
                     <span className={styles.slotTeam}>{save ? save.teamName : 'Empty slot'}</span>
-                    {save && <span className={styles.slotMeta}>{save.season ? `${save.season} · ` : ''}{save.record ? `${save.record} · ` : ''}{formatDate(save.date)}</span>}
+                    {save && <span className={styles.slotMeta}>{metaLine(save)}</span>}
                   </div>
                   {confirmSlot === slot ? (
                     <div className={styles.slotActions}>
@@ -190,20 +191,20 @@ export default function StartMenuScreen() {
                 </div>
               );
             })}
-            <button type="button" className={styles.back} onClick={() => setMode('menu')}>‹ Back</button>
+            <button type="button" className={styles.back} onClick={() => setMode('menu')}>Back</button>
           </div>
         )}
 
         {mode === 'load' && (
-          <div className={`${styles.card} ${styles.drawer} slide-in-right`}>
-            <span className={styles.cardKicker}>Load career</span>
+          <div className={styles.drawer}>
+            <span className={styles.drawerHead}>Load career</span>
             {saves.length === 0 && <div className={styles.empty}>No saved careers yet.</div>}
             {saves.map((sv) => (
               <div key={sv.slot} className={styles.slot}>
-                {sv.logo ? <BkImage path={sv.logo} alt={sv.teamName} className={styles.slotLogo} /> : <span className={`${styles.slotNum} mono-num`}>{sv.slot}</span>}
+                {sv.logo ? <BkImage path={sv.logo} alt={sv.teamName} className={styles.slotLogo} /> : <span className={`${styles.slotNum} numeral`}>{sv.slot}</span>}
                 <div className={styles.slotText}>
                   <span className={styles.slotTeam}>{sv.teamName}</span>
-                  <span className={styles.slotMeta}>Slot {sv.slot} · {sv.season ? `${sv.season} · ` : ''}{sv.record ? `${sv.record} · ` : ''}{formatDate(sv.date)}</span>
+                  <span className={styles.slotMeta}>Slot {sv.slot}, {metaLine(sv)}</span>
                 </div>
                 <div className={styles.slotActions}>
                   <button type="button" className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => doLoad(sv.slot)} disabled={loadingSlot != null}>{loadingSlot === sv.slot ? 'Loading…' : 'Load'}</button>
@@ -211,29 +212,17 @@ export default function StartMenuScreen() {
                 </div>
               </div>
             ))}
-            <button type="button" className={styles.back} onClick={() => setMode('menu')}>‹ Back</button>
+            <button type="button" className={styles.back} onClick={() => setMode('menu')}>Back</button>
           </div>
         )}
 
         {mode === 'settings' && (
-          <div className={`${styles.card} ${styles.drawer} ${styles.prefs} slide-in-right`}>
-            <span className={styles.cardKicker}>Settings</span>
+          <div className={`${styles.drawer} ${styles.prefs}`}>
+            <span className={styles.drawerHead}>Settings</span>
             <Preferences />
-            <button type="button" className={styles.back} onClick={() => setMode('menu')}>‹ Back</button>
+            <button type="button" className={styles.back} onClick={() => setMode('menu')}>Back</button>
           </div>
         )}
-      </div>
-
-      <div className={styles.footer}>
-        <div className={styles.marquee}>
-          <div className={styles.marqueeTrack}>
-            {marquee.map((t, i) => <BkImage key={`${t.id}-${i}`} path={t.logo} alt={t.abbr} className={styles.marqueeLogo} />)}
-          </div>
-        </div>
-        <div className={styles.footRow}>
-          <span>Alpha build</span>
-          <span>NBA · EuroLeague</span>
-        </div>
       </div>
     </div>
   );

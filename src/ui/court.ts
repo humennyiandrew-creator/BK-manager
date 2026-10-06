@@ -29,12 +29,12 @@ export function fitCourt(canvas: HTMLCanvasElement, aw: number, ah: number): Fit
 }
 
 interface CourtColors { line: string; wood: string; grain: string }
-const COLORS: CourtColors = { line: 'rgba(255,255,255,0.5)', wood: '#0e1626', grain: 'rgba(255,255,255,0.025)' };
+const BOARD: CourtColors = { line: 'rgba(255,255,255,0.5)', wood: '#1b1e23', grain: 'rgba(255,255,255,0.025)' };
+const WOOD_LINE = 'rgba(255,255,255,0.92)';
 
-function drawEnd(ctx: CanvasRenderingContext2D, tint?: string) {
-  const lw = 0.24;
+function drawEnd(ctx: CanvasRenderingContext2D, tint: string | undefined, line: string, lw: number) {
   ctx.lineWidth = lw;
-  ctx.strokeStyle = COLORS.line;
+  ctx.strokeStyle = line;
   // lane (16 wide x 19 deep)
   ctx.beginPath();
   ctx.rect(0, 25 - 8, 19, 16);
@@ -61,34 +61,109 @@ function drawEnd(ctx: CanvasRenderingContext2D, tint?: string) {
   // hoop
   ctx.beginPath(); ctx.lineWidth = 0.3; ctx.strokeStyle = '#ff7a3d';
   ctx.arc(HOOP_X, 25, 0.75, 0, Math.PI * 2); ctx.stroke();
-  ctx.lineWidth = lw; ctx.strokeStyle = COLORS.line;
+  ctx.lineWidth = lw; ctx.strokeStyle = line;
 }
 
-export function drawCourt(ctx: CanvasRenderingContext2D, mode: 'full' | 'half', tints: { home?: string; away?: string } = {}) {
+/** Maple boards running the length of the floor, seams, staggered end joints and a varnish sheen. */
+function paintHardwood(g: CanvasRenderingContext2D, w: number, h: number) {
+  const base = g.createLinearGradient(0, 0, 0, h);
+  base.addColorStop(0, '#cf9a5c');
+  base.addColorStop(0.5, '#dcac70');
+  base.addColorStop(1, '#cb955a');
+  g.fillStyle = base;
+  g.fillRect(0, 0, w, h);
+  let seed = 7;
+  const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  const row = 0.62;
+  for (let y = 0; y < h; y += row) {
+    let x = -rnd() * 10;
+    while (x < w) {
+      const len = 5 + rnd() * 9;
+      const tone = rnd();
+      g.fillStyle = tone < 0.5 ? `rgba(120,70,25,${0.05 + tone * 0.12})` : `rgba(255,235,200,${(tone - 0.5) * 0.14})`;
+      g.fillRect(x, y, len, row);
+      g.fillStyle = 'rgba(70,40,15,0.22)';
+      g.fillRect(x + len - 0.03, y, 0.04, row);
+      x += len;
+    }
+    g.fillStyle = 'rgba(70,40,15,0.16)';
+    g.fillRect(0, y, w, 0.03);
+  }
+  const sheen = g.createRadialGradient(w / 2, h / 2, 2, w / 2, h / 2, w * 0.62);
+  sheen.addColorStop(0, 'rgba(255,240,215,0.16)');
+  sheen.addColorStop(0.6, 'rgba(255,240,215,0)');
+  sheen.addColorStop(1, 'rgba(40,20,5,0.28)');
+  g.fillStyle = sheen;
+  g.fillRect(0, 0, w, h);
+}
+
+export interface CourtOpts {
+  /** Paint for the left-hand key / right-hand key. */
+  home?: string;
+  away?: string;
+  /** 'board' is the coach's whiteboard (playbook); 'hardwood' is the home floor (live games). */
+  surface?: 'board' | 'hardwood';
+  /** Centre-circle paint and crest for the home floor. */
+  centre?: string;
+  logo?: HTMLImageElement | null;
+}
+
+let woodCache: { key: string; canvas: HTMLCanvasElement } | null = null;
+
+function drawLines(ctx: CanvasRenderingContext2D, mode: 'full' | 'half', w: number, h: number, o: CourtOpts, line: string, lw: number) {
+  ctx.strokeStyle = line; ctx.lineWidth = lw;
+  ctx.strokeRect(lw / 2, lw / 2, w - lw, h - lw);
+  if (mode === 'full') {
+    ctx.beginPath(); ctx.arc(47, 25, 6, 0, Math.PI * 2);
+    if (o.centre) { ctx.save(); ctx.fillStyle = o.centre; ctx.fill(); ctx.restore(); }
+    ctx.stroke();
+    if (o.logo && o.logo.complete && o.logo.naturalWidth > 0) {
+      const size = 8.6, ratio = o.logo.naturalWidth / o.logo.naturalHeight;
+      const lw2 = ratio >= 1 ? size : size * ratio, lh = ratio >= 1 ? size / ratio : size;
+      ctx.save(); ctx.globalAlpha = 0.92; ctx.drawImage(o.logo, 47 - lw2 / 2, 25 - lh / 2, lw2, lh); ctx.restore();
+    }
+    ctx.beginPath(); ctx.moveTo(47, 0); ctx.lineTo(47, 50); ctx.stroke();
+    ctx.save(); drawEnd(ctx, o.home, line, lw); ctx.restore();
+    ctx.save(); ctx.translate(94, 0); ctx.scale(-1, 1); drawEnd(ctx, o.away, line, lw); ctx.restore();
+  } else {
+    drawEnd(ctx, o.home, line, lw);
+  }
+}
+
+export function drawCourt(ctx: CanvasRenderingContext2D, mode: 'full' | 'half', o: CourtOpts = {}) {
   const w = mode === 'full' ? COURT_W : COURT_W / 2;
   const h = COURT_H;
-  ctx.fillStyle = COLORS.wood;
+  if (o.surface === 'hardwood') {
+    // The floor is static for long stretches: render it once per size/paint into an offscreen canvas.
+    const px = ctx.getTransform().a;
+    const logoKey = o.logo ? `${o.logo.src}|${o.logo.complete && o.logo.naturalWidth > 0}` : '';
+    const key = `${mode}|${px.toFixed(3)}|${o.home}|${o.away}|${o.centre}|${logoKey}`;
+    if (!woodCache || woodCache.key !== key) {
+      const c = document.createElement('canvas');
+      c.width = Math.max(1, Math.ceil(w * px));
+      c.height = Math.max(1, Math.ceil(h * px));
+      const g = c.getContext('2d')!;
+      g.scale(px, px);
+      paintHardwood(g, w, h);
+      drawLines(g, mode, w, h, o, WOOD_LINE, 0.17);
+      woodCache = { key, canvas: c };
+    }
+    ctx.drawImage(woodCache.canvas, 0, 0, w, h);
+    return;
+  }
+  ctx.fillStyle = BOARD.wood;
   ctx.fillRect(0, 0, w, h);
-  ctx.strokeStyle = COLORS.grain;
+  ctx.strokeStyle = BOARD.grain;
   ctx.lineWidth = 0.06;
   for (let y = 2; y < h; y += 2.3) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
-  ctx.strokeStyle = COLORS.line; ctx.lineWidth = 0.24;
-  ctx.strokeRect(0.12, 0.12, w - 0.24, h - 0.24);
-
-  if (mode === 'full') {
-    ctx.beginPath(); ctx.moveTo(47, 0); ctx.lineTo(47, 50); ctx.stroke();
-    ctx.beginPath(); ctx.arc(47, 25, 6, 0, Math.PI * 2); ctx.stroke();
-    ctx.save(); drawEnd(ctx, tints.home); ctx.restore();
-    ctx.save(); ctx.translate(94, 0); ctx.scale(-1, 1); drawEnd(ctx, tints.away); ctx.restore();
-  } else {
-    drawEnd(ctx, tints.home);
-  }
+  drawLines(ctx, mode, w, h, o, BOARD.line, 0.24);
 }
 
 export interface PlayerDrawOpts {
   x: number; y: number; label: string; sub: string; energy: number; fouls: number; fill: string; hasBall: boolean; glow?: number;
   heat?: number; // shooting streak: >0 on fire (3+ makes in a row), <0 ice cold (4+ misses)
   pulse?: number; // 0–1 animation phase for the heat ring
+  ink?: string; // jersey number colour on the token
 }
 
 export function drawPlayer(ctx: CanvasRenderingContext2D, o: PlayerDrawOpts) {
@@ -113,7 +188,7 @@ export function drawPlayer(ctx: CanvasRenderingContext2D, o: PlayerDrawOpts) {
     ctx.stroke();
   }
   ctx.beginPath();
-  ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = 0.22;
+  ctx.strokeStyle = 'rgba(0,0,0,0.28)'; ctx.lineWidth = 0.22;
   ctx.arc(o.x, o.y, r + 0.45, 0, Math.PI * 2); ctx.stroke();
   const ringColor = o.energy > 0.7 ? '#3ddc97' : o.energy > 0.45 ? '#e8b93d' : '#ff4d5e';
   ctx.beginPath();
@@ -132,8 +207,8 @@ export function drawPlayer(ctx: CanvasRenderingContext2D, o: PlayerDrawOpts) {
   ctx.fill();
   ctx.lineWidth = 0.09; ctx.strokeStyle = 'rgba(0,0,0,0.55)'; ctx.stroke();
 
-  ctx.fillStyle = '#fff';
-  ctx.font = '1.3px "Titillium Web", sans-serif';
+  ctx.fillStyle = o.ink ?? '#fff';
+  ctx.font = '700 1.3px "Archivo Variable", "Archivo", sans-serif';
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.fillText(o.label, o.x, o.y + 0.06);
 
@@ -147,9 +222,16 @@ export function drawPlayer(ctx: CanvasRenderingContext2D, o: PlayerDrawOpts) {
     }
   }
 
-  ctx.fillStyle = 'rgba(255,255,255,0.88)';
-  ctx.font = '0.95px "Titillium Web", sans-serif';
-  ctx.fillText(o.sub, o.x, o.y + r + (o.fouls > 0 ? 1.55 : 1.1));
+  // Name tag: a small dark pill so it reads on a light floor as well as the dark board.
+  ctx.font = '600 0.9px "Archivo Variable", "Archivo", sans-serif';
+  const ty = o.y + r + (o.fouls > 0 ? 1.55 : 1.1);
+  const tw = ctx.measureText(o.sub).width + 0.6;
+  ctx.fillStyle = 'rgba(18,19,21,0.72)';
+  ctx.beginPath();
+  if (ctx.roundRect) ctx.roundRect(o.x - tw / 2, ty - 0.6, tw, 1.2, 0.3); else ctx.rect(o.x - tw / 2, ty - 0.6, tw, 1.2);
+  ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,0.92)';
+  ctx.fillText(o.sub, o.x, ty + 0.04);
 }
 
 /** Fading trail of recent ball positions, drawn before the ball itself. */
@@ -191,7 +273,7 @@ export function drawScreen(ctx: CanvasRenderingContext2D, ax: number, ay: number
 
 /** RGB Euclidean distance between two #hex colors — used to pick a distinguishable away fill. */
 export function colorDist(a: string, b: string): number {
-  const hex = (h: string) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+  const hex = (h: string) => [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16));
   const [ar, ag, ab] = hex(a.replace('#', ''));
   const [br, bg, bb] = hex(b.replace('#', ''));
   return Math.hypot(ar - br, ag - bg, ab - bb);

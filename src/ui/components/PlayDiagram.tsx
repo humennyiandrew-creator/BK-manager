@@ -41,7 +41,7 @@ export default function PlayDiagram({ play }: { play: Play }) {
     function frame(now: number) {
       const ctx = fit.ctx;
       ctx.clearRect(0, 0, 47, 50);
-      drawCourt(ctx, 'half', { home: 'rgba(25,195,214,0.06)' });
+      drawCourt(ctx, 'half', { home: 'rgba(236,234,228,0.05)' });
 
       let el = ((now - start) / 1000) % (total + PAUSE);
       let segI = 0, k = 0;
