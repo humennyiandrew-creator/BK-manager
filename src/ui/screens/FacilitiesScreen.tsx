@@ -52,7 +52,17 @@ export default function FacilitiesScreen() {
             const inProgress = !!f.upgrade;
             const canAfford = s.finance.cash >= cost;
             return (
-              <button key={id} type="button" className={id === active ? `${styles.card} ${styles.cardActive}` : styles.card} onClick={() => setActive(id)}>
+              // A div, not a <button>: the card contains the Upgrade button, and buttons can't nest.
+              <div
+                key={id} role="button" tabIndex={0} className={id === active ? `${styles.card} ${styles.cardActive}` : styles.card}
+                onClick={() => setActive(id)}
+                onKeyDown={(e) => {
+                  // Ignore keys bubbling up from the inner Upgrade button.
+                  if (e.target !== e.currentTarget || (e.key !== 'Enter' && e.key !== ' ')) return;
+                  e.preventDefault();
+                  setActive(id);
+                }}
+              >
                 <div className={styles.cardHead}>
                   <span className={styles.cardTitle}>{FACILITY_LABEL[id]}</span>
                   <span className={styles.level}>Lv {level}</span>
@@ -80,7 +90,7 @@ export default function FacilitiesScreen() {
                   </div>
                 )}
                 <span className={styles.nodeCount}>{f.nodes?.length ?? 0}/{NODES_BY_FACILITY[id].length} nodes built</span>
-              </button>
+              </div>
             );
           })}
         </div>
