@@ -19,12 +19,12 @@ export default function ObjectiveList({ list, status, compact }: Props) {
         const st = status?.(o) ?? { status: 'pending' as ObjStatus };
         return (
           <div key={o.id} className={`${styles.row} ${styles[st.status]}`}>
-            <span className={styles.mark}>{st.status === 'met' ? '✓' : st.status === 'failed' ? '✗' : '◆'}</span>
+            <span className={styles.mark} aria-hidden="true" />
             <div className={styles.text}>
               <span className={styles.label}>{o.label}</span>
               {!compact && <span className={styles.sponsor}>{o.sponsor}</span>}
             </div>
-            {st.value != null && <span className={`${styles.value} mono-num`}>{o.stat === 'fgPct' ? `${st.value}%` : o.stat === 'win' ? (st.value ? 'W' : '—') : st.value}</span>}
+            {st.value != null && <span className={`${styles.value} mono-num`}>{o.stat === 'fgPct' ? `${st.value}%` : o.stat === 'win' ? (st.value ? 'W' : '–') : st.value}</span>}
             <span className={`${styles.reward} mono-num`}>{formatMoneyShort(o.reward)}</span>
             {st.status !== 'pending' && <span className={styles.pill}>{STATUS_LABEL[st.status]}</span>}
           </div>

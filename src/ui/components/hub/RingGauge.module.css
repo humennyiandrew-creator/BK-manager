@@ -13,16 +13,15 @@
 
 .track {
   fill: none;
-  stroke: rgba(255, 255, 255, 0.07);
+  stroke: var(--rail);
   stroke-width: 8;
 }
 
 .fill {
   fill: none;
   stroke-width: 8;
-  stroke-linecap: round;
+  stroke-linecap: butt;
   transition: stroke-dasharray var(--dur-slow) var(--ease-out);
-  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--accent) 50%, transparent));
 }
 
 .center {
@@ -38,20 +37,21 @@
 }
 
 .value {
-  font-size: 1.45rem;
+  font-family: var(--font-display);
+  font-size: 1.9rem;
   font-weight: 800;
   line-height: 1;
 }
 
 .sub {
   font-size: 0.75rem;
-  font-weight: 800;
-  color: var(--text-muted);
+  font-weight: 600;
+  color: var(--chalk-2);
   margin-top: 0.15rem;
 }
 
 .label {
   font-size: 0.75rem;
-  font-weight: 800;
-  color: var(--text-dim);
+  font-weight: 600;
+  color: var(--chalk-3);
 }

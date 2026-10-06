@@ -72,7 +72,7 @@ export default function EventModal({ s, eventId, onClose }: { s: GameState; even
             <BkImage path={player.face} alt={player.lastName} className={styles.playerFace} />
             <div>
               <div className={styles.playerName}>{player.firstName} {player.lastName}</div>
-              <div className={styles.playerMeta}>{player.positions.join('/')} · OVR {player.ratings.ovr} · Morale {player.morale}</div>
+              <div className={styles.playerMeta}>{player.positions.join('/')}, OVR {player.ratings.ovr}, Morale {player.morale}</div>
             </div>
           </div>
         )}

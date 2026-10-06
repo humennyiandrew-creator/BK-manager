@@ -55,16 +55,16 @@ export function coachInsights(s: GameState, limit = 8): Insight[] {
 
   const lr = lockerRoom(s);
   const chem = chemistryReport(s, s.userTeamId);
-  if (!lr.captain || s.players[lr.captain]?.teamId !== s.userTeamId) out.push({ id: 'captain', tone: 'info', title: 'Name a team captain', detail: 'A good leader steadies the locker room.', cta: 'Locker Room', go: tab('locker') });
-  if (chem.score < 45) out.push({ id: 'chem', tone: 'warn', title: `Locker room is ${chem.mood.toLowerCase()}`, detail: `Chemistry ${chem.score}. Team activities can help.`, cta: 'Locker Room', go: tab('locker') });
+  if (!lr.captain || s.players[lr.captain]?.teamId !== s.userTeamId) out.push({ id: 'captain', tone: 'info', title: 'Name a team captain', detail: 'A good leader steadies the locker room.', cta: 'Locker room', go: tab('locker') });
+  if (chem.score < 45) out.push({ id: 'chem', tone: 'warn', title: `Locker room is ${chem.mood.toLowerCase()}`, detail: `Chemistry ${chem.score}. Team activities can help.`, cta: 'Locker room', go: tab('locker') });
 
-  if (s.prep && !s.prep.prepared && s.phase !== 'offseason') out.push({ id: 'prep', tone: 'info', title: `Scouting report: ${s.teams[s.prep.opponent].name}`, detail: 'Set a game plan before tip-off.', cta: 'Game Plan', go: tab('training') });
+  if (s.prep && !s.prep.prepared && s.phase !== 'offseason') out.push({ id: 'prep', tone: 'info', title: `Scouting report: ${s.teams[s.prep.opponent].name}`, detail: 'Set a game plan before tip-off.', cta: 'Game plan', go: tab('training') });
   if ((team.familiarity ?? 60) < 50) out.push({ id: 'fam', tone: 'info', title: 'Still learning the system', detail: `Tactical familiarity ${Math.round(team.familiarity ?? 60)}. Film and practice sessions help.`, cta: 'Training', go: tab('training') });
   const ext = extensionEligible(s).length;
   if (ext) out.push({ id: 'ext', tone: 'info', title: `${ext} player${ext === 1 ? '' : 's'} eligible for an extension`, detail: 'Lock up key players before they hit the market.', cta: 'Contracts', go: tab('squadHub') });
   if (boardMeetingAvailable(s)) out.push({ id: 'board', tone: 'info', title: 'Board meeting available', detail: 'Ownership will hear your requests.', cta: 'Board', go: () => { useBoardNav.getState().requestTab('meeting'); useUI.getState().setTab('board'); } });
   const minRoster = leagueOf(team.league).id === 'NBA' ? 13 : 10;
-  if (roster.length < minRoster && s.phase !== 'offseason') out.push({ id: 'roster', tone: 'urgent', title: `Only ${roster.length} players on the roster`, detail: `Sign at least ${minRoster - roster.length} more.`, cta: 'Free Agents', go: () => { useTransfersNav.getState().requestTab('fa'); useUI.getState().setTab('transfers'); } });
+  if (roster.length < minRoster && s.phase !== 'offseason') out.push({ id: 'roster', tone: 'urgent', title: `Only ${roster.length} players on the roster`, detail: `Sign at least ${minRoster - roster.length} more.`, cta: 'Free agents', go: () => { useTransfersNav.getState().requestTab('fa'); useUI.getState().setTab('transfers'); } });
   if (!roster.some((p) => p.program) && s.phase !== 'offseason') out.push({ id: 'programs', tone: 'info', title: 'No development programmes running', detail: 'Up to three players can follow a targeted plan.', cta: 'Training', go: tab('training') });
 
   return out.sort((a, b) => ORDER[a.tone] - ORDER[b.tone]).slice(0, limit);

@@ -158,7 +158,7 @@ export default function ChooseTeamScreen() {
           </Panel>
         )}
         <div className={styles.detailPanel} style={detailStyle}>
-          <Panel title="Team Detail" className={styles.detailPanelInner}>
+          <Panel title="Team detail" className={styles.detailPanelInner}>
             {!detail && <div className={styles.empty}>Select a team</div>}
             {detail && (
               <div className={styles.detail}>
@@ -174,7 +174,7 @@ export default function ChooseTeamScreen() {
                 <div className={styles.facts}>
                   <div><span>Board expects</span><b>{expectation(detail)}</b></div>
                   <div><span>Squad strength</span><b className="mono-num">#{detail.rank} of {detail.leagueSize}</b></div>
-                  <div><span>{detail.team.league === 'EL' ? 'Country' : 'Conference'}</span><b>{detail.team.league === 'EL' ? detail.team.country : `${detail.team.conference} · ${detail.team.division}`}</b></div>
+                  <div><span>{detail.team.league === 'EL' ? 'Country' : 'Conference'}</span><b>{detail.team.league === 'EL' ? detail.team.country : `${detail.team.conference}, ${detail.team.division}`}</b></div>
                   <div><span>Arena</span><b className="mono-num">{detail.team.arenaCapacity.toLocaleString()} seats</b></div>
                 </div>
                 <div className={styles.keyHead}>Key players</div>

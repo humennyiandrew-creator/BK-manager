@@ -50,7 +50,7 @@
 }
 
 .dirtyTag {
-  color: var(--cyan);
+  color: var(--accent);
   text-transform: none;
   letter-spacing: normal;
   font-weight: 700;
@@ -121,7 +121,7 @@
 }
 
 .draftSlider input {
-  accent-color: var(--cyan);
+  accent-color: var(--accent);
 }
 
 .draftSlider span {
@@ -150,9 +150,9 @@
 }
 
 .btnPrimary {
-  background: var(--cyan);
+  background: var(--chalk);
   border: none;
-  color: var(--bg);
+  color: #15171a;
   border-radius: var(--radius);
   padding: 0.4rem 0.5rem;
   font-size: 0.68rem;

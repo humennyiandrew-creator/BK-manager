@@ -68,8 +68,8 @@
 }
 
 .btnDanger:hover {
-  border-color: var(--red);
-  color: var(--red);
+  border-color: var(--loss);
+  color: var(--loss);
 }
 
 .status {

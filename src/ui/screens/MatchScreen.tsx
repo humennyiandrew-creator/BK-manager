@@ -290,7 +290,7 @@ export default function MatchScreen() {
                 actions={(
                   <div className={styles.overlayBtns}>
                     <button className={styles.primaryBtn} onClick={handleTipOff}>Tip-Off</button>
-                    <button className={styles.secondaryBtn} onClick={handleQuickSim}>Quick Sim</button>
+                    <button className={styles.secondaryBtn} onClick={handleQuickSim}>Quick sim</button>
                   </div>
                 )}
               />
@@ -308,7 +308,7 @@ export default function MatchScreen() {
             <Overlay>
               <div className={styles.overlayTitle}>{snap.period <= 4 && snap.period === 3 ? 'Halftime' : `End of ${periodLabel(snap.period - 1)}`}</div>
               <LineScore snap={snap} home={home} away={away} />
-              <button className={styles.primaryBtn} onClick={() => match!.resume()}>Resume Now</button>
+              <button className={styles.primaryBtn} onClick={() => match!.resume()}>Resume now</button>
             </Overlay>
           )}
           {snap.state === 'final' && (
@@ -544,8 +544,8 @@ function TacticsTab({ tactics, roster, court, onOffense, onDefense, onSlider, on
     <div className={styles.tacticsWrap}>
       {fit && (
         <div className={styles.fitBox}>
-          <BipolarBar label="Lineup Offense Fit" value={fit.off.score} />
-          <BipolarBar label="Lineup Defense Fit" value={fit.def.score} />
+          <BipolarBar label="Lineup offense fit" value={fit.off.score} />
+          <BipolarBar label="Lineup defense fit" value={fit.def.score} />
           {fitNotes.map((n, i) => <div key={i} className={styles.fitNote}>{n}</div>)}
         </div>
       )}
@@ -569,21 +569,21 @@ function TacticsTab({ tactics, roster, court, onOffense, onDefense, onSlider, on
         </div>
       ))}
       <div className={styles.tField}>
-        <label>Focus Player</label>
+        <label>Focus player</label>
         <select value={tactics.focusPlayer ?? ''} onChange={(e) => onFocus(e.target.value)}>
           <option value="">None</option>
           {roster.map((sp: SP) => <option key={sp.p.id} value={sp.p.id}>{sp.p.lastName}</option>)}
         </select>
       </div>
       <div className={styles.tField}>
-        <label>Clutch Play</label>
+        <label>Clutch play</label>
         <select value={tactics.clutchPlay ?? ''} onChange={(e) => onClutch(e.target.value)}>
           <option value="">Auto</option>
           {PLAYS.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
       </div>
       <div className={styles.tField}>
-        <label>Call Next Possession</label>
+        <label>Call next possession</label>
         <div className={styles.callRow}>
           <select value={calledPlay} onChange={(e) => onCalledPlayChange(e.target.value)}>
             <option value="">—</option>
@@ -607,7 +607,7 @@ function LineupTab({ side, subOut, onPickCourt, onPickBench, autoSubs, onAutoSub
       <label className={styles.autoSubsRow}>
         <input type="checkbox" checked={autoSubs} onChange={(e) => onAutoSubs(e.target.checked)} /> Auto-subs
       </label>
-      <div className={styles.lineupLabel}>On Court</div>
+      <div className={styles.lineupLabel}>On court</div>
       {side.court.map((sp) => (
         <button key={sp.p.id} className={sp.p.id === subOut ? `${styles.lineupRow} ${styles.lineupRowSelected}` : styles.lineupRow} onClick={() => onPickCourt(sp.p.id)}>
           <span>{sp.p.lastName}</span>

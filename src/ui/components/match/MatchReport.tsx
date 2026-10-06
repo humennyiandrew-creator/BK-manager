@@ -66,13 +66,13 @@ export function PregamePreview({ match, objectives, header, actions }: PreProps)
           <span className={styles.preVs}>VS</span>
           <span className={styles.preOddsLabel}>Pre-game win chance</span>
           <span className={`${styles.preOdds} mono-num`}>{Math.round(wp * 100)}<small>%</small> <em>{match.H.team.abbr}</em></span>
-          <span className={styles.preRules}>{match.rules.periods}×{match.rules.periodSec / 60} min · foul out at {match.rules.foulOut}</span>
+          <span className={styles.preRules}>{match.rules.periods} × {match.rules.periodSec / 60} minutes, foul out at {match.rules.foulOut}</span>
         </div>
         {side(match.A, 'right')}
       </div>
       {objectives && (
         <div className={styles.preObj}>
-          <span className={styles.subhead}>Sponsor objectives · up to {formatMoneyShort(objectives.reduce((a, o) => a + o.reward, 0))}</span>
+          <span className={styles.subhead}>Sponsor objectives, up to {formatMoneyShort(objectives.reduce((a, o) => a + o.reward, 0))}</span>
           <ObjectiveList list={objectives} />
         </div>
       )}
@@ -133,7 +133,7 @@ export function PostgameReport({ s, match, userSide, objectives, lineScore, acti
               <div className={styles.potgText}>
                 <span className={styles.subhead}>Player of the game</span>
                 <span className={styles.potgName}>{potg.sp.p.firstName} {potg.sp.p.lastName} <em>{potg.side.team.abbr}</em></span>
-                <span className="mono-num">{potg.sp.line.pts} pts · {potg.sp.line.orb + potg.sp.line.drb} reb · {potg.sp.line.ast} ast · {potg.sp.line.fgm}/{potg.sp.line.fga} FG</span>
+                <span className="mono-num">{potg.sp.line.pts} pts, {potg.sp.line.orb + potg.sp.line.drb} reb, {potg.sp.line.ast} ast, {potg.sp.line.fgm}/{potg.sp.line.fga} FG</span>
               </div>
             </div>
           )}
@@ -166,7 +166,7 @@ export function PostgameReport({ s, match, userSide, objectives, lineScore, acti
                 <div key={sp.p.id} className={styles.gradeRow}>
                   <BkImage path={sp.p.face} alt={sp.p.lastName} className={styles.gradeFace} />
                   <span className={styles.gradeName}>{sp.p.lastName}</span>
-                  <span className={`${styles.gradeLine} mono-num`}>{Math.round(minutes(sp))}′ · {sp.line.pts}/{sp.line.orb + sp.line.drb}/{sp.line.ast} · {sp.line.pm > 0 ? '+' : ''}{sp.line.pm}</span>
+                  <span className={`${styles.gradeLine} mono-num`}>{Math.round(minutes(sp))} min, {sp.line.pts}/{sp.line.orb + sp.line.drb}/{sp.line.ast}, {sp.line.pm > 0 ? '+' : ''}{sp.line.pm}</span>
                   <span className={`${styles.gradeBadge} ${gradeClass(g)} mono-num`}>{g.toFixed(1)}</span>
                 </div>
               );
@@ -174,7 +174,7 @@ export function PostgameReport({ s, match, userSide, objectives, lineScore, acti
           </div>
           {objectives && (
             <>
-              <span className={styles.subhead}>Sponsor objectives · {earned ? `+${formatMoneyShort(earned)}` : 'no bonus'}</span>
+              <span className={styles.subhead}>Sponsor objectives: {earned ? `+${formatMoneyShort(earned)}` : 'no bonus'}</span>
               <ObjectiveList list={objectives} status={status} compact />
             </>
           )}

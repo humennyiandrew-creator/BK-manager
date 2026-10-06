@@ -36,3 +36,14 @@ export function uniform(primary: string, secondary: string): Uniform {
   const trim = s && contrast(p, s) >= 1.6 ? secondary : CHALK;
   return { team, trim, ink: teamInk(team) };
 }
+
+const CONCRETE: Rgb = [0x1e, 0x20, 0x24];
+
+/** A team colour that reads against the concrete background: primary, else secondary, else chalk. */
+export function onConcrete(primary: string, secondary: string): string {
+  for (const c of [primary, secondary]) {
+    const v = rgb(c);
+    if (v && contrast(v, CONCRETE) >= 1.8) return c;
+  }
+  return CHALK;
+}

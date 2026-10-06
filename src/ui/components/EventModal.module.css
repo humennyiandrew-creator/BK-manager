@@ -125,7 +125,7 @@
 }
 
 .choiceBtn:hover:not(:disabled) {
-  border-color: var(--cyan-dim);
+  border-color: var(--accent-2);
   background: rgba(25, 195, 214, 0.06);
 }
 
@@ -156,7 +156,7 @@
 .outcomeLabel {
   font-size: 0.75rem;
   font-weight: 700;
-  color: var(--cyan);
+  color: var(--accent);
 }
 
 .outcomeText {
@@ -167,8 +167,8 @@
 
 .doneBtn {
   align-self: flex-end;
-  background: var(--cyan);
-  color: var(--bg);
+  background: var(--chalk);
+  color: #15171a;
   border: none;
   border-radius: var(--radius);
   padding: 0.45rem 1rem;

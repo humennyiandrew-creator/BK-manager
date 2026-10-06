@@ -1,84 +1,86 @@
 .list {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
 }
 
 .item {
-  display: flex;
+  display: grid;
+  grid-template-columns: 0.35rem 1fr auto;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.5rem 0.55rem;
-  background: rgba(255, 255, 255, 0.025);
-  border: 1px solid var(--panel-border);
-  border-left: 3px solid var(--text-dim);
-  border-radius: var(--radius-sm);
+  gap: 0.7rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--seam-soft);
 }
 
-.urgent { border-left-color: #e3a32e; background: rgba(227, 163, 46, 0.08); }
-.warn { border-left-color: var(--negative); }
-.good { border-left-color: var(--positive); }
-.info { border-left-color: var(--cyan); }
+.item:last-child {
+  border-bottom: none;
+}
 
+/* Tone is a short coloured tick, not a whole tinted card. */
 .icon {
-  width: 1.05rem;
-  height: 1.05rem;
-  flex-shrink: 0;
+  display: none;
 }
 
-.urgent .icon { color: #e3a32e; }
-.warn .icon { color: var(--negative); }
-.good .icon { color: var(--positive); }
-.info .icon { color: var(--cyan); }
+.item::before {
+  content: '';
+  grid-column: 1;
+  grid-row: 1;
+  align-self: stretch;
+  width: 3px;
+  border-radius: 1px;
+  background: var(--chalk-3);
+}
+
+.urgent::before { background: var(--loss); }
+.warn::before { background: var(--warn); }
+.good::before { background: var(--win); }
+.info::before { background: var(--seam); }
 
 .text {
-  flex: 1;
-  min-width: 0;
+  grid-column: 2;
   display: flex;
   flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
 }
 
 .title {
-  font-size: 0.8rem;
-  font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-size: 0.9rem;
+  font-weight: 650;
 }
 
 .detail {
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  line-height: 1.3;
+  font-size: 0.8rem;
+  color: var(--chalk-3);
 }
 
 .cta {
-  flex-shrink: 0;
-  background: transparent;
-  border: 1px solid var(--panel-border);
-  border-radius: 2px;
-  color: var(--text);
-  font-size: 0.75rem;
-  font-weight: 800;
-  padding: 0.3rem 0.55rem;
+  grid-column: 3;
+  padding: 0.3rem 0.7rem;
+  background: var(--rail);
+  border: 1px solid var(--seam);
+  border-radius: var(--radius);
+  color: var(--chalk);
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .cta:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+  border-color: var(--chalk-3);
 }
 
 .clear {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: var(--text-muted);
-  font-size: 0.8rem;
-  padding: 0.4rem 0;
+  padding: 1rem 0;
+  color: var(--chalk-2);
+  font-size: 0.9rem;
 }
 
 .clearIcon {
   width: 1.1rem;
   height: 1.1rem;
-  color: var(--positive);
+  color: var(--win);
 }

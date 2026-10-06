@@ -57,7 +57,7 @@
 
 .slider {
   width: 100%;
-  accent-color: var(--cyan);
+  accent-color: var(--accent);
 }
 
 .hint {
@@ -68,8 +68,8 @@
 
 .startBtn {
   width: 100%;
-  background: var(--red);
-  color: var(--text);
+  background: var(--chalk);
+  color: #15171a;
   border: none;
   border-radius: var(--radius);
   padding: 0.55rem;

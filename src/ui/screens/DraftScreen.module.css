@@ -39,9 +39,9 @@
 }
 
 .subTabActive {
-  background: var(--red);
-  border-color: var(--red);
-  color: var(--text);
+  background: var(--chalk);
+  border-color: var(--chalk);
+  color: #15171a;
 }
 
 .statsRow {
@@ -56,9 +56,13 @@
 }
 
 .eyeIcon {
-  font-size: 0.65rem;
-  margin-right: 0.3rem;
-  opacity: 0.85;
+  display: inline-block;
+  width: 0.4rem;
+  height: 0.4rem;
+  margin-right: 0.35rem;
+  border-radius: 50%;
+  background: var(--win);
+  vertical-align: middle;
 }
 
 .starBtn,
@@ -83,8 +87,8 @@
   justify-content: space-between;
   gap: 1rem;
   flex-shrink: 0;
-  background: linear-gradient(90deg, var(--red), var(--panel));
-  border: 1px solid var(--red);
+  background: linear-gradient(90deg, color-mix(in srgb, var(--team) 70%, var(--slab)), var(--slab));
+  border: 1px solid var(--seam);
   border-radius: var(--radius);
   padding: 0.7rem 1.1rem;
 }
@@ -400,13 +404,13 @@
 }
 
 .simBtn {
-  background: var(--cyan);
-  color: var(--bg);
+  background: var(--chalk);
+  color: #15171a;
 }
 
 .draftBtn {
-  background: var(--red);
-  color: var(--text);
+  background: var(--chalk);
+  color: #15171a;
 }
 
 .draftBtn:disabled {

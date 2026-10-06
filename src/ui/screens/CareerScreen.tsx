@@ -98,7 +98,7 @@ export default function CareerScreen() {
     <div className={styles.screen}>
       <HeroHeader title="Career" subtitle={m.unemployed ? 'Between jobs' : `${team!.city} ${team!.name}`} />
       <div className={styles.body}>
-        <Panel title="Manager Profile" className={styles.leftPanel}>
+        <Panel title="Manager profile" className={styles.leftPanel}>
           <div className={styles.profileTop}>
             <ReputationRing value={m.reputation} />
             <div className={styles.profileInfo}>
@@ -121,15 +121,15 @@ export default function CareerScreen() {
             <>
               <div className={styles.statRow}><span>Salary</span><span>{formatMoneyShort(m.salary)}/yr</span></div>
               <div className={styles.statRow}><span>Contract</span><span>{m.contractYears} yr{m.contractYears === 1 ? '' : 's'}</span></div>
-              <div className={styles.statRow}><span>Tenure Since</span><span>{formatDate(m.hiredOn)}</span></div>
+              <div className={styles.statRow}><span>Tenure since</span><span>{formatDate(m.hiredOn)}</span></div>
 
               <div className={styles.divider} />
-              <div className={styles.gaugeHead}><span>Hot Seat</span><span style={{ color: hs.color }}>{hs.label}</span></div>
+              <div className={styles.gaugeHead}><span>Hot seat</span><span style={{ color: hs.color }}>{hs.label}</span></div>
               <ProgressBar value={m.hotSeat} variant={hs.variant} />
 
               <div className={styles.divider} />
-              <div className={styles.statRow}><span>Season Objective</span><span>{objectiveLabel(s.board.objective)}</span></div>
-              <div className={styles.statRow}><span>Board Confidence</span><span>{Math.round(s.board.confidence)}</span></div>
+              <div className={styles.statRow}><span>Season objective</span><span>{objectiveLabel(s.board.objective)}</span></div>
+              <div className={styles.statRow}><span>Board confidence</span><span>{Math.round(s.board.confidence)}</span></div>
 
               <button type="button" className={styles.resignBtn} onClick={() => setConfirmResign(true)}>Resign</button>
             </>
@@ -137,13 +137,13 @@ export default function CareerScreen() {
         </Panel>
 
         <div className={styles.rightCol}>
-          <Panel title="Job Offers" className={styles.offersPanel} flush headerRight={<span className={styles.count}>{m.offers.length}</span>}>
+          <Panel title="Job offers" className={styles.offersPanel} flush headerRight={<span className={styles.count}>{m.offers.length}</span>}>
             {m.offers.length === 0 && <div className={styles.empty}>No offers on the table</div>}
             <div className={styles.offerList}>
               {m.offers.map((o) => <OfferCard key={o.id} s={s} offer={o} onAccept={() => accept(o.id)} />)}
             </div>
           </Panel>
-          <Panel title="Career History" className={styles.historyPanel} flush>
+          <Panel title="Career history" className={styles.historyPanel} flush>
             <DataTable
               columns={historyColumns}
               rows={[...historyRows].reverse()}

@@ -23,7 +23,7 @@ function HistoryTable({ s, rows, selected, onSelect }: { s: GameState; rows: Sea
     { key: 'record', header: 'Record', align: 'right', render: (r) => `${r.w}-${r.l}` },
     { key: 'rank', header: 'Conf', align: 'right', render: (r) => `#${r.confRank}` },
     { key: 'result', header: 'Result', render: (r) => r.result },
-    { key: 'objective', header: 'Objective', render: (r) => `${r.objective}${r.objectiveMet ? ' ✓' : ' ✗'}` },
+    { key: 'objective', header: 'Objective', render: (r) => `${r.objective} (${r.objectiveMet ? 'met' : 'missed'})` },
     { key: 'champ', header: 'Champion', render: (r) => <TeamBadge logoPath={s.teams[r.champion]?.logo ?? null} name={s.teams[r.champion]?.abbr ?? '-'} /> },
     { key: 'mvp', header: 'MVP', render: (r) => playerName(s, r.awards.mvp) },
     { key: 'roy', header: 'ROY', render: (r) => playerName(s, r.awards.roy) },
@@ -277,7 +277,7 @@ export default function StandingsScreen() {
           )}
           {activeTab === 'History' && (
             <div className={styles.historyGrid}>
-              <Panel title="Season History" className={styles.historyPanel} flush>
+              <Panel title="Season history" className={styles.historyPanel} flush>
                 <HistoryTable s={s} rows={s.history} selected={selectedRecord?.season ?? ''} onSelect={setSelectedSeason} />
               </Panel>
               <Panel title={`All-NBA — ${selectedRecord?.season ?? ''}`} className={styles.allNbaPanel}>

@@ -48,9 +48,9 @@ function MonthlyChart({ monthly }: { monthly: GameState['finance']['monthly'] })
   const pts = values.map((v, i) => `${(i / (values.length - 1)) * w},${h - ((v - lo) / range) * h}`).join(' ');
   return (
     <svg viewBox={`0 0 ${w} ${h}`} className={styles.chart} preserveAspectRatio="none">
-      <polyline points={pts} fill="none" stroke="var(--cyan)" strokeWidth={2} />
+      <polyline points={pts} fill="none" stroke="var(--accent)" strokeWidth={2} />
       {values.map((v, i) => (
-        <circle key={i} cx={(i / (values.length - 1)) * w} cy={h - ((v - lo) / range) * h} r={2} fill="var(--cyan)" />
+        <circle key={i} cx={(i / (values.length - 1)) * w} cy={h - ((v - lo) / range) * h} r={2} fill="var(--accent)" />
       ))}
     </svg>
   );
@@ -60,10 +60,10 @@ function bonusProgress(s: GameState, bonus: { kind: 'playoffs' | 'title' | 'wins
   if (bonus.kind === 'wins') {
     const team = s.teams[s.userTeamId];
     const w = standings(s, team.conference).find((r) => r.teamId === team.id)?.w ?? 0;
-    return `${w}/${bonus.target} wins → $${(bonus.amount / 1e6).toFixed(1)}M`;
+    return `${w}/${bonus.target} wins: $${(bonus.amount / 1e6).toFixed(1)}M`;
   }
-  if (bonus.kind === 'playoffs') return `Reach the playoffs → $${(bonus.amount / 1e6).toFixed(1)}M`;
-  return `Win the title → $${(bonus.amount / 1e6).toFixed(1)}M`;
+  if (bonus.kind === 'playoffs') return `Reach the playoffs: $${(bonus.amount / 1e6).toFixed(1)}M`;
+  return `Win the title: $${(bonus.amount / 1e6).toFixed(1)}M`;
 }
 
 export default function FinancesScreen() {
@@ -111,13 +111,13 @@ export default function FinancesScreen() {
         <SectionCard title="Overview" accent className={styles.panel}>
           <div className={styles.statGrid}>
             <StatTile label="Cash on Hand" value={f.cash} formatter={formatMoney} delta={cashDelta} deltaFormatter={formatMoneyShort} />
-            <StatTile label="Season Revenue" value={revTotal} formatter={formatMoney} />
-            <StatTile label="Season Expense" value={expTotal} formatter={formatMoney} />
+            <StatTile label="Season revenue" value={revTotal} formatter={formatMoney} />
+            <StatTile label="Season expense" value={expTotal} formatter={formatMoney} />
             <StatTile label="Net" value={revTotal - expTotal} formatter={formatMoney} />
           </div>
           <div className={styles.ticketRow}>
             <div className={styles.ticketHead}>
-              <span>Ticket Price</span>
+              <span>Ticket price</span>
               <span className={styles.ticketValue}>${ticketPrice}</span>
             </div>
             <input type="range" min={40} max={300} step={5} value={ticketPrice} onChange={(e) => commit(Number(e.target.value))} className={styles.slider} />
@@ -160,11 +160,11 @@ export default function FinancesScreen() {
           </div>
         </Panel>
 
-        <Panel title="Monthly Cash" className={styles.panel}>
+        <Panel title="Monthly cash" className={styles.panel}>
           <MonthlyChart monthly={f.monthly} />
         </Panel>
 
-        <Panel title="Recent Attendance" className={styles.panel}>
+        <Panel title="Recent attendance" className={styles.panel}>
           {recent.length === 0 ? (
             <div className={styles.chartEmpty}>No home games played yet.</div>
           ) : (
@@ -176,11 +176,11 @@ export default function FinancesScreen() {
           )}
         </Panel>
 
-        <Panel title="Hype & Promotions" className={styles.panel} headerRight={<span className={styles.hypeValue}>{Math.round(hype)}</span>}>
+        <Panel title="Hype & promotions" className={styles.panel} headerRight={<span className={styles.hypeValue}>{Math.round(hype)}</span>}>
           <ProgressBar value={hype} variant={hype >= 65 ? 'positive' : hype <= 35 ? 'negative' : 'cyan'} />
           <div className={styles.themeRow}>
             <span>Theme nights: {themeNights}/{THEME_NIGHT_CAP}</span>
-            <button type="button" className={styles.signBtn} disabled={themeNights >= THEME_NIGHT_CAP} onClick={doTheme}>Book Theme Night</button>
+            <button type="button" className={styles.signBtn} disabled={themeNights >= THEME_NIGHT_CAP} onClick={doTheme}>Book theme night</button>
           </div>
         </Panel>
 
@@ -191,7 +191,7 @@ export default function FinancesScreen() {
               <div key={d.id} className={styles.sponsorRow}>
                 <div className={styles.sponsorInfo}>
                   <span className={styles.sponsorName}>{d.name}</span>
-                  <span className={styles.sponsorMeta}>{d.tier} · {formatMoneyShort(d.perSeason)}/yr · {d.years}yr</span>
+                  <span className={styles.sponsorMeta}>{d.tier}, {formatMoneyShort(d.perSeason)}/yr, {d.years}yr</span>
                 </div>
                 <span className={styles.sponsorBonus}>{bonusProgress(s, d.bonus)}</span>
               </div>
@@ -206,7 +206,7 @@ export default function FinancesScreen() {
                 <div key={o.id} className={styles.sponsorRow}>
                   <div className={styles.sponsorInfo}>
                     <span className={styles.sponsorName}>{o.name}</span>
-                    <span className={styles.sponsorMeta}>{o.tier} · {formatMoneyShort(o.perSeason)}/yr · {o.years}yr{locked ? ` · needs ${o.requiresHype} hype` : ''}</span>
+                    <span className={styles.sponsorMeta}>{o.tier}, {formatMoneyShort(o.perSeason)}/yr, {o.years}yr{locked ? `, needs ${o.requiresHype} hype` : ''}</span>
                   </div>
                   <button type="button" className={styles.signBtn} disabled={locked || (f.sponsors ?? []).length >= 3} onClick={() => doSign(o.id)}>Sign</button>
                 </div>

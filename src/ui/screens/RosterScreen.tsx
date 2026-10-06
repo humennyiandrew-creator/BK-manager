@@ -49,11 +49,11 @@ export function moraleLabel(m: number): { text: string; variant: 'positive' | 'm
 
 export function formChip(f: number | undefined): { icon: string; variant: 'positive' | 'muted' | 'negative' } {
   const v = f ?? 0;
-  if (v >= 1.5) return { icon: '🔥', variant: 'positive' };
-  if (v >= 0.5) return { icon: '▲', variant: 'positive' };
-  if (v <= -1.5) return { icon: '❄', variant: 'negative' };
-  if (v <= -0.5) return { icon: '▼', variant: 'negative' };
-  return { icon: '—', variant: 'muted' };
+  if (v >= 1.5) return { icon: 'Hot', variant: 'positive' };
+  if (v >= 0.5) return { icon: 'Warm', variant: 'positive' };
+  if (v <= -1.5) return { icon: 'Cold', variant: 'negative' };
+  if (v <= -0.5) return { icon: 'Cool', variant: 'negative' };
+  return { icon: '–', variant: 'muted' };
 }
 
 export function formExplanation(f: number | undefined): string {
@@ -152,7 +152,7 @@ export default function RosterScreen() {
       <Panel title="Roster" className={styles.tablePanel} flush>
         <DataTable columns={columns} rows={sorted} rowKey={(p) => p.id} highlightedRowKey={selected?.id} onRowClick={(p) => setSelectedId(p.id)} onRowOpen={(p) => openPlayer(p.id)} compact animateRows />
       </Panel>
-      <Panel title="Player Detail" className={styles.detailPanel}>
+      <Panel title="Player detail" className={styles.detailPanel}>
         {selected && <PlayerDetail player={selected} s={s} onRelease={() => setReleaseId(selected.id)} onMeet={() => setMeetingId(selected.id)} onOpenFull={() => openPlayer(selected.id)} />}
       </Panel>
       {meetingId && <MeetingDialog s={s} playerId={meetingId} mutate={mutate} onClose={() => setMeetingId(null)} />}
@@ -184,10 +184,10 @@ function PlayerDetail({ player: p, s, onRelease, onMeet, onOpenFull }: { player:
             <div className={styles.detailName}>{p.firstName} {p.lastName}</div>
           </button>
           <div className={styles.detailMeta}>
-            #{p.jersey} · {p.positions.join('/')} · {age}y · {heightFtIn(p.heightCm)} · {p.weightKg}kg · {p.country}
+            #{p.jersey}, {p.positions.join('/')}, {age}y, {heightFtIn(p.heightCm)}, {p.weightKg}kg, {p.country}
           </div>
           <div className={styles.detailMeta}>
-            {p.draft ? `Draft ${p.draft.year} R${p.draft.round} P${p.draft.pick}` : 'Undrafted'} · OVR {p.ratings.ovr} · POT {Math.round(p.ratings.pot)}
+            {p.draft ? `Draft ${p.draft.year} R${p.draft.round} P${p.draft.pick}` : 'Undrafted'}, OVR {p.ratings.ovr}, POT {Math.round(p.ratings.pot)}
           </div>
         </div>
         <button type="button" className={styles.meetBtn} disabled={!meetOk} title={meetOk ? '1-on-1 meeting' : 'Met with him recently'} onClick={onMeet}>1-on-1</button>
@@ -214,7 +214,7 @@ function PlayerDetail({ player: p, s, onRelease, onMeet, onOpenFull }: { player:
           <div className={styles.sparkWrap}>
             <div className={styles.sparkCol}>
               <span className={styles.sparkLabel}>OVR</span>
-              <Sparkline values={p.ovrHistory.map((h) => h.ovr)} color="var(--cyan)" />
+              <Sparkline values={p.ovrHistory.map((h) => h.ovr)} color="var(--accent)" />
             </div>
             <div className={styles.sparkCol}>
               <span className={styles.sparkLabel}>POT</span>
@@ -232,7 +232,7 @@ function PlayerDetail({ player: p, s, onRelease, onMeet, onOpenFull }: { player:
               <div key={a} className={styles.attrRow}>
                 <span className={styles.attrLabel}>{ATTR_LABEL[a]}</span>
                 <ProgressBar value={p.ratings.attrs[a]} variant={attrVariant(p.ratings.attrs[a])} className={styles.attrBar} />
-                <span className={styles.attrValue}>{p.ratings.attrs[a]}</span>
+                <span className={styles.attrValue}>{Math.round(p.ratings.attrs[a])}</span>
               </div>
             ))}
           </div>

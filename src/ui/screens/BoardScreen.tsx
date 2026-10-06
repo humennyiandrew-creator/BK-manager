@@ -25,7 +25,7 @@ function ConfidenceGauge({ value }: { value: number }) {
   const [x0, y0] = point(0);
   const [x100, y100] = point(100);
   const [x1, y1] = point(value);
-  const color = value >= 65 ? 'var(--positive)' : value >= 35 ? 'var(--cyan)' : 'var(--negative)';
+  const color = value >= 65 ? 'var(--positive)' : value >= 35 ? 'var(--accent)' : 'var(--negative)';
   return (
     <svg viewBox="0 0 180 118" className={styles.gauge}>
       <path d={`M ${x0} ${y0} A ${r} ${r} 0 1 1 ${x100} ${y100}`} stroke="var(--panel-border)" strokeWidth={14} fill="none" strokeLinecap="round" />
@@ -37,16 +37,16 @@ function ConfidenceGauge({ value }: { value: number }) {
 }
 
 const BUDGET_KINDS: { id: BudgetKind; label: string; hint: string }[] = [
-  { id: 'staff', label: 'Staff Budget', hint: 'Raises the coaching & scouting staff budget cap.' },
-  { id: 'facilities', label: 'Facilities Fund', hint: 'One-off cash injection for facility upgrades.' },
-  { id: 'payroll', label: 'Payroll Relief', hint: 'One-off cash injection for the payroll/tax bill.' },
+  { id: 'staff', label: 'Staff budget', hint: 'Raises the coaching & scouting staff budget cap.' },
+  { id: 'facilities', label: 'Facilities fund', hint: 'One-off cash injection for facility upgrades.' },
+  { id: 'payroll', label: 'Payroll relief', hint: 'One-off cash injection for the payroll/tax bill.' },
 ];
 
 const PROMISE_KINDS: { id: BoardPromise['kind']; label: string }[] = [
   { id: 'playoffs', label: 'Reach the Playoffs' },
   { id: 'wins', label: 'Hit a Win Total' },
   { id: 'develop', label: 'Develop a Young Player' },
-  { id: 'payroll', label: 'Cut Payroll' },
+  { id: 'payroll', label: 'Cut payroll' },
   { id: 'title', label: 'Win the Title' },
 ];
 
@@ -112,14 +112,14 @@ export default function BoardScreen() {
           <div className={styles.col}>
             <Panel title="Board of Directors" className={styles.panel}>
               <div className={styles.gaugeWrap}><ConfidenceGauge value={b.confidence} /></div>
-              <StatRow label="Season Objective" value={objectiveLabel(b.objective)} />
-              <StatRow label="Budget Multiplier" value={`${b.budgetMul.toFixed(2)}x`} variant={b.budgetMul >= 1 ? 'positive' : b.budgetMul < 0.9 ? 'negative' : 'neutral'} />
+              <StatRow label="Season objective" value={objectiveLabel(b.objective)} />
+              <StatRow label="Budget multiplier" value={`${b.budgetMul.toFixed(2)}x`} variant={b.budgetMul >= 1 ? 'positive' : b.budgetMul < 0.9 ? 'negative' : 'neutral'} />
             </Panel>
             <Panel title="Long-Term Vision" className={styles.panel}>
               <p className={styles.longTerm}>{b.longTerm}</p>
             </Panel>
           </div>
-          <Panel title="Season History" className={styles.historyPanel} flush>
+          <Panel title="Season history" className={styles.historyPanel} flush>
             {b.history.length === 0 ? (
               <div className={styles.empty}>No completed seasons yet.</div>
             ) : (
@@ -132,7 +132,7 @@ export default function BoardScreen() {
       {tab === 'meeting' && (
         <div className={styles.tabBody}>
           <div className={styles.col}>
-            <Panel title="Request Budget" className={styles.panel} headerRight={<span className={available ? styles.availYes : styles.availNo}>{available ? 'Meeting available' : 'Not available yet'}</span>}>
+            <Panel title="Request budget" className={styles.panel} headerRight={<span className={available ? styles.availYes : styles.availNo}>{available ? 'Meeting available' : 'Not available yet'}</span>}>
               {BUDGET_KINDS.map((k) => (
                 <div key={k.id} className={styles.actionRow}>
                   <div className={styles.actionInfo}>
@@ -144,7 +144,7 @@ export default function BoardScreen() {
                 </div>
               ))}
             </Panel>
-            <Panel title="Renegotiate Objective" className={styles.panel}>
+            <Panel title="Renegotiate objective" className={styles.panel}>
               <p className={styles.longTerm}>Current objective: {objectiveLabel(b.objective)}. Once per season.</p>
               <div className={styles.renegRow}>
                 <button type="button" className={styles.actionBtn} disabled={b.lastRenegotiateSeason === s.season} onClick={() => doRenegotiate('lower')}>Lower (−confidence)</button>
@@ -165,7 +165,7 @@ export default function BoardScreen() {
       )}
 
       {tab === 'promises' && (
-        <Panel title="Board Promises" className={styles.panel} flush>
+        <Panel title="Board promises" className={styles.panel} flush>
           {s.promises.length === 0 ? (
             <div className={styles.empty}>No promises made yet.</div>
           ) : (
@@ -176,7 +176,7 @@ export default function BoardScreen() {
 
       {tab === 'media' && (
         <div className={styles.tabBody}>
-          <Panel title="Press Conference" className={styles.panel}>
+          <Panel title="Press conference" className={styles.panel}>
             {!pending && <div className={styles.empty}>No press conference right now.</div>}
             {pending && pending.questions.map((q) => {
               const answered = pending.answered.includes(q.id);
@@ -197,7 +197,7 @@ export default function BoardScreen() {
             })}
             {note && <div className={styles.note}>{note}</div>}
           </Panel>
-          <Panel title="Press History" className={styles.panel} flush>
+          <Panel title="Press history" className={styles.panel} flush>
             {pressHistory.length === 0 ? (
               <div className={styles.empty}>No past press conferences.</div>
             ) : (

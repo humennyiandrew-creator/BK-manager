@@ -52,7 +52,7 @@ export default function GLeagueScreen() {
     { key: 'pos', header: 'Pos', render: (p) => p.positions.join('/') },
     { key: 'age', header: 'Age', align: 'right', render: (p) => age(p), sortValue: age },
     { key: 'ovr', header: 'OVR', align: 'right', render: (p) => <strong>{p.ratings.ovr}</strong>, sortValue: (p) => p.ratings.ovr },
-    { key: 'pot', header: 'POT', align: 'right', render: (p) => p.ratings.pot, sortValue: (p) => p.ratings.pot },
+    { key: 'pot', header: 'POT', align: 'right', render: (p) => Math.round(p.ratings.pot), sortValue: (p) => p.ratings.pot },
   ];
 
   const downCols = [...who, ...lineCols(s), {

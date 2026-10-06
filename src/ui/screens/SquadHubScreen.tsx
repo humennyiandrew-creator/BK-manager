@@ -76,14 +76,14 @@ function CapSheetTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
     <div className={styles.capGrid}>
       <div className={styles.capStats}>
         <StatTile label="Payroll 2026-27" value={payroll2627} formatter={formatMoneyShort} />
-        <StatTile label="Cap Room" value={capLine - payroll2627} formatter={formatMoneyShort} />
-        <StatTile label="Roster Size" value={roster.length} />
+        <StatTile label="Cap room" value={capLine - payroll2627} formatter={formatMoneyShort} />
+        <StatTile label="Roster size" value={roster.length} />
       </div>
       <div className={styles.capBody}>
-        <Panel title="Cap Sheet" className={styles.tablePanel} flush>
+        <Panel title="Cap sheet" className={styles.tablePanel} flush>
           <DataTable columns={columns} rows={roster} rowKey={(p) => p.id} onRowOpen={(p) => openPlayer(p.id)} compact />
           <div className={styles.totalsRow}>
-            <span className={styles.totalsLabel}>Total Payroll</span>
+            <span className={styles.totalsLabel}>Total payroll</span>
             {totals.map((t, i) => <span key={i} className={styles.totalsValue}>{formatMoneyShort(t)}</span>)}
           </div>
         </Panel>
@@ -137,7 +137,7 @@ function WageSheetTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
     { key: 'age', header: 'Age', align: 'right', render: (p) => Math.floor(ageOf(p.birthDate)), sortValue: (p) => Math.floor(ageOf(p.birthDate)) },
     { key: 'ovr', header: 'OVR', align: 'right', render: (p) => p.ratings.ovr, sortValue: (p) => p.ratings.ovr },
     { key: 'wage', header: 'Wage', align: 'right', render: (p) => { const line = salaryFor(p, s.season); return line ? formatMoneyShort(line.amount) : <span className={styles.noSalary}>—</span>; }, sortValue: (p) => salaryFor(p, s.season)?.amount ?? 0 },
-    { key: 'years', header: 'Years Left', align: 'right', render: (p) => p.contract?.salaries.filter((x) => x.season >= s.season).length ?? 0, sortValue: (p) => p.contract?.salaries.filter((x) => x.season >= s.season).length ?? 0 },
+    { key: 'years', header: 'Years left', align: 'right', render: (p) => p.contract?.salaries.filter((x) => x.season >= s.season).length ?? 0, sortValue: (p) => p.contract?.salaries.filter((x) => x.season >= s.season).length ?? 0 },
     {
       key: 'release', header: '', align: 'right', render: (p) => (
         <button type="button" className={styles.releaseBtn} onClick={() => setReleaseId(p.id)}>Release</button>
@@ -148,16 +148,16 @@ function WageSheetTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
   return (
     <div className={styles.capGrid}>
       <div className={styles.capStats}>
-        <StatTile label="Wage Budget" value={budget} formatter={formatMoneyShort} />
-        <StatTile label="Committed Wages" value={committed} formatter={formatMoneyShort} />
-        <StatTile label="Remaining Room" value={budget - committed} formatter={formatMoneyShort} />
+        <StatTile label="Wage budget" value={budget} formatter={formatMoneyShort} />
+        <StatTile label="Committed wages" value={committed} formatter={formatMoneyShort} />
+        <StatTile label="Remaining room" value={budget - committed} formatter={formatMoneyShort} />
         <StatTile label="Roster" value={roster.length} formatter={(v) => `${v}/${maxRoster}`} />
       </div>
       <div className={styles.capBody}>
-        <Panel title="Wage Sheet" className={styles.tablePanel} flush>
+        <Panel title="Wage sheet" className={styles.tablePanel} flush>
           <DataTable columns={columns} rows={roster} rowKey={(p) => p.id} onRowOpen={(p) => openPlayer(p.id)} compact />
           <div className={styles.totalsRow}>
-            <span className={styles.totalsLabel}>Total Wages</span>
+            <span className={styles.totalsLabel}>Total wages</span>
             <span className={styles.totalsValue}>{formatMoneyShort(committed)}</span>
           </div>
         </Panel>
@@ -209,14 +209,14 @@ function ResignTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
     { key: 'name', header: 'Player', render: (p) => `${p.firstName} ${p.lastName}` },
     { key: 'pos', header: 'Pos', render: (p) => p.positions.join('/') },
     { key: 'age', header: 'Age', align: 'right', render: (p) => Math.floor(ageOf(p.birthDate)), sortValue: (p) => Math.floor(ageOf(p.birthDate)) },
-    { key: 'ovrpot', header: 'OVR/POT', align: 'right', render: (p) => `${p.ratings.ovr}/${p.ratings.pot}`, sortValue: (p) => p.ratings.ovr },
+    { key: 'ovrpot', header: 'OVR/POT', align: 'right', render: (p) => `${p.ratings.ovr}/${Math.round(p.ratings.pot)}`, sortValue: (p) => p.ratings.ovr },
     {
-      key: 'last', header: 'Last Season', render: (p) => {
+      key: 'last', header: 'Last season', render: (p) => {
         const h = p.history[0];
         return h ? `${(h.pts / Math.max(1, h.gp)).toFixed(1)} PPG, ${h.gp} GP` : '—';
       }
     },
-    { key: 'salary', header: 'Current Salary', align: 'right', render: (p) => (p.contract ? formatMoneyShort(salaryFor(p, s.season)?.amount ?? 0) : '—'), sortValue: (p) => salaryFor(p, s.season)?.amount ?? 0 },
+    { key: 'salary', header: 'Current salary', align: 'right', render: (p) => (p.contract ? formatMoneyShort(salaryFor(p, s.season)?.amount ?? 0) : '—'), sortValue: (p) => salaryFor(p, s.season)?.amount ?? 0 },
     { key: 'ask', header: 'Asking', align: 'right', render: (p) => { const a = resignAsk(s, p); return `${formatMoneyShort(a.amount)} / ${a.years}y`; }, sortValue: (p) => resignAsk(s, p).amount },
     {
       key: 'actions', header: '', align: 'right', render: (p) => letGo.has(p.id) ? (
@@ -240,7 +240,7 @@ function ResignTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
         <StatTile label="Room" value={cap.cap - pay} formatter={formatMoneyShort} />
         <StatTile label="Expiring" value={list.length} />
       </div>
-      <Panel title="Expiring Contracts" className={styles.tablePanel} flush>
+      <Panel title="Expiring contracts" className={styles.tablePanel} flush>
         {list.length === 0 && <div className={styles.empty}>No expiring contracts this summer.</div>}
         {list.length > 0 && <DataTable columns={columns} rows={list} rowKey={(p) => p.id} onRowOpen={(p) => openPlayer(p.id)} compact />}
       </Panel>
@@ -261,10 +261,10 @@ function ExtensionsTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
     { key: 'name', header: 'Player', render: (p) => `${p.firstName} ${p.lastName}` },
     { key: 'pos', header: 'Pos', render: (p) => p.positions.join('/') },
     { key: 'age', header: 'Age', align: 'right', render: (p) => Math.floor(ageOf(p.birthDate)), sortValue: (p) => Math.floor(ageOf(p.birthDate)) },
-    { key: 'ovrpot', header: 'OVR/POT', align: 'right', render: (p) => `${p.ratings.ovr}/${p.ratings.pot}`, sortValue: (p) => p.ratings.ovr },
+    { key: 'ovrpot', header: 'OVR/POT', align: 'right', render: (p) => `${p.ratings.ovr}/${Math.round(p.ratings.pot)}`, sortValue: (p) => p.ratings.ovr },
     { key: 'form', header: 'Form', align: 'right', render: (p) => `${(p.form ?? 0) > 0 ? '+' : ''}${(p.form ?? 0).toFixed(1)}`, sortValue: (p) => p.form ?? 0 },
-    { key: 'salary', header: 'Current Salary', align: 'right', render: (p) => (p.contract ? formatMoneyShort(salaryFor(p, s.season)?.amount ?? 0) : '—'), sortValue: (p) => salaryFor(p, s.season)?.amount ?? 0 },
-    { key: 'mv', header: 'Market Value', align: 'right', render: (p) => formatMoneyShort(marketValue(p, s.seasonYear + 1)), sortValue: (p) => marketValue(p, s.seasonYear + 1) },
+    { key: 'salary', header: 'Current salary', align: 'right', render: (p) => (p.contract ? formatMoneyShort(salaryFor(p, s.season)?.amount ?? 0) : '—'), sortValue: (p) => salaryFor(p, s.season)?.amount ?? 0 },
+    { key: 'mv', header: 'Market value', align: 'right', render: (p) => formatMoneyShort(marketValue(p, s.seasonYear + 1)), sortValue: (p) => marketValue(p, s.seasonYear + 1) },
     {
       key: 'actions', header: '', align: 'right', render: (p) => (
         <button type="button" className={styles.offerBtn} onClick={() => setOfferId(p.id)}>Negotiate</button>
@@ -301,7 +301,7 @@ export default function SquadHubScreen() {
 
   return (
     <div className={styles.screen}>
-      <HeroHeader title="Squad Hub" subtitle={isEuro ? 'Contracts and wage sheet' : 'Contracts and cap sheet'} />
+      <HeroHeader title="Contracts" subtitle={isEuro ? 'Contracts and wage sheet' : 'Contracts and cap sheet'} />
       <div className={styles.body}>
         <SideRail items={railItems} active={activeTab} onSelect={setTab} />
         <div className={styles.content}>

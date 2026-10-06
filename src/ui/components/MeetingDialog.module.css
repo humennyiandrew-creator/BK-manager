@@ -43,7 +43,7 @@
 }
 
 .optBtn:hover {
-  border-color: var(--cyan);
+  border-color: var(--accent);
 }
 
 .outcome {
@@ -74,6 +74,6 @@
 }
 
 .confirmBtn {
-  background: var(--cyan);
-  color: var(--bg);
+  background: var(--chalk);
+  color: #15171a;
 }

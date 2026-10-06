@@ -48,13 +48,13 @@
 }
 
 .ticketValue {
-  color: var(--cyan);
+  color: var(--accent);
   font-weight: 800;
 }
 
 .slider {
   width: 100%;
-  accent-color: var(--cyan);
+  accent-color: var(--accent);
 }
 
 .ticketProjection {
@@ -105,7 +105,7 @@
 
 .capBarFill {
   height: 100%;
-  background: var(--cyan);
+  background: var(--accent);
   border-radius: var(--radius);
 }
 
@@ -154,7 +154,7 @@
 
 .attendanceBar {
   flex: 1;
-  background: var(--cyan);
+  background: var(--accent);
   border-radius: 2px 2px 0 0;
   min-height: 2px;
 }
@@ -162,7 +162,7 @@
 .hypeValue {
   font-size: 0.85rem;
   font-weight: 800;
-  color: var(--cyan);
+  color: var(--accent);
 }
 
 .themeRow {
@@ -219,7 +219,7 @@
 
 .sponsorBonus {
   font-size: 0.7rem;
-  color: var(--cyan);
+  color: var(--accent);
   text-align: right;
 }
 
@@ -234,8 +234,8 @@
 }
 
 .signBtn:not(:disabled):hover {
-  border-color: var(--cyan);
-  color: var(--cyan);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .signBtn:disabled {
@@ -246,5 +246,5 @@
 .sponsorNote {
   padding: 0.5rem 0.9rem;
   font-size: 0.72rem;
-  color: var(--cyan);
+  color: var(--accent);
 }

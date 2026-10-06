@@ -6,7 +6,7 @@ interface Props {
 }
 
 /** Minimal inline SVG sparkline, no axes. */
-export default function Sparkline({ values, width = 120, height = 26, color = 'var(--cyan)' }: Props) {
+export default function Sparkline({ values, width = 120, height = 26, color = 'var(--accent)' }: Props) {
   if (values.length < 2) return null;
   const min = Math.min(...values), max = Math.max(...values);
   const range = max - min || 1;

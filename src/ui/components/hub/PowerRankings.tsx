@@ -27,11 +27,11 @@ export default function PowerRankings({ s, comp, limit = 10, detailed }: Props) 
         return (
           <div key={id} className={`${styles.row} ${id === s.userTeamId ? styles.mine : ''} ${i >= limit ? styles.gap : ''}`}>
             <span className={`${styles.rank} mono-num`}>{i + 1}</span>
-            <span className={`${styles.move} ${move > 0 ? styles.up : move < 0 ? styles.down : ''}`}>{move > 0 ? `▲${move}` : move < 0 ? `▼${-move}` : '–'}</span>
+            <span className={`${styles.move} ${move > 0 ? styles.up : move < 0 ? styles.down : ''}`}>{move > 0 ? `+${move}` : move < 0 ? `−${-move}` : ''}</span>
             <BkImage path={t.logo} alt={t.abbr} className={styles.logo} />
             <span className={styles.name}>{detailed ? `${t.city} ${t.name}` : t.name}</span>
             {r && <span className={`${styles.rec} mono-num`}>{r.w}-{r.l}</span>}
-            {detailed && r && <span className={`${styles.net} mono-num ${r.pf - r.pa >= 0 ? styles.up : styles.down}`}>{gp ? `${r.pf - r.pa >= 0 ? '+' : ''}${((r.pf - r.pa) / gp).toFixed(1)}` : '—'}</span>}
+            {detailed && r && <span className={`${styles.net} mono-num ${r.pf - r.pa >= 0 ? styles.up : styles.down}`}>{gp ? `${r.pf - r.pa >= 0 ? '+' : ''}${((r.pf - r.pa) / gp).toFixed(1)}` : '–'}</span>}
             {detailed && r && <span className={`${styles.l10} mono-num`}>{r.last10[0]}-{r.last10[1]}</span>}
           </div>
         );

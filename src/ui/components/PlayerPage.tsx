@@ -142,7 +142,7 @@ export default function PlayerPage({ s, playerId, onClose }: Props) {
                 <span className={styles.lastName}>{p.lastName}</span>
               </div>
               <div className={styles.metaLine}>
-                {p.positions.join('/')} · {age}y · {heightFtIn(p.heightCm)} · {p.weightKg}kg · {p.country}
+                {p.positions.join('/')}, {age}y, {heightFtIn(p.heightCm)}, {p.weightKg}kg, {p.country}
               </div>
               {team && (
                 <TeamBadge logoPath={team.logo} name={`${team.city} ${team.name}`} className={styles.teamBadge} />
@@ -273,7 +273,7 @@ function ProgramPickerModal({ s, playerId, onClose, onStart }: {
           {options.map((o, i) => (
             <button key={i} type="button" className={i === idx ? `${styles.pickerOpt} ${styles.pickerOptActive}` : styles.pickerOpt} onClick={() => setIdx(i)}>
               <span>{o.label}</span>
-              <span className={styles.pickerMeta}>{o.weeks}wk · +{o.expectedGain} · {Math.round(o.risk * 100)}% risk</span>
+              <span className={styles.pickerMeta}>{o.weeks} weeks, +{o.expectedGain} expected, {Math.round(o.risk * 100)}% risk</span>
             </button>
           ))}
         </div>
@@ -341,7 +341,7 @@ function SeasonTab({ s, p }: { s: GameState; p: Player }) {
         <div className={styles.statTile}><span className={styles.statVal}>{perGame(p.season.blk, p.season.gp)}</span><span className={styles.statLabel}>BPG</span></div>
         <div className={styles.statTile}><span className={styles.statVal}>{p.season.gp}</span><span className={styles.statLabel}>GP</span></div>
       </div>
-      <div className={styles.sectionTitle}>Game Log</div>
+      <div className={styles.sectionTitle}>Game log</div>
       {games.length === 0 && <div className={styles.empty}>No games played this season.</div>}
       {games.length > 0 && (
         <table className={styles.logTable}>
@@ -372,7 +372,7 @@ function CareerTab({ p }: { p: Player }) {
         <div className={styles.sparkWrap}>
           <div className={styles.sparkCol}>
             <span className={styles.sparkLabel}>OVR</span>
-            <Sparkline values={p.ovrHistory.map((h) => h.ovr)} color="var(--cyan)" />
+            <Sparkline values={p.ovrHistory.map((h) => h.ovr)} color="var(--accent)" />
           </div>
           <div className={styles.sparkCol}>
             <span className={styles.sparkLabel}>POT</span>
@@ -382,12 +382,12 @@ function CareerTab({ p }: { p: Player }) {
       )}
       {!!p.arcHistory?.length && (
         <>
-          <div className={styles.sectionTitle}>Defining Seasons</div>
+          <div className={styles.sectionTitle}>Defining seasons</div>
           <div className={styles.arcHistory}>
             {p.arcHistory.slice().reverse().map((h) => (
               <div key={h.season} className={styles.arcHistRow}>
                 <span>{h.season}</span>
-                <span className={h.kind === 'breakout' ? styles.positive : styles.negative}>{h.kind === 'breakout' ? '▲ Breakout' : '▼ Slump'} · {ARC_LABEL[h.style]}</span>
+                <span className={h.kind === 'breakout' ? styles.positive : styles.negative}>{h.kind === 'breakout' ? 'Breakout' : 'Slump'}: {ARC_LABEL[h.style]}</span>
                 <span className="mono-num">{h.delta > 0 ? '+' : ''}{h.delta} OVR, kept {h.kept > 0 ? '+' : ''}{h.kept}</span>
               </div>
             ))}
@@ -419,10 +419,10 @@ function DevelopmentTab({ s, p }: { s: GameState; p: Player }) {
   const arc = p.arc?.revealed && p.arc.season === s.season ? p.arc : undefined;
   return (
     <div className={styles.devWrap}>
-      <div className={styles.sectionTitle}>This Season</div>
+      <div className={styles.sectionTitle}>This season</div>
       <div className={styles.seasonTrend}>
-        {track.length > 1 ? <Sparkline values={track} width={220} height={40} color={delta > 0 ? 'var(--positive)' : delta < 0 ? 'var(--negative)' : 'var(--cyan)'} /> : <span className={styles.formText}>The trend line builds week by week once the season is under way.</span>}
-        {track.length > 1 && <span className={`${styles.trendDelta} ${delta > 0 ? styles.positive : delta < 0 ? styles.negative : ''}`}>{track[0]} → {track[track.length - 1]} ({delta > 0 ? '+' : ''}{delta})</span>}
+        {track.length > 1 ? <Sparkline values={track} width={220} height={40} color={delta > 0 ? 'var(--positive)' : delta < 0 ? 'var(--negative)' : 'var(--accent)'} /> : <span className={styles.formText}>The trend line builds week by week once the season is under way.</span>}
+        {track.length > 1 && <span className={`${styles.trendDelta} ${delta > 0 ? styles.positive : delta < 0 ? styles.negative : ''}`}>{track[0]} to {track[track.length - 1]} ({delta > 0 ? '+' : ''}{delta})</span>}
       </div>
       {arc && (
         <div className={`${styles.arcCard} ${arc.kind === 'breakout' ? styles.arcUp : styles.arcDown}`}>
@@ -440,11 +440,11 @@ function DevelopmentTab({ s, p }: { s: GameState; p: Player }) {
         {(() => { const f = formChip(p.form); return <span className={styles[f.variant]}>{f.icon} {(p.form ?? 0).toFixed(1)}</span>; })()}
         <span className={styles.formText}>{formExplanation(p.form)}</span>
       </div>
-      <div className={styles.sectionTitle}>Potential Trend</div>
+      <div className={styles.sectionTitle}>Potential trend</div>
       <div className={styles.formText}>
         {p.potSeason ? `${p.potSeason > 0 ? 'Rising' : 'Fading'} this season (${p.potSeason > 0 ? '+' : ''}${p.potSeason.toFixed(0)}).` : 'Stable so far this season.'}
       </div>
-      <div className={styles.sectionTitle}>Active Programme</div>
+      <div className={styles.sectionTitle}>Active programme</div>
       {p.program ? (
         <div className={styles.programBlock}>
           <div className={styles.rowHead}>
@@ -465,8 +465,8 @@ function ContractTab({ s, p }: { s: GameState; p: Player }) {
   return (
     <div className={styles.contractWrap}>
       <div className={styles.statTiles}>
-        <div className={styles.statTile}><span className={styles.statVal}>{formatMoneyShort(mv)}</span><span className={styles.statLabel}>Market Value</span></div>
-        <div className={styles.statTile}><span className={styles.statVal}>{p.contract ? `${yearsLeft(p, s.season)}y` : '—'}</span><span className={styles.statLabel}>Years Left</span></div>
+        <div className={styles.statTile}><span className={styles.statVal}>{formatMoneyShort(mv)}</span><span className={styles.statLabel}>Market value</span></div>
+        <div className={styles.statTile}><span className={styles.statVal}>{p.contract ? `${yearsLeft(p, s.season)}y` : '—'}</span><span className={styles.statLabel}>Years left</span></div>
         <div className={styles.statTile}><span className={styles.statVal}>{p.contract?.type ?? '—'}</span><span className={styles.statLabel}>Type</span></div>
       </div>
       <div className={styles.sectionTitle}>Salary by Season</div>

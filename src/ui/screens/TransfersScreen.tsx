@@ -70,7 +70,7 @@ function describeSide(s: GameState, side: TradeSide): string {
 
 function interestMeter(margin: number) {
   const pct = Math.max(4, Math.min(100, ((margin + 60) / 70) * 100));
-  const color = margin >= 5 ? 'var(--positive)' : margin >= -15 ? 'var(--cyan)' : margin >= -40 ? '#e2b93b' : 'var(--negative)';
+  const color = margin >= 5 ? 'var(--positive)' : margin >= -15 ? 'var(--accent)' : margin >= -40 ? '#e2b93b' : 'var(--negative)';
   const label = margin >= 5 ? 'Deal' : margin >= -15 ? 'Warm' : margin >= -40 ? 'Cool' : 'Cold';
   return { pct, color, label };
 }
@@ -91,10 +91,10 @@ function AssetTable({ s, teamId, selected, onToggle }: { s: GameState; teamId: s
     },
     { key: 'pos', header: 'Pos', render: (a) => (a.kind === 'player' ? a.player.positions.join('/') : '-') },
     { key: 'age', header: 'Age', align: 'right', render: (a) => (a.kind === 'player' ? Math.floor(ageOf(a.player.birthDate)) : '-'), sortValue: (a) => (a.kind === 'player' ? ageOf(a.player.birthDate) : 0) },
-    { key: 'ovr', header: 'OVR/POT', align: 'right', render: (a) => (a.kind === 'player' ? `${a.player.ratings.ovr}/${a.player.ratings.pot}` : '-'), sortValue: (a) => (a.kind === 'player' ? a.player.ratings.ovr : 0) },
+    { key: 'ovr', header: 'OVR/POT', align: 'right', render: (a) => (a.kind === 'player' ? `${a.player.ratings.ovr}/${Math.round(a.player.ratings.pot)}` : '-'), sortValue: (a) => (a.kind === 'player' ? a.player.ratings.ovr : 0) },
     {
       key: 'sal', header: 'Salary', align: 'right', render: (a) => a.kind === 'player'
-        ? (a.player.contract ? `${formatMoneyShort(salaryIn(a.player, s.season))} · ${yearsLeft(a.player, s.season)}y` : '-')
+        ? (a.player.contract ? `${formatMoneyShort(salaryIn(a.player, s.season))}, ${yearsLeft(a.player, s.season)}y` : '-')
         : '-',
       sortValue: (a) => (a.kind === 'player' ? salaryIn(a.player, s.season) : 0)
     },
@@ -158,23 +158,23 @@ function TradeCenter({ s, mutate }: { s: GameState; mutate: Mutate }) {
         ))}
       </div>
       <div className={styles.tradeGrid}>
-        <Panel title="You Send" className={styles.tradeCol} flush>
+        <Panel title="You send" className={styles.tradeCol} flush>
           <AssetTable s={s} teamId={s.userTeamId} selected={youSend} onToggle={(a) => setYouSend((side) => toggleAsset(side, a))} />
         </Panel>
-        <Panel title="Trade Terms" className={styles.tradeMid}>
+        <Panel title="Trade terms" className={styles.tradeMid}>
           <div className={styles.dealHint}>Trade deadline: {formatDate(s.keyDates.tradeDeadline)}{!open && ' — CLOSED'}</div>
-          <div className={styles.salaryRow}><span>Salary Out</span><span>{formatMoneyShort(sideSalary(s, youSend))}</span></div>
-          <div className={styles.salaryRow}><span>Salary In</span><span>{formatMoneyShort(sideSalary(s, theySend))}</span></div>
+          <div className={styles.salaryRow}><span>Salary out</span><span>{formatMoneyShort(sideSalary(s, youSend))}</span></div>
+          <div className={styles.salaryRow}><span>Salary in</span><span>{formatMoneyShort(sideSalary(s, theySend))}</span></div>
           <div className={legal ? styles.legalBad : styles.legalOk}>{legal ?? 'Trade is legal'}</div>
           <div className={styles.meterWrap}>
             <div className={styles.meterLabel}>AI Interest — {meter.label}</div>
             <div className={styles.meterTrack}><div className={styles.meterFill} style={{ width: `${meter.pct}%`, background: meter.color }} /></div>
             <div className={styles.meterReason}>{hasAssets ? ev.reason : 'Select players or picks on both sides.'}</div>
           </div>
-          <button type="button" className={styles.proposeBtn} disabled={!canPropose} onClick={propose}>Propose Trade</button>
+          <button type="button" className={styles.proposeBtn} disabled={!canPropose} onClick={propose}>Propose trade</button>
           {dealMsg && <div className={styles.toast}>{dealMsg}</div>}
         </Panel>
-        <Panel title="You Receive" className={styles.tradeCol} flush>
+        <Panel title="You receive" className={styles.tradeCol} flush>
           <AssetTable s={s} teamId={aiTeamId} selected={theySend} onToggle={(a) => setTheySend((side) => toggleAsset(side, a))} />
         </Panel>
       </div>
@@ -194,7 +194,7 @@ function OffersTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
     }
   };
   return (
-    <Panel title="Incoming Offers" className={styles.offersPanel} flush>
+    <Panel title="Incoming offers" className={styles.offersPanel} flush>
       {msg && <div className={styles.toast}>{msg}</div>}
       {s.tradeOffers.length === 0 && <div className={styles.empty}>No pending offers</div>}
       <div className={styles.offerList}>
@@ -251,7 +251,7 @@ function FreeAgentsTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
     { key: 'pos', header: th('pos', 'Pos'), render: (r) => r.p.positions.join('/') },
     { key: 'age', header: th('age', 'Age'), align: 'right', render: (r) => Math.floor(ageOf(r.p.birthDate)) },
     { key: 'ovr', header: th('ovr', 'OVR'), align: 'right', render: (r) => r.p.ratings.ovr },
-    { key: 'pot', header: th('pot', 'POT'), align: 'right', render: (r) => r.p.ratings.pot },
+    { key: 'pot', header: th('pot', 'POT'), align: 'right', render: (r) => Math.round(r.p.ratings.pot) },
     { key: 'ask', header: th('ask', 'Asking'), align: 'right', render: (r) => `${formatMoneyShort(r.ask.amount)} / ${r.ask.years}y` },
     { key: 'mv', header: th('mv', 'Market'), align: 'right', render: (r) => formatMoneyShort(r.mv) },
   ];
@@ -273,7 +273,7 @@ function FreeAgentsTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
         <span>Roster {stdCount}/15</span>
         <span>Two-Way {twCount}/3</span>
       </div>
-      <Panel title="Free Agents" className={styles.faPanel} flush>
+      <Panel title="Free agents" className={styles.faPanel} flush>
         <DataTable columns={columns} rows={rows} rowKey={(r) => r.p.id} onRowClick={(r) => setOfferId(r.p.id)} onRowOpen={(r) => openPlayer(r.p.id)} compact />
       </Panel>
       {offering && <NegotiationModal s={s} mutate={mutate} playerId={offering.p.id} kind="fa" onClose={() => setOfferId(null)} />}
@@ -327,7 +327,7 @@ function BuyoutTargetsPanel({ s, mutate }: { s: GameState; mutate: Mutate }) {
 
   return (
     <div className={styles.faWrap}>
-      <Panel title="International Buyout Targets" className={styles.faPanel} flush>
+      <Panel title="International buyout targets" className={styles.faPanel} flush>
         {targets.length === 0 && <div className={styles.empty}>No contracted players from other leagues.</div>}
         {targets.length > 0 && <DataTable columns={columns} rows={targets} rowKey={(p) => p.id} onRowOpen={(p) => openPlayer(p.id)} compact />}
       </Panel>
@@ -355,7 +355,7 @@ function TransactionsTab({ s }: { s: GameState }) {
     <div className={styles.txWrap}>
       <div className={styles.subTabs}>
         <button type="button" className={filter === 'all' ? `${styles.subTab} ${styles.subTabActive}` : styles.subTab} onClick={() => setFilter('all')}>All</button>
-        <button type="button" className={filter === 'mine' ? `${styles.subTab} ${styles.subTabActive}` : styles.subTab} onClick={() => setFilter('mine')}>My Team</button>
+        <button type="button" className={filter === 'mine' ? `${styles.subTab} ${styles.subTabActive}` : styles.subTab} onClick={() => setFilter('mine')}>My team</button>
       </div>
       <Panel title="Transactions" className={styles.txPanel} flush>
         <div className={styles.txList}>
@@ -424,7 +424,7 @@ function BidModal({ s, mutate, playerId, onClose }: { s: GameState; mutate: Muta
           <BkImage path={p.face} alt={p.lastName} className={styles.offerModalFace} />
           <div>
             <div className={styles.offerModalName}>{p.firstName} {p.lastName}</div>
-            <div className={styles.offerModalMeta}>{s.teams[p.teamId!]?.name} · Asking {formatMoneyShort(ask)}</div>
+            <div className={styles.offerModalMeta}>{s.teams[p.teamId!]?.name}, Asking {formatMoneyShort(ask)}</div>
           </div>
         </div>
         <label className={styles.offerField}>
@@ -444,7 +444,7 @@ function BidModal({ s, mutate, playerId, onClose }: { s: GameState; mutate: Muta
         {result && <div className={styles.toast}>{result}</div>}
         <div className={styles.offerModalBtns}>
           <button type="button" className={styles.cancelBtn} onClick={onClose}>Close</button>
-          <button type="button" className={styles.proposeBtn} disabled={!cashOk || !wageOk} onClick={submit}>Submit Bid</button>
+          <button type="button" className={styles.proposeBtn} disabled={!cashOk || !wageOk} onClick={submit}>Submit bid</button>
         </div>
       </div>
     </div>
@@ -472,8 +472,8 @@ function MarketTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
     { key: 'age', header: 'Age', align: 'right', render: (p) => Math.floor(ageOf(p.birthDate)), sortValue: (p) => ageOf(p.birthDate) },
     { key: 'ovr', header: 'OVR', align: 'right', render: (p) => p.ratings.ovr, sortValue: (p) => p.ratings.ovr },
     { key: 'wage', header: 'Wage', align: 'right', render: (p) => formatMoneyShort(salaryIn(p, s.season)), sortValue: (p) => salaryIn(p, s.season) },
-    { key: 'yrs', header: 'Yrs Left', align: 'right', render: (p) => yearsLeft(p, s.season), sortValue: (p) => yearsLeft(p, s.season) },
-    { key: 'val', header: 'Your Value', align: 'right', render: (p) => formatMoneyShort(transferValue(s, p)), sortValue: (p) => transferValue(s, p) },
+    { key: 'yrs', header: 'Yrs left', align: 'right', render: (p) => yearsLeft(p, s.season), sortValue: (p) => yearsLeft(p, s.season) },
+    { key: 'val', header: 'Your value', align: 'right', render: (p) => formatMoneyShort(transferValue(s, p)), sortValue: (p) => transferValue(s, p) },
     { key: 'ask', header: 'Asking', align: 'right', render: (p) => formatMoneyShort(askingPriceFor(s, p)), sortValue: (p) => askingPriceFor(s, p) },
     { key: 'action', header: '', align: 'right', render: (p) => <button type="button" className={styles.offerBtn} onClick={(e) => { e.stopPropagation(); setBidId(p.id); }}>Bid</button> }
   ];
@@ -507,7 +507,7 @@ function IncomingBidsTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
   };
 
   return (
-    <Panel title="Incoming Bids" className={styles.offersPanel} flush>
+    <Panel title="Incoming bids" className={styles.offersPanel} flush>
       {msg && <div className={styles.toast}>{msg}</div>}
       {bids.length === 0 && <div className={styles.empty}>No incoming bids</div>}
       <div className={styles.offerList}>
@@ -555,10 +555,10 @@ function LoansTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
     { key: 'name', header: 'Name', render: (p) => `${p.firstName} ${p.lastName}` },
     { key: 'pos', header: 'Pos', render: (p) => p.positions.join('/') },
     { key: 'age', header: 'Age', align: 'right', render: (p) => Math.floor(ageOf(p.birthDate)), sortValue: (p) => ageOf(p.birthDate) },
-    { key: 'ovr', header: 'OVR/POT', align: 'right', render: (p) => `${p.ratings.ovr}/${p.ratings.pot}`, sortValue: (p) => p.ratings.ovr },
+    { key: 'ovr', header: 'OVR/POT', align: 'right', render: (p) => `${p.ratings.ovr}/${Math.round(p.ratings.pot)}`, sortValue: (p) => p.ratings.ovr },
     {
       key: 'action', header: '', align: 'right', render: (p) => (
-        <button type="button" className={styles.offerBtn} onClick={(e) => { e.stopPropagation(); setTargetId(p.id); setClubId(clubs[0]?.id ?? ''); }}>Loan Out</button>
+        <button type="button" className={styles.offerBtn} onClick={(e) => { e.stopPropagation(); setTargetId(p.id); setClubId(clubs[0]?.id ?? ''); }}>Loan out</button>
       )
     }
   ];
@@ -596,7 +596,7 @@ function LoansTab({ s, mutate }: { s: GameState; mutate: Mutate }) {
             </label>
             <div className={styles.offerModalBtns}>
               <button type="button" className={styles.cancelBtn} onClick={() => setTargetId(null)}>Cancel</button>
-              <button type="button" className={styles.proposeBtn} disabled={!clubId} onClick={doLoan}>Confirm Loan</button>
+              <button type="button" className={styles.proposeBtn} disabled={!clubId} onClick={doLoan}>Confirm loan</button>
             </div>
           </div>
         </div>
@@ -621,16 +621,16 @@ export default function TransfersScreen() {
   const railItems: SideRailItem<SubTab>[] = isEuroClub
     ? [
         { id: 'market', label: 'Market', icon: IconTransfers },
-        { id: 'bids', label: 'Incoming Bids', icon: IconMessages, badge: s.bids.filter((b) => b.fromTeam === s.userTeamId && b.status === 'pending').length },
+        { id: 'bids', label: 'Incoming bids', icon: IconMessages, badge: s.bids.filter((b) => b.fromTeam === s.userTeamId && b.status === 'pending').length },
         { id: 'loans', label: 'Loans', icon: IconRoster },
-        { id: 'fa', label: 'Free Agents', icon: IconRoster },
+        { id: 'fa', label: 'Free agents', icon: IconRoster },
         { id: 'tx', label: 'Transactions', icon: IconFinances }
       ]
     : [
-        { id: 'trade', label: 'Trade Center', icon: IconTransfers },
+        { id: 'trade', label: 'Trade center', icon: IconTransfers },
         { id: 'offers', label: 'Offers', icon: IconMessages, badge: s.tradeOffers.length },
-        { id: 'fa', label: 'Free Agents', icon: IconRoster },
-        { id: 'buyout', label: 'Buyout Targets', icon: IconTransfers },
+        { id: 'fa', label: 'Free agents', icon: IconRoster },
+        { id: 'buyout', label: 'Buyout targets', icon: IconTransfers },
         { id: 'tx', label: 'Transactions', icon: IconFinances }
       ];
 

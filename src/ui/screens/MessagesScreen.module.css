@@ -166,7 +166,7 @@
 
 .rowActive {
   background: rgba(25, 195, 214, 0.1);
-  box-shadow: inset 3px 0 0 var(--cyan);
+  box-shadow: inset 3px 0 0 var(--accent);
 }
 
 .rowIcon {
@@ -176,7 +176,7 @@
   border-radius: var(--radius);
   background: var(--panel-alt);
   border: 1px solid var(--panel-border);
-  color: var(--cyan);
+  color: var(--accent);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -214,7 +214,7 @@
   width: 0.4rem;
   height: 0.4rem;
   border-radius: 50%;
-  background: var(--cyan);
+  background: var(--accent);
   flex-shrink: 0;
 }
 
@@ -278,8 +278,8 @@
 
 .viewOfferBtn {
   background: var(--panel-alt);
-  border: 1px solid var(--cyan-dim);
-  color: var(--cyan);
+  border: 1px solid var(--accent-2);
+  color: var(--accent);
   margin-left: auto;
 }
 

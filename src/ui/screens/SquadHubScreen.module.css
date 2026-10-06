@@ -78,8 +78,8 @@
 }
 
 .offerBtn {
-  background: var(--cyan);
-  color: var(--bg);
+  background: var(--chalk);
+  color: #15171a;
   border: none;
   border-radius: var(--radius);
   padding: 0.25rem 0.6rem;
@@ -193,8 +193,8 @@
 }
 
 .proposeBtn {
-  background: var(--cyan);
-  color: var(--bg);
+  background: var(--chalk);
+  color: #15171a;
   border: none;
   border-radius: var(--radius);
   padding: 0.5rem 1rem;
@@ -237,7 +237,7 @@
 }
 
 .optionTeam {
-  color: var(--cyan);
+  color: var(--accent);
   background: rgba(25, 195, 214, 0.12);
   border-radius: var(--radius);
   padding: 0.05rem 0.3rem;
@@ -262,7 +262,7 @@
 .totalsValue {
   min-width: 4.5rem;
   text-align: right;
-  color: var(--cyan);
+  color: var(--accent);
 }
 
 .barTrack {
@@ -276,7 +276,7 @@
 
 .barFill {
   height: 100%;
-  background: var(--cyan);
+  background: var(--accent);
   border-radius: var(--radius);
 }
 

@@ -41,7 +41,7 @@
 
 .ringFill {
   fill: none;
-  stroke: var(--cyan);
+  stroke: var(--accent);
   stroke-width: 6;
   stroke-linecap: round;
   transform: rotate(-90deg);
@@ -75,7 +75,7 @@
 
 .nameInput:focus {
   outline: none;
-  border-color: var(--cyan);
+  border-color: var(--accent);
 }
 
 .unemployedBadge {

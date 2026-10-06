@@ -293,7 +293,7 @@ export default function MessagesScreen() {
                           <span className={styles.rowIcon}><Icon /></span>
                           <span className={styles.rowBody}>
                             <span className={m.read ? styles.rowSubject : `${styles.rowSubject} ${styles.unread}`}>{m.subject}</span>
-                            <span className={styles.rowMeta}>{m.from} · {formatDate(m.date)}</span>
+                            <span className={styles.rowMeta}>{m.from}, {formatDate(m.date)}</span>
                           </span>
                           {!m.read && <span className={styles.dot} />}
                         </button>
@@ -320,7 +320,7 @@ export default function MessagesScreen() {
                     <span className={styles.rowIcon}><Icon /></span>
                     <span className={styles.rowBody}>
                       <span className={m.read ? styles.rowSubject : `${styles.rowSubject} ${styles.unread}`}>{m.subject}</span>
-                      <span className={styles.rowMeta}>{m.from} · {formatDate(m.date)}</span>
+                      <span className={styles.rowMeta}>{m.from}, {formatDate(m.date)}</span>
                     </span>
                     {!m.read && <span className={styles.dot} />}
                   </button>
@@ -358,7 +358,7 @@ export default function MessagesScreen() {
           {selected && (
             <div className={styles.reading}>
               <div className={styles.readingSubject}>{selected.subject}</div>
-              <div className={styles.readingMeta}>From {selected.from} · {formatDate(selected.date)}</div>
+              <div className={styles.readingMeta}>From {selected.from}, {formatDate(selected.date)}</div>
               <div className={styles.readingBody}>{selected.body}</div>
               {selected.action?.type === 'trade-offer' && (() => {
                 const offerId = selected.action.offerId;

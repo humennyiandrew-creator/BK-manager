@@ -33,7 +33,7 @@ export default function LeagueScreen() {
   return (
     <div className={styles.screen}>
       <HeroHeader
-        title="League Hub"
+        title="League hub"
         subtitle="Power rankings, storylines and the award races"
         right={comps.length > 1 ? (
           <div className={styles.comps}>
@@ -44,11 +44,11 @@ export default function LeagueScreen() {
         ) : undefined}
       />
       <div className={styles.grid}>
-        <Panel title={`Power Rankings${updated ? ` · week of ${updated.slice(5).replace('-', '/')}` : ''}`} className={styles.rankings}>
+        <Panel title={`Power rankings${updated ? `, week of ${updated.slice(5).replace('-', '/')}` : ''}`} className={styles.rankings}>
           <div className={styles.rankHead}><span>Rank</span><span>Team</span><span>W-L</span><span>Net</span><span>L10</span></div>
           <PowerRankings s={s} comp={league} limit={40} detailed />
         </Panel>
-        <Panel title="League Wire" className={styles.wire} headerRight={
+        <Panel title="League wire" className={styles.wire} headerRight={
           <div className={styles.filters}>
             {FILTERS.map((x, i) => (
               <button key={x.label} type="button" className={i === filter ? `${styles.filter} ${styles.filterOn}` : styles.filter} onClick={() => setFilter(i)}>{x.label}</button>
@@ -57,7 +57,7 @@ export default function LeagueScreen() {
         }>
           <NewsFeed s={s} items={items} limit={60} empty="No stories in this category yet." />
         </Panel>
-        <Panel title="Award Races" className={styles.awards}>
+        <Panel title="Award races" className={styles.awards}>
           <AwardRaces s={s} comp={league} all limit={5} />
         </Panel>
       </div>

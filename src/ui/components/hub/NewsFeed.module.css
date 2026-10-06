@@ -4,51 +4,52 @@
 }
 
 .empty {
-  color: var(--text-dim);
-  font-size: 0.8rem;
+  color: var(--chalk-3);
+  font-size: 0.85rem;
   padding: 0.5rem 0;
 }
 
 .item {
   display: flex;
-  gap: 0.65rem;
-  padding: 0.55rem 0.2rem 0.55rem 0.5rem;
+  gap: 0.7rem;
+  padding: 0.55rem 0;
   background: transparent;
   border: none;
-  border-left: 2px solid transparent;
-  border-bottom: 1px solid var(--panel-border);
-  color: var(--text);
+  border-bottom: 1px solid var(--seam-soft);
+  color: var(--chalk);
   text-align: left;
-  transition: background var(--dur-fast) var(--ease-out);
 }
 
 .item:last-child {
   border-bottom: none;
 }
 
-.item:not(:disabled):hover {
-  background: rgba(255, 255, 255, 0.03);
+.item:not(:disabled):hover .headline {
+  text-decoration: underline;
 }
 
 .item:disabled {
   cursor: default;
 }
 
-.good { border-left-color: var(--positive); }
-.bad { border-left-color: var(--negative); }
-.neutral { border-left-color: var(--panel-border); }
-.mine { background: color-mix(in srgb, var(--accent) 7%, transparent); }
+.mine .headline {
+  color: var(--chalk);
+}
+
+.mine .team {
+  color: var(--chalk);
+  background: color-mix(in srgb, var(--team) 40%, var(--rail));
+}
 
 .thumb {
+  flex-shrink: 0;
   width: 2.3rem;
   height: 2.3rem;
-  flex-shrink: 0;
   border-radius: 50%;
   overflow: hidden;
-  background: var(--panel-alt);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  background: var(--rail);
+  display: grid;
+  place-items: center;
 }
 
 .face {
@@ -58,14 +59,17 @@
 }
 
 .logo {
-  width: 72%;
-  height: 72%;
+  width: 70%;
+  height: 70%;
   object-fit: contain;
 }
 
 .body {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
 }
 
 .meta {
@@ -73,32 +77,35 @@
   align-items: center;
   gap: 0.45rem;
   font-size: 0.75rem;
-  font-weight: 800;
-  color: var(--text-dim);
+  color: var(--chalk-3);
 }
 
 .kind {
-  color: var(--accent);
+  font-weight: 650;
+  color: var(--chalk-2);
 }
 
-.good .kind { color: var(--positive); }
-.bad .kind { color: var(--negative); }
+.good .kind { color: var(--win); }
+.bad .kind { color: var(--loss); }
+
+.team {
+  padding: 0 0.3rem;
+  border-radius: 2px;
+  background: var(--rail);
+  font-weight: 600;
+}
 
 .when {
   margin-left: auto;
-  font-weight: 700;
 }
 
 .headline {
-  font-size: 0.82rem;
-  font-weight: 700;
-  line-height: 1.25;
-  margin-top: 0.1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.3;
 }
 
 .text {
-  font-size: 0.72rem;
-  color: var(--text-muted);
-  line-height: 1.35;
-  margin-top: 0.1rem;
+  font-size: 0.8rem;
+  color: var(--chalk-3);
 }

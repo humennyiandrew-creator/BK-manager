@@ -56,7 +56,7 @@
 }
 
 .playoffLine td {
-  border-bottom: 2px solid var(--cyan);
+  border-bottom: 2px solid var(--accent);
 }
 
 .playinLine td {
@@ -82,7 +82,7 @@
 .bracketConfTitle {
   font-size: 0.75rem;
   font-weight: 800;
-  color: var(--cyan);
+  color: var(--accent);
 }
 
 .bracketRound {
@@ -116,7 +116,7 @@
 }
 
 .seriesWinner {
-  color: var(--cyan);
+  color: var(--accent);
   font-weight: 700;
 }
 

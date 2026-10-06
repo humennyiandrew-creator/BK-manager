@@ -7,7 +7,7 @@ const ICON = { urgent: IconAlert, warn: IconAlert, good: IconFlame, info: IconTa
 /** The assistant coach's to-do list: each item jumps straight to where it's handled. */
 export default function ActionItems({ items }: { items: Insight[] }) {
   if (!items.length) return (
-    <div className={styles.clear}><IconCheck className={styles.clearIcon} /> All clear, coach. Nothing needs your attention.</div>
+    <div className={styles.clear}><IconCheck className={styles.clearIcon} /> Nothing needs you right now.</div>
   );
   return (
     <div className={styles.list}>
@@ -20,7 +20,7 @@ export default function ActionItems({ items }: { items: Insight[] }) {
               <span className={styles.title}>{it.title}</span>
               <span className={styles.detail}>{it.detail}</span>
             </div>
-            <button type="button" className={styles.cta} onClick={it.go}>{it.cta} ›</button>
+            <button type="button" className={styles.cta} onClick={it.go}>{it.cta}</button>
           </div>
         );
       })}

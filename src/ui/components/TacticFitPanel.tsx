@@ -15,7 +15,7 @@ const LEAGUE_MEAN: Record<string, number> = {
 const PROFILE_ROWS: { key: keyof Profile; label: string }[] = [
   { key: 'spacing', label: 'Spacing' }, { key: 'rim', label: 'Rim' }, { key: 'post', label: 'Post' },
   { key: 'handling', label: 'Handling' }, { key: 'glass', label: 'Glass' }, { key: 'size', label: 'Size' },
-  { key: 'speed', label: 'Speed' }, { key: 'rimProt', label: 'Rim Protection' }, { key: 'perimD', label: 'Perimeter D' }
+  { key: 'speed', label: 'Speed' }, { key: 'rimProt', label: 'Rim protection' }, { key: 'perimD', label: 'Perimeter D' }
 ];
 const WARN_WORDS = ['poor', 'without', 'weak', 'wastes', 'sloppy', 'slow'];
 const isWarn = (n: string) => WARN_WORDS.some((w) => n.toLowerCase().includes(w));
@@ -79,11 +79,11 @@ export default function TacticFitPanel() {
   const labColor = !lab ? undefined : lab.delta - lab.margin > 0 ? 'var(--positive)' : lab.delta + lab.margin < 0 ? 'var(--negative)' : 'var(--text-muted)';
 
   return (
-    <Panel title="Tactic Fit" className={styles.panel}>
+    <Panel title="Tactic fit" className={styles.panel}>
       <div className={styles.wrap}>
         <div className={styles.bars}>
-          <BipolarBar label="Offense Fit" value={off.score} />
-          <BipolarBar label="Defense Fit" value={def.score} />
+          <BipolarBar label="Offense fit" value={off.score} />
+          <BipolarBar label="Defense fit" value={def.score} />
         </div>
 
         {notes.length > 0 && (

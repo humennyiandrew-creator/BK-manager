@@ -38,9 +38,9 @@
 }
 
 .subTabActive {
-  background: var(--red);
-  border-color: var(--red);
-  color: var(--text);
+  background: var(--chalk);
+  border-color: var(--chalk);
+  color: #15171a;
 }
 
 .empty {
@@ -77,8 +77,8 @@
 }
 
 .teamPickActive {
-  border-color: var(--cyan);
-  box-shadow: inset 0 0 0 1px var(--cyan);
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
 }
 
 .teamPickLogo {
@@ -163,8 +163,8 @@
 }
 
 .proposeBtn {
-  background: var(--cyan);
-  color: var(--bg);
+  background: var(--chalk);
+  color: #15171a;
   border: none;
   border-radius: var(--radius);
   padding: 0.6rem;
@@ -202,7 +202,7 @@
 }
 
 .assetSelected {
-  box-shadow: inset 3px 0 0 var(--cyan);
+  box-shadow: inset 3px 0 0 var(--accent);
   background: rgba(25, 195, 214, 0.08);
 }
 
@@ -251,7 +251,7 @@
 }
 
 .offerValue {
-  color: var(--cyan);
+  color: var(--accent);
   font-size: 0.7rem;
 }
 
@@ -333,7 +333,7 @@
 }
 
 .sortArrow {
-  color: var(--cyan);
+  color: var(--accent);
   font-size: 0.6rem;
 }
 
@@ -348,8 +348,8 @@
 }
 
 .offerBtn:hover {
-  border-color: var(--cyan);
-  color: var(--cyan);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 /* ---------- european market ---------- */
@@ -398,7 +398,7 @@
 
 .searchInput:focus {
   outline: none;
-  border-color: var(--cyan);
+  border-color: var(--accent);
 }
 
 .select {
@@ -522,7 +522,7 @@
 }
 
 .txKind {
-  color: var(--cyan);
+  color: var(--accent);
   font-size: 0.75rem;
   width: 4rem;
   flex-shrink: 0;

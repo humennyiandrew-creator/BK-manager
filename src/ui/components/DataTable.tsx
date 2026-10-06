@@ -107,7 +107,7 @@ export default function DataTable<T>({
                     onClick={(e) => { e.stopPropagation(); onRowOpen(row); }}
                     aria-label="Open"
                   >
-                    &#10148;
+                    <svg viewBox="0 0 6 10" width="6" height="10" aria-hidden="true"><path d="M1 1l4 4-4 4" stroke="currentColor" strokeWidth="1.6" fill="none" /></svg>
                   </button>
                 </td>
               )}

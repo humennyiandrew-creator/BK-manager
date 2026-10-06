@@ -43,9 +43,9 @@
 }
 
 .planActive {
-  border-color: var(--cyan);
+  border-color: var(--accent);
   color: var(--text);
-  background: color-mix(in srgb, var(--cyan) 15%, var(--panel-alt));
+  background: color-mix(in srgb, var(--accent) 15%, var(--panel-alt));
 }
 
 .status {

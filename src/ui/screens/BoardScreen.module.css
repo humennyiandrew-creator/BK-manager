@@ -131,7 +131,7 @@
 
 .chance {
   font-size: 0.75rem;
-  color: var(--cyan);
+  color: var(--accent);
   font-weight: 700;
   width: 2.6rem;
   text-align: right;
@@ -148,8 +148,8 @@
 }
 
 .actionBtn:not(:disabled):hover {
-  border-color: var(--cyan);
-  color: var(--cyan);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .actionBtn:disabled {
@@ -165,7 +165,7 @@
 .note {
   margin-top: 0.6rem;
   font-size: 0.75rem;
-  color: var(--cyan);
+  color: var(--accent);
 }
 
 .pressQ {
@@ -203,7 +203,7 @@
 }
 
 .pressChoice:not(:disabled):hover {
-  border-color: var(--cyan);
+  border-color: var(--accent);
 }
 
 .pressChoice:disabled {

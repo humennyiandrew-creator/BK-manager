@@ -47,8 +47,8 @@
 }
 
 .cardActive {
-  border-color: var(--cyan);
-  box-shadow: 0 0 0 1px var(--cyan) inset;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent) inset;
 }
 
 .nodeCount {
@@ -99,7 +99,7 @@
 }
 
 .node_available {
-  border-color: var(--cyan);
+  border-color: var(--accent);
 }
 
 .node_building {
@@ -153,7 +153,7 @@
 
 .level {
   font-size: 0.7rem;
-  color: var(--cyan);
+  color: var(--accent);
   font-weight: 700;
 }
 
@@ -171,7 +171,7 @@
 }
 
 .pipFilled {
-  background: var(--cyan);
+  background: var(--accent);
 }
 
 .effect {
@@ -211,9 +211,9 @@
 }
 
 .upgradeBtn {
-  background: var(--red);
+  background: var(--chalk);
   border: none;
-  color: var(--text);
+  color: #15171a;
   border-radius: var(--radius);
   padding: 0.35rem 0.8rem;
   font-size: 0.75rem;

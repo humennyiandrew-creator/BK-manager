@@ -25,12 +25,12 @@ export default function CareerSummary({ s, onBack, onExtend }: { s: GameState; o
   const columns: DataTableColumn<SeasonRecord>[] = [
     { key: 'season', header: 'Season', render: (r) => r.season },
     { key: 'record', header: 'Record', align: 'right', render: (r) => `${r.w}-${r.l}` },
-    { key: 'rank', header: 'Conf Rank', align: 'right', render: (r) => `#${r.confRank}` },
+    { key: 'rank', header: 'Conf rank', align: 'right', render: (r) => `#${r.confRank}` },
     { key: 'result', header: 'Result', render: (r) => r.result },
     { key: 'objective', header: 'Objective', render: (r) => r.objective },
-    { key: 'met', header: 'Met', align: 'right', render: (r) => (r.objectiveMet ? '✓' : '✗') },
+    { key: 'met', header: 'Met', align: 'right', render: (r) => (r.objectiveMet ? 'Yes' : 'No') },
     { key: 'mvp', header: 'MVP', render: (r) => playerName(s, r.awards.mvp) },
-    { key: 'top', header: 'Leading Scorer', render: (r) => (r.topScorer.id ? `${playerName(s, r.topScorer.id)} (${r.topScorer.ppg})` : '-') }
+    { key: 'top', header: 'Leading scorer', render: (r) => (r.topScorer.id ? `${playerName(s, r.topScorer.id)} (${r.topScorer.ppg})` : '-') }
   ];
 
   return (
@@ -45,9 +45,9 @@ export default function CareerSummary({ s, onBack, onExtend }: { s: GameState; o
 
       <div className={styles.stats}>
         <StatTile label="Titles" value={titles} />
-        <StatTile label="Playoff Appearances" value={playoffApps} formatter={() => `${playoffApps}/${history.length}`} />
-        <StatTile label="Objectives Met" value={objectivesMet} formatter={() => `${objectivesMet}/${history.length}`} />
-        <StatTile label="Total Record" value={totalW} formatter={() => `${totalW}-${totalL}`} />
+        <StatTile label="Playoff appearances" value={playoffApps} formatter={() => `${playoffApps}/${history.length}`} />
+        <StatTile label="Objectives met" value={objectivesMet} formatter={() => `${objectivesMet}/${history.length}`} />
+        <StatTile label="Total record" value={totalW} formatter={() => `${totalW}-${totalL}`} />
         {bestSeason && (
           <div className={styles.stat}>
             <span className={styles.statValue}>{playerName(s, bestSeason.topScorer.id)}</span>

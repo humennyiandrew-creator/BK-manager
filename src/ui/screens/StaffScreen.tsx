@@ -75,12 +75,12 @@ export default function StaffScreen() {
     <div className={styles.screen}>
       <HeroHeader title="Staff" subtitle="Coaching and front office" />
       <div className={styles.statsRow}>
-        <StatTile label="Staff Spend" value={spend} formatter={formatMoneyShort} />
-        <StatTile label="Budget Cap" value={cap} formatter={formatMoneyShort} />
-        <StatTile label="Roles Filled" value={filled} formatter={(v) => `${v}/${ROLES.length}`} />
+        <StatTile label="Staff spend" value={spend} formatter={formatMoneyShort} />
+        <StatTile label="Budget cap" value={cap} formatter={formatMoneyShort} />
+        <StatTile label="Roles filled" value={filled} formatter={(v) => `${v}/${ROLES.length}`} />
       </div>
       <div className={styles.body}>
-        <Panel title="Current Staff" className={styles.panel}>
+        <Panel title="Current staff" className={styles.panel}>
           <div className={styles.budgetBar}><ProgressBar value={spend} max={cap} variant={spend > cap ? 'negative' : 'cyan'} /></div>
           <div className={styles.roleList}>
             {ROLES.map((r) => {
@@ -116,7 +116,7 @@ export default function StaffScreen() {
                     <div className={styles.courseOptions}>
                       {options.map((c, i) => (
                         <button key={i} type="button" className={styles.courseOption} onClick={() => st && doEnroll(st.id, c)}>
-                          {c.name} · {c.weeks}wk · {formatMoneyShort(c.cost)} · +{c.gain} rating
+                          {c.name}: {c.weeks} weeks, {formatMoneyShort(c.cost)}, +{c.gain} rating
                         </button>
                       ))}
                     </div>
@@ -127,7 +127,7 @@ export default function StaffScreen() {
           </div>
         </Panel>
 
-        <Panel title="Staff Market" className={styles.panel} flush>
+        <Panel title="Staff market" className={styles.panel} flush>
           <div className={styles.tabs}>
             {ROLES.map((r) => (
               <button key={r} type="button" className={filter === r ? styles.tabActive : styles.tab} onClick={() => setFilter(r)}>

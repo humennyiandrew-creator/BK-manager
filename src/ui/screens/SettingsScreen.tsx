@@ -43,7 +43,7 @@ export default function SettingsScreen() {
           <div><span className={styles.label}>Phase</span><span className={styles.phase}>{s.phase}</span></div>
         </div>
         <div className={styles.actions}>
-          <button type="button" className={styles.btn} onClick={doSave}>Save Now</button>
+          <button type="button" className={styles.btn} onClick={doSave}>Save now</button>
           <button type="button" className={`${styles.btn} ${styles.btnDanger}`} onClick={saveAndQuit}>Save &amp; Quit to Menu</button>
         </div>
         {status && <div className={styles.status}>{status}</div>}

@@ -41,10 +41,10 @@ export default function LockerRoomScreen() {
 
   return (
     <div className={styles.screen}>
-      <HeroHeader title="Locker Room" subtitle="Chemistry, leadership and team activities" />
+      <HeroHeader title="Locker room" subtitle="Chemistry, leadership and team activities" />
       <div className={styles.grid}>
         <div className={styles.col}>
-          <Panel title="Team Chemistry">
+          <Panel title="Team chemistry">
             <div className={styles.chemTop}>
               <RingGauge value={rep.score} label="Chemistry" sub={rep.mood} size={7.5} color={rep.score < 40 ? 'var(--negative)' : rep.score >= 65 ? 'var(--positive)' : 'var(--accent)'} />
               <div className={styles.parts}>
@@ -61,7 +61,7 @@ export default function LockerRoomScreen() {
             </div>
             <p className={styles.note}>Chemistry gives a small on-court edge (up to about ±1% on every shot). It's rebuilt every Monday from morale, continuity, egos, leadership, recent results and team bonding.</p>
           </Panel>
-          <Panel title="Team Activities">
+          <Panel title="Team activities">
             <div className={styles.activities}>
               {ACTIVITIES.map((a) => {
                 const wait = activityReadyIn(s, a.id);
@@ -92,7 +92,7 @@ export default function LockerRoomScreen() {
                 <div className={styles.capInfo}>
                   <span className={styles.capBadge}>C</span>
                   <span className={styles.capName}>{captain.firstName} {captain.lastName}</span>
-                  <span className={styles.capMeta}>Leadership {Math.round(leadership(captain) * 100)} · {captain.yearsPro} yrs pro · morale {captain.morale}</span>
+                  <span className={styles.capMeta}>Leadership {Math.round(leadership(captain) * 100)}, {captain.yearsPro} yrs pro, morale {captain.morale}</span>
                 </div>
               </div>
             ) : <div className={styles.noCap}>No captain named. The room is missing a voice — pick a leader below.</div>}
@@ -111,7 +111,7 @@ export default function LockerRoomScreen() {
         </div>
 
         <div className={styles.col}>
-          <Panel title="Mood Board" className={styles.mood}>
+          <Panel title="Mood board" className={styles.mood}>
             {byMood.map((p) => {
               const tags = [
                 trait(p.ratings.personality.ego, 'Big ego', 'Humble'),

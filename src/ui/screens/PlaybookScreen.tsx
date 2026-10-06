@@ -19,24 +19,24 @@ type SubTab = 'offense' | 'defense' | 'style' | 'rotation';
 const RAIL_ITEMS: SideRailItem<SubTab>[] = [
   { id: 'offense', label: 'Offense', icon: IconPlaybook },
   { id: 'defense', label: 'Defense', icon: IconPlaybook },
-  { id: 'style', label: 'Team Style', icon: IconPlaybook },
+  { id: 'style', label: 'Team style', icon: IconPlaybook },
   { id: 'rotation', label: 'Rotation', icon: IconTraining }
 ];
 
 const CATEGORIES: (PlayCategory | 'all')[] = ['all', 'pnr', 'horns', 'off-ball', 'post', 'iso', 'motion', 'transition', 'zone-buster'];
 
 const STYLE_SLIDERS: { key: 'pace' | 'threeFocus' | 'crashGlass' | 'transition'; label: string; hint: string }[] = [
-  { key: 'threeFocus', label: 'Shot Profile', hint: 'Paint ↔ Perimeter — leaning away from your shot-makers costs efficiency' },
-  { key: 'crashGlass', label: 'Crash Glass', hint: 'Get back ↔ Crash — extra offensive boards cost you in opponent transition' },
+  { key: 'threeFocus', label: 'Shot profile', hint: 'Paint ↔ Perimeter — leaning away from your shot-makers costs efficiency' },
+  { key: 'crashGlass', label: 'Crash glass', hint: 'Get back ↔ Crash — extra offensive boards cost you in opponent transition' },
   { key: 'pace', label: 'Pace', hint: 'Slow ↔ Fast — faster pace needs handling and speed or it bleeds turnovers' },
   { key: 'transition', label: 'Transition', hint: 'Set ↔ Push — pushing every miss/make tires legs but creates easy points' }
 ];
 
 const EFFECTS: { key: string; label: string; get: (s: SchemeDef) => number; invert?: boolean }[] = [
-  { key: 'rim', label: 'Rim Protection', get: (s) => s.rimD },
+  { key: 'rim', label: 'Rim protection', get: (s) => s.rimD },
   { key: 'perim', label: 'Perimeter', get: (s) => s.threeD },
   { key: 'pullup', label: 'Pull-up D', get: (s) => s.midD },
-  { key: 'to', label: 'Turnovers Forced', get: (s) => s.toMul },
+  { key: 'to', label: 'Turnovers forced', get: (s) => s.toMul },
   { key: 'fouls', label: 'Fouls', get: (s) => s.foulMul },
   { key: 'fatigue', label: 'Fatigue', get: (s) => s.drainMul },
   { key: 'glass', label: 'Glass', get: (s) => -s.orbAllowed }
@@ -114,7 +114,7 @@ export default function PlaybookScreen() {
       <div className={styles.mainCol}>
       {subTab === 'offense' && (
         <div className={styles.offenseGrid}>
-          <Panel title="Offensive Systems" className={styles.col}>
+          <Panel title="Offensive systems" className={styles.col}>
             <div className={styles.sysGrid}>
               {Object.values(SYSTEMS).map((sys) => (
                 <button key={sys.id} className={sys.id === tactics.offense ? `${styles.sysCard} ${styles.sysCardActive}` : styles.sysCard} onClick={() => setOffense(sys.id)}>
@@ -144,7 +144,7 @@ export default function PlaybookScreen() {
           </Panel>
 
           <Panel
-            title="Play Library"
+            title="Play library"
             className={styles.col}
             flush
             headerRight={
@@ -196,7 +196,7 @@ export default function PlaybookScreen() {
       )}
 
       {subTab === 'defense' && (
-        <Panel title="Defensive Schemes" className={styles.fullPanel}>
+        <Panel title="Defensive schemes" className={styles.fullPanel}>
           <div className={styles.schemeGrid}>
             {Object.values(SCHEMES).map((sc) => (
               <button key={sc.id} className={sc.id === tactics.defense ? `${styles.sysCard} ${styles.sysCardActive}` : styles.sysCard} onClick={() => setDefense(sc.id)}>
@@ -215,7 +215,7 @@ export default function PlaybookScreen() {
       )}
 
       {subTab === 'style' && (
-        <Panel title="Team Style" className={styles.fullPanel}>
+        <Panel title="Team style" className={styles.fullPanel}>
           <div className={styles.styleWrap}>
             {STYLE_SLIDERS.map(({ key: k, label, hint }) => (
               <div key={k} className={styles.styleSliderWrap}>
@@ -228,14 +228,14 @@ export default function PlaybookScreen() {
               </div>
             ))}
             <div className={styles.styleField}>
-              <label>Focus Player</label>
+              <label>Focus player</label>
               <select value={tactics.focusPlayer ?? ''} onChange={(e) => setFocus(e.target.value)}>
                 <option value="">None</option>
                 {roster.map((p) => <option key={p.id} value={p.id}>{p.firstName} {p.lastName}</option>)}
               </select>
             </div>
             <div className={styles.styleField}>
-              <label>Clutch Play</label>
+              <label>Clutch play</label>
               <select value={tactics.clutchPlay ?? ''} onChange={(e) => setClutch(e.target.value)}>
                 <option value="">Auto</option>
                 {PLAYS.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}

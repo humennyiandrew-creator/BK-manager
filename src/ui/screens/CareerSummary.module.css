@@ -63,7 +63,7 @@
 .statValue {
   font-size: 1.3rem;
   font-weight: 800;
-  color: var(--cyan);
+  color: var(--accent);
 }
 
 .statLabel {
@@ -78,8 +78,8 @@
 
 .backBtn {
   align-self: center;
-  background: var(--red);
-  color: var(--text);
+  background: var(--chalk);
+  color: #15171a;
   border: none;
   border-radius: var(--radius);
   padding: 0.7rem 2rem;

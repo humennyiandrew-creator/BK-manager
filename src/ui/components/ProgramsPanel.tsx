@@ -26,7 +26,7 @@ export default function ProgramsPanel({ s, mutate }: Props) {
   const atCap = active.length >= 3;
 
   return (
-    <Panel title="Development Programmes" className={styles.panel}>
+    <Panel title="Development programmes" className={styles.panel}>
       {active.length === 0 && <div className={styles.empty}>No active programmes.</div>}
       {active.map((p) => {
         const prog = p.program!;
@@ -89,7 +89,7 @@ function StartProgramModal({ s, eligible, initialPlayerId, onClose, onStart }: {
           {options.map((o, i) => (
             <button key={i} type="button" className={i === optIdx ? `${styles.optCard} ${styles.optCardActive}` : styles.optCard} onClick={() => setOptIdx(i)}>
               <span className={styles.optLabel}>{displayLabel(o.label, String(o.target))}</span>
-              <span className={styles.optMeta}>{o.weeks}wk · +{o.expectedGain} · {Math.round(o.risk * 100)}% risk</span>
+              <span className={styles.optMeta}>{o.weeks} weeks, +{o.expectedGain} expected, {Math.round(o.risk * 100)}% risk</span>
             </button>
           ))}
         </div>

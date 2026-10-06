@@ -33,9 +33,9 @@ const INTENSITY_TEXT: Record<number, string> = {
 
 const SESSION_CYCLE: Session[] = ['high', 'light', 'shootaround', 'film', 'rest'];
 const SESSION_LABEL: Record<Session, string> = { high: 'High', light: 'Light', shootaround: 'Shootaround', film: 'Film', rest: 'Rest' };
-const SESSION_ICON: Record<Session, string> = { high: '\u{1F525}', light: '\u{1F7E2}', shootaround: '\u{1F3C0}', film: '\u{1F3AC}', rest: '\u{1F634}' };
+const SESSION_LOAD: Record<Session, number> = { high: 4, light: 2, shootaround: 1, film: 1, rest: 0 };
 const SESSION_COLOR: Record<Session, string> = {
-  high: 'var(--negative)', light: 'var(--positive)', shootaround: 'var(--text-muted)', film: 'var(--cyan)', rest: 'var(--text-dim)',
+  high: 'var(--negative)', light: 'var(--positive)', shootaround: 'var(--text-muted)', film: 'var(--accent)', rest: 'var(--text-dim)',
 };
 const DAY_LABEL = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
@@ -53,7 +53,7 @@ function Sparkline({ history }: { history: Player['ovrHistory'] }) {
   const pts = vals.map((v, i) => `${(i / (vals.length - 1)) * w},${ht - ((v - lo) / range) * ht}`).join(' ');
   return (
     <svg viewBox={`0 0 ${w} ${ht}`} className={styles.spark}>
-      <polyline points={pts} fill="none" stroke="var(--cyan)" strokeWidth={1.5} />
+      <polyline points={pts} fill="none" stroke="var(--accent)" strokeWidth={1.5} />
     </svg>
   );
 }
@@ -115,7 +115,7 @@ export default function TrainingScreen() {
     { key: 'name', header: 'Player', render: (p) => `${p.firstName} ${p.lastName}`, sortValue: (p) => `${p.lastName} ${p.firstName}` },
     { key: 'age', header: 'Age', align: 'right', render: (p) => Math.floor(ageOf(p.birthDate)), sortValue: (p) => ageOf(p.birthDate) },
     { key: 'ovr', header: 'OVR', align: 'right', render: (p) => p.ratings.ovr, sortValue: (p) => p.ratings.ovr },
-    { key: 'pot', header: 'POT', align: 'right', render: (p) => p.ratings.pot, sortValue: (p) => p.ratings.pot },
+    { key: 'pot', header: 'POT', align: 'right', render: (p) => Math.round(p.ratings.pot), sortValue: (p) => p.ratings.pot },
     { key: 'change', header: 'Last', align: 'right', render: (p) => <ChangeArrow v={p.lastChange} />, sortValue: (p) => p.lastChange ?? 0 },
     { key: 'spark', header: 'Trend', render: (p) => <Sparkline history={p.ovrHistory} /> },
     {
@@ -131,7 +131,7 @@ export default function TrainingScreen() {
       }
     },
     {
-      key: 'focus', header: 'Team Focus Override', render: (p) => (
+      key: 'focus', header: 'Team focus override', render: (p) => (
         <select
           className={styles.select}
           value={plan.individual[p.id] ?? ''}
@@ -143,7 +143,7 @@ export default function TrainingScreen() {
       )
     },
     {
-      key: 'devplan', header: 'Dev Plan', render: (p) => (
+      key: 'devplan', header: 'Dev plan', render: (p) => (
         <select
           className={styles.select}
           value={p.devPlan ?? ''}
@@ -163,7 +163,7 @@ export default function TrainingScreen() {
       <div className={styles.wrap}>
       <div className={styles.left}>
         <PrepPanel s={s} mutate={mutate} />
-        <Panel title="Weekly Schedule" className={styles.weekPanel}>
+        <Panel title="Weekly schedule" className={styles.weekPanel}>
           <div className={styles.weekGrid}>
             {weekDates.map((date, i) => {
               const opp = opponentFor(date);
@@ -178,7 +178,7 @@ export default function TrainingScreen() {
                   disabled={locked}
                 >
                   <span className={styles.dayLabel}>{DAY_LABEL[i]}</span>
-                  <span className={styles.dayIcon} style={{ color: SESSION_COLOR[session] }}>{SESSION_ICON[session]}</span>
+                  <span className={styles.dayIcon} title={`Load ${SESSION_LOAD[session]} of 4`}>{[0, 1, 2, 3].map((k) => <i key={k} style={k < SESSION_LOAD[session] ? { background: SESSION_COLOR[session] } : undefined} />)}</span>
                   <span className={styles.daySession}>{SESSION_LABEL[session]}</span>
                   {opp && <TeamBadge logoPath={opp.logo} name={opp.abbr} className={styles.oppBadge} />}
                 </button>
@@ -187,9 +187,9 @@ export default function TrainingScreen() {
           </div>
         </Panel>
 
-        <Panel title="Training Plan" className={styles.planPanel}>
+        <Panel title="Training plan" className={styles.planPanel}>
           <div className={styles.section}>
-            <div className={styles.sectionTitle}>Team Focus</div>
+            <div className={styles.sectionTitle}>Team focus</div>
             <div className={styles.focusRow}>
               {FOCUS_OPTIONS.map((f) => (
                 <button key={f} type="button" className={f === plan.focus ? styles.focusActive : styles.focusBtn} onClick={() => setFocus(f)}>
@@ -205,12 +205,12 @@ export default function TrainingScreen() {
             <p className={styles.intensityText}>{INTENSITY_TEXT[plan.intensity]}</p>
           </div>
           <div className={styles.section}>
-            <div className={styles.sectionTitle}>Tactical Familiarity</div>
+            <div className={styles.sectionTitle}>Tactical familiarity</div>
             <ProgressBar value={familiarity} max={100} variant={familiarity >= 70 ? 'positive' : familiarity >= 40 ? 'cyan' : 'negative'} />
             <p className={styles.intensityText}>{Math.round(familiarity)}/100 with {SYSTEMS[team.tactics.offense].name} / {SCHEMES[team.tactics.defense].name}. Changing systems drops this to 35.</p>
           </div>
           <div className={styles.section}>
-            <div className={styles.sectionTitle}>Weekly Effect Summary</div>
+            <div className={styles.sectionTitle}>Weekly effect summary</div>
             <div className={styles.summaryRow}><span>Growth</span><span>×{growthMul.toFixed(2)}</span></div>
             <div className={styles.summaryRow}><span>Injury risk</span><span>×{injuryMul.toFixed(2)}</span></div>
             <div className={styles.summaryRow}><span>Familiarity</span><span>+{famGain.toFixed(1)}/wk</span></div>
@@ -220,7 +220,7 @@ export default function TrainingScreen() {
         <ProgramsPanel s={s} mutate={mutate} />
       </div>
 
-      <Panel title="Roster Development" className={styles.rosterPanel} flush>
+      <Panel title="Roster development" className={styles.rosterPanel} flush>
         <DataTable columns={columns} rows={roster} rowKey={(p) => p.id} compact />
       </Panel>
       </div>

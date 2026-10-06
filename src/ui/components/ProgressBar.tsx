@@ -10,7 +10,7 @@ interface Props {
 }
 
 const variantColor: Record<Variant, string> = {
-  cyan: 'var(--cyan)',
+  cyan: 'var(--accent)',
   positive: 'var(--positive)',
   negative: 'var(--negative)',
   muted: 'var(--text-muted)'

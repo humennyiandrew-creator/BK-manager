@@ -62,8 +62,8 @@ export default function StartMenuScreen() {
 
   const items: { id: string; label: string; sub: string; onClick: () => void; disabled?: boolean; active?: boolean }[] = [
     { id: 'continue', label: 'Continue', sub: latest ? `${latest.teamName} · ${formatDate(latest.date)}` : 'No career in progress', onClick: () => latest && doLoad(latest.slot), disabled: !latest },
-    { id: 'new', label: 'New Career', sub: 'NBA or EuroLeague — pick your club', onClick: () => setMode('newSlot'), active: mode === 'newSlot' },
-    { id: 'load', label: 'Load Career', sub: `${saves.length} saved career${saves.length === 1 ? '' : 's'}`, onClick: () => setMode('load'), active: mode === 'load' },
+    { id: 'new', label: 'New career', sub: 'NBA or EuroLeague — pick your club', onClick: () => setMode('newSlot'), active: mode === 'newSlot' },
+    { id: 'load', label: 'Load career', sub: `${saves.length} saved career${saves.length === 1 ? '' : 's'}`, onClick: () => setMode('load'), active: mode === 'load' },
     { id: 'settings', label: 'Settings', sub: 'Audio and display', onClick: () => setMode('settings'), active: mode === 'settings' },
     { id: 'quit', label: 'Quit', sub: 'Back to the desktop', onClick: () => window.close() },
   ];

@@ -24,7 +24,7 @@ export default function PlayerCard({ rank, rankTrend = 'none', facePath, firstNa
       </div>
       <div className={styles.info}>
         <span className={styles.first}>{firstName}</span>
-        <span className={styles.last}>{lastName.toUpperCase()}</span>
+        <span className={styles.last}>{lastName}</span>
         <span className={styles.subtitle}>{subtitle}</span>
       </div>
     </div>

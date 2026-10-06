@@ -36,8 +36,8 @@
 }
 
 .nav button:hover {
-  color: var(--cyan);
-  border-color: var(--cyan);
+  color: var(--accent);
+  border-color: var(--accent);
 }
 
 .dowRow {
@@ -94,7 +94,7 @@
 }
 
 .gameChip:not(:disabled):hover {
-  border-color: var(--cyan);
+  border-color: var(--accent);
 }
 
 .gameLogo {
@@ -188,7 +188,7 @@
 .boxTeamName {
   font-size: 0.75rem;
   font-weight: 700;
-  color: var(--cyan);
+  color: var(--accent);
   margin-bottom: 0.4rem;
 }
 

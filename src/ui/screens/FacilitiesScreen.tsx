@@ -36,9 +36,9 @@ export default function FacilitiesScreen() {
         subtitle="Arena and training center"
         right={
           <div className={styles.heroStats}>
-            <StatTile label="Facility Levels" value={builtLevels} formatter={(v) => `${v}/25`} />
-            <StatTile label="Nodes Built" value={totalNodes} />
-            <StatTile label="Monthly Upkeep" value={monthlyMaint} formatter={(v) => `$${v.toFixed(2)}M`} />
+            <StatTile label="Facility levels" value={builtLevels} formatter={(v) => `${v}/25`} />
+            <StatTile label="Nodes built" value={totalNodes} />
+            <StatTile label="Monthly upkeep" value={monthlyMaint} formatter={(v) => `$${v.toFixed(2)}M`} />
           </div>
         }
       />
@@ -52,7 +52,12 @@ export default function FacilitiesScreen() {
             const inProgress = !!f.upgrade;
             const canAfford = s.finance.cash >= cost;
             return (
-              <button key={id} type="button" className={id === active ? `${styles.card} ${styles.cardActive}` : styles.card} onClick={() => setActive(id)}>
+              <div
+                key={id} role="button" tabIndex={0} aria-pressed={id === active}
+                className={id === active ? `${styles.card} ${styles.cardActive}` : styles.card}
+                onClick={() => setActive(id)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setActive(id); } }}
+              >
                 <div className={styles.cardHead}>
                   <span className={styles.cardTitle}>{FACILITY_LABEL[id]}</span>
                   <span className={styles.level}>Lv {level}</span>
@@ -64,13 +69,13 @@ export default function FacilitiesScreen() {
                 {inProgress ? (
                   <div className={styles.progress}>
                     <ProgressBar value={days - daysUntil(s, f.upgrade!.done)} max={days || 1} />
-                    <span className={styles.progressLabel}>Upgrading to Lv {f.upgrade!.to} — {Math.max(0, daysUntil(s, f.upgrade!.done))}d left</span>
+                    <span className={styles.progressLabel}>Upgrading to level {f.upgrade!.to}, {Math.max(0, daysUntil(s, f.upgrade!.done))} days left</span>
                   </div>
                 ) : maxed ? (
                   <div className={styles.maxed}>Maximum level reached</div>
                 ) : (
                   <div className={styles.upgradeRow}>
-                    <span className={styles.cost}>{formatMoneyShort(cost)} · {days}d</span>
+                    <span className={styles.cost}>{formatMoneyShort(cost)}, {days} days</span>
                     <button
                       type="button" className={styles.upgradeBtn} disabled={!canAfford}
                       onClick={(e) => { e.stopPropagation(); doUpgrade(id); }}
@@ -80,7 +85,7 @@ export default function FacilitiesScreen() {
                   </div>
                 )}
                 <span className={styles.nodeCount}>{f.nodes?.length ?? 0}/{NODES_BY_FACILITY[id].length} nodes built</span>
-              </button>
+              </div>
             );
           })}
         </div>
@@ -117,7 +122,7 @@ export default function FacilitiesScreen() {
                   )}
                   {state === 'available' && (
                     <div className={styles.upgradeRow}>
-                      <span className={styles.cost}>{formatMoneyShort(node.cost)} · {node.days}d</span>
+                      <span className={styles.cost}>{formatMoneyShort(node.cost)}, {node.days} days</span>
                       <button type="button" className={styles.upgradeBtn} disabled={!canAfford || blocked} onClick={() => doNode(node.id)}>
                         Build
                       </button>

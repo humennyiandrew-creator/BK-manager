@@ -88,16 +88,16 @@ export default function NegotiationModal({ s, mutate, playerId, kind, onClose }:
           <div className={styles.left}>
             <BkImage path={p.face} alt={p.lastName} className={styles.face} />
             <div className={styles.name}>{p.firstName} {p.lastName}</div>
-            <div className={styles.meta}>{p.positions.join('/')} · Age {Math.floor(ageOf(p.birthDate))} · OVR {p.ratings.ovr} / POT {p.ratings.pot}</div>
+            <div className={styles.meta}>{p.positions.join('/')}, Age {Math.floor(ageOf(p.birthDate))}, OVR {p.ratings.ovr}, POT {Math.round(p.ratings.pot)}</div>
             <div className={styles.metaRow}><span>Form</span><span>{(p.form ?? 0) > 0 ? '+' : ''}{(p.form ?? 0).toFixed(1)}</span></div>
             <div className={styles.metaRow}><span>Morale</span><span>{p.morale}</span></div>
-            <div className={styles.metaRow}><span>Market Value</span><span>{formatMoneyShort(mv)}</span></div>
+            <div className={styles.metaRow}><span>Market value</span><span>{formatMoneyShort(mv)}</span></div>
             <div className={styles.metaRow}>
-              <span>Current Deal</span>
-              <span>{p.contract && !isTwoWay(p) ? `${formatMoneyShort(salaryIn(p, s.season))} · ${yearsLeft(p, s.season)}y` : '—'}</span>
+              <span>Current deal</span>
+              <span>{p.contract && !isTwoWay(p) ? `${formatMoneyShort(salaryIn(p, s.season))}, ${yearsLeft(p, s.season)}y` : '–'}</span>
             </div>
             <div className={styles.divider} />
-            <div className={styles.patienceLabel}>Agent Patience</div>
+            <div className={styles.patienceLabel}>Agent patience</div>
             <div className={styles.meterTrack}>
               <div className={styles.meterFill} style={{ width: `${Math.max(0, neg.patience)}%`, background: neg.patience > 50 ? 'var(--positive)' : neg.patience > 20 ? '#e2b93b' : 'var(--negative)' }} />
             </div>
@@ -135,7 +135,7 @@ export default function NegotiationModal({ s, mutate, playerId, kind, onClose }:
                 <div className={capBad ? styles.legalBad : styles.legalOk}>{capLine}</div>
                 <div className={styles.builderBtns}>
                   <button type="button" className={styles.cancelBtn} onClick={onClose}>Close</button>
-                  <button type="button" className={styles.submitBtn} disabled={capBad} onClick={submit}>Submit Offer</button>
+                  <button type="button" className={styles.submitBtn} disabled={capBad} onClick={submit}>Submit offer</button>
                 </div>
               </div>
             ) : (

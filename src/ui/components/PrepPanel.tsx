@@ -11,8 +11,8 @@ const PLANS: { id: 'contain-star' | 'take-away-three' | 'protect-rim' | 'force-t
   { id: 'contain-star', label: 'Contain the Star', hint: 'Box-and-one on their top scorer.' },
   { id: 'take-away-three', label: 'Take Away the Three', hint: 'Switch everything, close out hard.' },
   { id: 'protect-rim', label: 'Protect the Rim', hint: 'Drop coverage, sag off the arc.' },
-  { id: 'force-turnovers', label: 'Force Turnovers', hint: 'Full-court press.' },
-  { id: 'run-them', label: 'Run With Them', hint: 'Push the pace and transition game.' },
+  { id: 'force-turnovers', label: 'Force turnovers', hint: 'Full-court press.' },
+  { id: 'run-them', label: 'Run with them', hint: 'Push the pace and transition game.' },
 ];
 
 export default function PrepPanel({ s, mutate }: Props) {
@@ -27,14 +27,14 @@ export default function PrepPanel({ s, mutate }: Props) {
   });
 
   return (
-    <Panel title="Game Prep" className={styles.panel}>
+    <Panel title="Game prep" className={styles.panel}>
       <div className={styles.opp}>
         <TeamBadge logoPath={opp.logo} name={`${opp.city} ${opp.name}`} />
       </div>
       <div className={styles.reportGrid}>
         <span>Pace</span><span>{prep.report.pace}</span>
         <span>3PT Rate</span><span>{Math.round(prep.report.threeRate * 100)}%</span>
-        <span>Rim Rate</span><span>{Math.round(prep.report.rimRate * 100)}%</span>
+        <span>Rim rate</span><span>{Math.round(prep.report.rimRate * 100)}%</span>
         <span>Star</span><span>{star ? `${star.firstName} ${star.lastName}` : '-'}</span>
         <span>Scheme</span><span>{prep.report.scheme}</span>
         <span>Weakness</span><span>{prep.report.weakness}</span>

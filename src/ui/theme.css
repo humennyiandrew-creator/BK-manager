@@ -75,10 +75,6 @@
   --text-dim: var(--chalk-3);
   --positive: var(--win);
   --negative: var(--loss);
-  --cyan: var(--accent);
-  --cyan-dim: var(--accent-2);
-  --red: var(--accent);
-  --yellow: var(--warn);
 }
 
 * {

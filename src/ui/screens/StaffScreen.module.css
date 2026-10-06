@@ -70,7 +70,7 @@
 }
 
 .courseStatus {
-  color: var(--cyan);
+  color: var(--accent);
   white-space: nowrap;
 }
 
@@ -85,8 +85,8 @@
 }
 
 .courseBtn:hover {
-  border-color: var(--cyan);
-  color: var(--cyan);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .courseOptions {
@@ -107,7 +107,7 @@
 }
 
 .courseOption:hover {
-  border-color: var(--cyan);
+  border-color: var(--accent);
 }
 
 .roleRow {
@@ -193,8 +193,8 @@
 }
 
 .hireBtn:hover {
-  border-color: var(--cyan);
-  color: var(--cyan);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .tabs {
@@ -218,9 +218,9 @@
 }
 
 .tabActive {
-  background: var(--red);
-  border-color: var(--red);
-  color: var(--text);
+  background: var(--chalk);
+  border-color: var(--chalk);
+  color: #15171a;
 }
 
 .marketList {

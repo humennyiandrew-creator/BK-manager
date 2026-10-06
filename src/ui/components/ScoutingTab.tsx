@@ -49,13 +49,13 @@ export default function ScoutingTab({ s, mutate }: Props) {
   return (
     <div className={styles.wrap}>
       <div className={styles.col}>
-        <Panel title="Scouting Department" className={styles.statsPanel}>
+        <Panel title="Scouting department" className={styles.statsPanel}>
           <div className={styles.statRow}><span>Chief Scout rating</span><span>{scoutRating}</span></div>
           <div className={styles.statRow}><span>Analytics rating</span><span>{analyticsRating}</span></div>
           <div className={styles.statRow}><span>Assignments in flight</span><span>{assignments.length} / {scoutCount || 0}</span></div>
         </Panel>
 
-        <Panel title="New Assignment" className={styles.newPanel}>
+        <Panel title="New assignment" className={styles.newPanel}>
           <div className={styles.field}>
             <label>Target type</label>
             <select className={styles.select} value={kind} onChange={(e) => { const nk = e.target.value as ScoutTargetKind; setKind(nk); setKey(nk === 'region' ? SCOUT_REGIONS[0] : ''); }}>
@@ -74,11 +74,11 @@ export default function ScoutingTab({ s, mutate }: Props) {
             <label>Duration: {weeks} weeks</label>
             <input type="range" min={2} max={8} step={1} value={weeks} onChange={(e) => setWeeks(Number(e.target.value))} className={styles.slider} />
           </div>
-          <button type="button" className={styles.startBtn} disabled={!keyOptions.length} onClick={start}>Assign Scout</button>
+          <button type="button" className={styles.startBtn} disabled={!keyOptions.length} onClick={start}>Assign scout</button>
         </Panel>
       </div>
 
-      <Panel title="Active Assignments" className={styles.activePanel}>
+      <Panel title="Active assignments" className={styles.activePanel}>
         {assignments.length === 0 && <div className={styles.empty}>No scouts currently assigned.</div>}
         {assignments.map((a) => {
           const pct = ((a.weeksTotal - a.weeksLeft) / a.weeksTotal) * 100;
@@ -102,7 +102,7 @@ export default function ScoutingTab({ s, mutate }: Props) {
           return (
             <div key={p.id} className={styles.shortRow}>
               <span className={styles.shortName}>{p.firstName} {p.lastName}</span>
-              <span className={styles.shortMeta}>{p.positions[0]} · POT {v.pot}±{v.range}</span>
+              <span className={styles.shortMeta}>{p.positions[0]}, POT {v.pot}±{v.range}</span>
               <button type="button" className={styles.removeBtn} onClick={() => mutate((st) => removeFromShortlist(st, p.id))}>Remove</button>
             </div>
           );
