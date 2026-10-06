@@ -236,8 +236,24 @@
 }
 
 .mComp {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
   font-weight: 650;
 }
+
+.rivalTag {
+  padding: 0 0.45rem;
+  border-radius: 2px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.35rem;
+  color: #15171a;
+  background: var(--chalk-3);
+}
+
+.rv_heated { background: var(--warn); }
+.rv_defining { background: var(--loss); color: #fff; }
 
 .mWhen {
   color: var(--chalk-3);

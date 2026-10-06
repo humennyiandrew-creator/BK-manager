@@ -20,6 +20,7 @@ export const TAB_TITLES: Record<TabId, { title: string; subtitle: string }> = {
   finances: { title: 'Finances', subtitle: 'Budget and payroll' },
   standings: { title: 'Standings', subtitle: 'League table' },
   league: { title: 'League hub', subtitle: 'Power rankings, storylines and award races' },
+  stories: { title: 'Rivalries and stories', subtitle: 'Rivals, duels and the stories around your players' },
   moments: { title: 'Season moments', subtitle: 'NBA Cup, All-Star weekend, the deadline and awards night' },
   settings: { title: 'Settings', subtitle: 'Preferences' }
 };

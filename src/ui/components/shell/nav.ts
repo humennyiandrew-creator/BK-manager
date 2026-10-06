@@ -23,7 +23,7 @@ export const NAV_GROUPS: NavGroup[] = [
     { id: 'standings', label: 'Standings' }, { id: 'league', label: 'League hub' },
     { id: 'moments', label: 'Season moments', when: (s) => !!s.calendar?.cup },
   ] },
-  { id: 'career', label: 'Career', items: [{ id: 'career', label: 'Your career' }, { id: 'settings', label: 'Settings' }] },
+  { id: 'career', label: 'Career', items: [{ id: 'career', label: 'Your career' }, { id: 'stories', label: 'Rivalries and stories' }, { id: 'settings', label: 'Settings' }] },
 ];
 
 export const groupOf = (tab: TabId) => NAV_GROUPS.find((g) => g.items.some((i) => i.id === tab))?.id ?? 'home';

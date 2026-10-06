@@ -6,6 +6,7 @@ import { addDays } from './schedule';
 import { clamp } from './mgmt/market';
 import { ROLE_LABEL } from './mgmt/staff';
 import { applyArcChoice, arcEventDraft, pendingArcDecision } from './arcs';
+import { applyStoryChoice, storyDraft } from './storylines';
 
 type Rng = () => number;
 type Choice = { id: string; label: string; hint: string };
@@ -519,6 +520,12 @@ function applyEffect(s: GameState, ev: GameEvent, choiceId: string): string {
     case 'arc-breakout':
     case 'arc-slump':
       return applyArcChoice(s, ev, choiceId);
+    case 'story-contract-year':
+    case 'story-unhappy-star':
+    case 'story-comeback':
+    case 'story-mentor':
+    case 'story-rookie-wall':
+      return applyStoryChoice(s, ev, choiceId);
     case 'charity-event': {
       if (choiceId === 'host') {
         s.finance.cash -= 150_000;
@@ -584,7 +591,9 @@ export function eventsDaily(s: GameState): void {
 
   // A breakout or collapse on our roster is the story of the week: it jumps the queue.
   const arcPlayer = !pendingUserEvent(s) ? pendingArcDecision(s) : undefined;
+  const story = !arcPlayer && !pendingUserEvent(s) ? storyDraft(s) : undefined;
   if (arcPlayer) pushEvent(s, arcEventDraft(s, arcPlayer));
+  else if (story) pushEvent(s, story);
   else if (!pendingUserEvent(s)) {
     const rng = mulberry32(hashString(`${s.seed}|event|${s.date}`));
     if (rng() < 1 / 9) triggerFrom(s, CATALOGUE, rng);

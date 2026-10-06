@@ -27,6 +27,7 @@ import ArcBadge from './hub/ArcBadge';
 import { ARC_LABEL } from '../../engine/arcs';
 import { affiliateName, assign, canAssign, recall } from '../../engine/gleague';
 import { uniform } from './shell/teamColors';
+import { TIER_LABEL, playerRival, tierOf } from '../../engine/rivalries';
 import { toast } from './Toasts';
 import { play } from '../sound';
 import styles from './PlayerPage.module.css';
@@ -154,6 +155,7 @@ export default function PlayerPage({ s, playerId, onClose }: Props) {
               )}
               {p.prospect && <div className={styles.metaLine}>{p.college ?? 'International'}, draft prospect</div>}
               {p.assigned && p.teamId && <div className={styles.metaLine}>On assignment with the {affiliateName(s, p.teamId)}</div>}
+              {(() => { const r = playerRival(s, p.id); const q = r && s.players[r.rivalId]; return r && q ? <div className={styles.metaLine}>{TIER_LABEL[tierOf(r.heat)]} with {q.firstName} {q.lastName}, duels {r.season.w}–{r.season.l}</div> : null; })()}
               {!p.teamId && p.affiliate && !p.prospect && <div className={styles.metaLine}>Playing for the {affiliateName(s, p.affiliate)}</div>}
             </div>
 

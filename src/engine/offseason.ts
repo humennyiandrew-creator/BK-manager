@@ -1,6 +1,7 @@
 // Offseason loop: awards/history → lottery → draft → options + re-sign window → free agency → camp → new season.
 // Driven one step per "Continue" via offseasonStep(). Career ends after s.maxSeasons seasons.
 import { coachOfTheYear, setupCalendar } from './calendar';
+import { setupRivalries } from './rivalries';
 import type { Awards, GameState, Player, SeasonRecord } from './model';
 import { emptyLine } from './model';
 import { capNumbers, contractRows, isTwoWay, marketValue, minSalary, rosterOf, salaryIn, seasonLabel } from './cba';
@@ -286,6 +287,7 @@ function newSeason(s: GameState) {
     draft: `${Y + 1}-06-24`, freeAgency: `${Y + 1}-06-30`,
   };
   setupCalendar(s);
+  setupRivalries(s);
   addPickYear(s, Y + 5);
   generateDraftClass(s, Y + 1);
   // Finances + board for the new season.

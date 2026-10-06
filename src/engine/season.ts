@@ -16,6 +16,7 @@ import { eventsDaily } from './events';
 import { settleMatchObjectives } from './objectives';
 import { newsAfterGame, newsInjury } from './news';
 import { cupAfterGame } from './calendar';
+import { rivalriesAfterGame, rivalriesSeasonEnd } from './rivalries';
 
 // ---------- standings ----------
 
@@ -115,6 +116,7 @@ export function applyResult(s: GameState, g: Game, res: GameResult) {
   }
   newsAfterGame(s, g, res);
   cupAfterGame(s, g, res);
+  rivalriesAfterGame(s, g, res);
   g.result = isUser ? res : { home: res.home, away: res.away, periods: res.periods };
   if (isUser) {
     const us = g.home === s.userTeamId;
@@ -277,6 +279,7 @@ export function advanceDay(s: GameState, skipUserGame = false) {
   // Competitions the user is not in still run their own postseason quietly.
   if (userLeague !== 'EL' && elRegularDone(s)) { elStartPostseason(s); elTick(s); }
   dailyUpdate(s, played);
+  if (phaseBefore === 'regular' && s.phase !== 'regular') rivalriesSeasonEnd(s);
   if (s.phase !== phaseBefore) boardOnPhase(s);
   s.date = addDays(s.date, 1);
 }

@@ -199,6 +199,8 @@ export interface GameState {
   // ---- living world (optional: older saves fill these in lazily) ----
   news?: NewsItem[];                       // league wire, newest first, capped
   calendar?: SeasonCalendar;               // NBA Cup, All-Star weekend, deadline day, awards night
+  rivals?: Rivalries;                      // club and player rivalries (F1-style heat tiers)
+  stories?: Storyline[];                   // multi-step storylines around the user's players
   powerRankings?: PowerRankings;           // weekly power rankings per competition
   matchObjectives?: MatchObjectiveSet;     // sponsor goals for the user's next game
   objectiveLog?: { gameId: number; date: string; met: number; total: number; earned: number }[];
@@ -476,4 +478,45 @@ export interface SeasonCalendar {
   allStar?: AllStarState;
   deadline: { warned?: boolean; done?: boolean; trades?: number };
   awards?: { date: string; result: Awards };
+}
+
+// ---------- rivalries and storylines ----------
+
+export type RivalTier = 'regular' | 'heated' | 'defining';
+export interface H2H { w: number; l: number }
+export interface ClubRivalry {
+  teamId: string;
+  heat: number;                            // 0–100; tiers at 40 (heated) and 75 (career-defining)
+  reason: string;
+  since: string;                           // season label
+  season: H2H; allTime: H2H;
+}
+export interface PlayerRivalry {
+  playerId: string;                        // our player
+  rivalId: string;
+  heat: number;
+  reason: string;
+  since: string;
+  season: H2H; allTime: H2H;               // head-to-head duels (game score)
+}
+export interface Rivalries {
+  season: string;
+  clubs: ClubRivalry[];
+  players: PlayerRivalry[];
+  acclaim: number;                         // career total earned from rivalry wins
+}
+
+export type StoryKind = 'contract-year' | 'unhappy-star' | 'comeback' | 'mentor' | 'rookie-wall';
+export interface Storyline {
+  id: string;
+  kind: StoryKind;
+  playerId: string;
+  otherId?: string;                        // mentor pairing: the veteran
+  season: string;
+  stage: number;
+  next: string;                            // date of the next beat
+  awaiting?: boolean;                      // a decision event is out for this beat
+  done?: boolean;
+  outcome?: 'good' | 'bad' | 'neutral';
+  log: { date: string; text: string }[];
 }

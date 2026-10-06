@@ -24,6 +24,7 @@ import { objectiveLabel } from '../../engine/mgmt/board';
 import { addDays } from '../../engine/schedule';
 import { sessionOn } from '../../engine/training';
 import { cupLabel, momentOn } from '../../engine/calendar';
+import { TIER_LABEL, clubRival, tierOf } from '../../engine/rivalries';
 import { formChip } from './RosterScreen';
 import styles from './HomeScreen.module.css';
 
@@ -128,6 +129,7 @@ function NextMatch({ s, g }: { s: GameState; g: Game }) {
   const objectives = s.matchObjectives?.gameId === g.id ? s.matchObjectives.list : null;
   const star = (id: string) => topPlayers(s, id, 6).find((p) => !p.injury);
   const home = g.home === us.id;
+  const rival = clubRival(s, opp.id);
   const side = (team: typeof us, right: boolean) => {
     const r = rec(team.id), p = star(team.id);
     return (
@@ -153,7 +155,10 @@ function NextMatch({ s, g }: { s: GameState; g: Game }) {
   return (
     <section className={styles.match}>
       <header className={styles.mHead}>
-        <span className={styles.mComp}>{gameLabel(s, g)}</span>
+        <span className={styles.mComp}>
+          {gameLabel(s, g)}
+          {rival && <span className={`${styles.rivalTag} ${styles[`rv_${tierOf(rival.heat)}`]}`}>{TIER_LABEL[tierOf(rival.heat)]}, {rival.season.w}–{rival.season.l} this season</span>}
+        </span>
         <span className={styles.mWhen}>{home ? 'Home' : 'Away'}, {formatDate(g.date)}</span>
       </header>
       <div className={styles.mMain}>

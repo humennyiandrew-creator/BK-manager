@@ -1,0 +1,302 @@
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  height: 100%;
+  min-height: 0;
+  padding: 1rem 1.25rem;
+  overflow-y: auto;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.1fr;
+  gap: var(--gap);
+  align-items: start;
+}
+
+.note {
+  margin: 0;
+  color: var(--chalk-3);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.acclaim {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  color: var(--chalk-2);
+  font-size: 0.86rem;
+}
+
+.acclaim :global(.numeral) {
+  font-size: 2rem;
+  color: var(--maple);
+}
+
+.face {
+  width: 2.3rem;
+  height: 2.3rem;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--rail);
+  flex-shrink: 0;
+}
+
+/* ---------- heat meter ---------- */
+
+.heat {
+  position: relative;
+  display: block;
+  height: 6px;
+  background: var(--rail);
+}
+
+.heat > i {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 1px;
+  background: var(--chalk-3);
+}
+
+.heatFill {
+  display: block;
+  height: 100%;
+}
+
+.regular { background: var(--chalk-3); }
+.heated { background: var(--warn); }
+.defining { background: var(--loss); }
+
+.records {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  font-size: 0.8rem;
+  color: var(--chalk-3);
+}
+
+.records b {
+  font-size: 1.2rem;
+  color: var(--chalk);
+  margin-right: 0.2rem;
+}
+
+/* ---------- clubs ---------- */
+
+.clubs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.club {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--seam-soft);
+}
+
+.club:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.clubTop {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.patch {
+  position: relative;
+  flex-shrink: 0;
+  width: 3.4rem;
+  height: 3.4rem;
+  border-radius: 50%;
+  background: var(--chalk);
+  display: grid;
+  place-items: center;
+}
+
+.patch::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  border: 1px dashed rgba(21, 23, 26, 0.3);
+}
+
+.crest {
+  width: 72%;
+  height: 72%;
+  object-fit: contain;
+}
+
+.clubText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.tier {
+  font-size: 0.78rem;
+  font-weight: 650;
+  color: var(--maple);
+}
+
+.clubName {
+  font-size: 1.9rem;
+}
+
+.reason {
+  font-size: 0.8rem;
+  color: var(--chalk-3);
+}
+
+.stakes {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--chalk-2);
+}
+
+/* ---------- duels ---------- */
+
+.duels {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.duel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.duelTop {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.duelSide {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--chalk);
+  text-align: left;
+  min-width: 0;
+}
+
+.duelRight {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.duelSide:hover .duelName {
+  text-decoration: underline;
+}
+
+.duelName {
+  font-weight: 650;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.duelTeam {
+  margin-left: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--chalk-3);
+}
+
+.duelScore {
+  font-size: 1.8rem;
+}
+
+/* ---------- stories ---------- */
+
+.story {
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--seam-soft);
+}
+
+.story:first-of-type {
+  padding-top: 0;
+}
+
+.storyHead {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.storyText {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.storyKind {
+  font-size: 0.78rem;
+  font-weight: 650;
+  color: var(--maple);
+}
+
+.storyName {
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--chalk);
+  font-weight: 650;
+  text-align: left;
+}
+
+.storyName:hover {
+  text-decoration: underline;
+}
+
+.storyState {
+  font-size: 0.75rem;
+  font-weight: 650;
+  color: var(--chalk-2);
+}
+
+.out_good .storyState { color: var(--win); }
+.out_bad .storyState { color: var(--loss); }
+.out_neutral .storyState { color: var(--chalk-3); }
+
+.log {
+  margin: 0.5rem 0 0 1.1rem;
+  padding: 0 0 0 0.8rem;
+  list-style: none;
+  border-left: 1px solid var(--seam);
+}
+
+.log li {
+  position: relative;
+  padding: 0.15rem 0;
+  font-size: 0.82rem;
+  color: var(--chalk-3);
+}
+
+.log li span {
+  margin-right: 0.5rem;
+  color: var(--chalk-3);
+  font-size: 0.75rem;
+}
+
+.logLast {
+  color: var(--chalk) !important;
+}

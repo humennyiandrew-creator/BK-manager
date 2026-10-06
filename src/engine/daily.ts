@@ -22,6 +22,8 @@ import { checkPromises } from './mgmt/board';
 import { sponsorsWeekly } from './sponsors';
 import { staffWeekly } from './mgmt/staff';
 import { calendarDaily } from './calendar';
+import { rivalriesWeekly } from './rivalries';
+import { storylinesDaily } from './storylines';
 
 export function dailyUpdate(s: GameState, playedToday: Game[]) {
   for (const g of playedToday) if (g.home === s.userTeamId || g.away === s.userTeamId) boardAfterGame(s, g);
@@ -36,10 +38,12 @@ export function dailyUpdate(s: GameState, playedToday: Game[]) {
   buildMatchObjectives(s);
   if (s.phase === 'regular' && s.date <= s.keyDates.tradeDeadline) aiTradeDaily(s);
   calendarDaily(s);
+  rivalriesWeekly(s);
   freeAgencyDaily(s);
   euroTransferDaily(s);
   returnLoans(s);
   managerDaily(s);
+  storylinesDaily(s);
   eventsDaily(s);
   newsDaily(s, playedToday);
   chemistryWeekly(s);

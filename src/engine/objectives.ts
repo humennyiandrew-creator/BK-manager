@@ -6,6 +6,7 @@ import { hashString, mulberry32, type Rng } from './rng';
 import { daysBetween } from './schedule';
 import { clamp, teamStrength } from './mgmt/market';
 import { BRAND_GLOBAL, BRAND_LOCAL, BRAND_NATIONAL } from './sponsors';
+import { rivalryStakes } from './rivalries';
 
 // ---------- evaluation (shared by settlement and the live match tracker) ----------
 
@@ -152,7 +153,8 @@ export function buildMatchObjectives(s: GameState, game?: Game): void {
     if ((d.stat === 'margin' || d.stat === 'win') && chosen.some((c) => c.stat === 'margin' || c.stat === 'win')) continue;
     chosen.push(d);
   }
-  const big = g.type !== 'regular' ? 1.6 : 1;
+  // Partners pay more for playoff and Cup games, and for nights against a rival.
+  const big = (g.type !== 'regular' ? 1.6 : 1) * rivalryStakes(s, g);
   const sponsors = partners(s, rng);
   s.matchObjectives = {
     gameId: g.id,
