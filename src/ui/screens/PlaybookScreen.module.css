@@ -114,10 +114,8 @@
 
 .sectionLabel {
   margin-top: 0.7rem;
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   color: var(--text-dim);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
 }
 
 .sysPlayList {
@@ -143,7 +141,6 @@
 
 .freqDots {
   color: var(--cyan);
-  letter-spacing: 0.1em;
 }
 
 .catSelect {
@@ -287,9 +284,7 @@
 .vsLabel {
   color: var(--text-dim);
   margin-right: 0.4rem;
-  text-transform: uppercase;
-  font-size: 0.6rem;
-  letter-spacing: 0.05em;
+  font-size: 0.75rem;
 }
 
 /* ---------- defense ---------- */
@@ -359,10 +354,8 @@
 }
 
 .styleField label {
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
 }
 
 .styleField select {

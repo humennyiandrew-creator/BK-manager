@@ -64,10 +64,8 @@
 }
 
 .kicker {
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
   color: #e3a32e;
 }
 
@@ -156,10 +154,8 @@
 }
 
 .outcomeLabel {
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
   color: var(--cyan);
 }
 
@@ -176,8 +172,7 @@
   border: none;
   border-radius: var(--radius);
   padding: 0.45rem 1rem;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  text-transform: uppercase;
   cursor: pointer;
 }

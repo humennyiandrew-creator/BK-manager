@@ -1,12 +1,12 @@
 // Derives team-accent CSS colors (bright accent, secondary accent, contrast text)
-// from a team's primary/secondary colors, ensuring readable contrast on the dark shell bg.
+// from a team's primary/secondary colors, ensuring readable contrast on the concrete shell bg.
 
 type Rgb = [number, number, number];
 
-const BG: Rgb = [0x0b, 0x0f, 0x1a];
-const FALLBACK_ACCENT = '#19c3d6';
-const FALLBACK_ACCENT2 = '#0f7c8a';
-const FALLBACK_CONTRAST = '#052226';
+const BG: Rgb = [0x1e, 0x20, 0x24];
+const FALLBACK_ACCENT = '#e0662c';
+const FALLBACK_ACCENT2 = '#b5501f';
+const FALLBACK_CONTRAST = '#1e2024';
 
 export interface AccentTheme { accent: string; accent2: string; accentContrast: string }
 
@@ -54,6 +54,6 @@ export function computeAccent(primary?: string, secondary?: string): AccentTheme
     tries++;
   }
   if (contrastRatio(accentRgb, BG) < 3) return fallback();
-  const contrast = contrastRatio(accentRgb, [0, 0, 0]) >= contrastRatio(accentRgb, [255, 255, 255]) ? '#0b0f1a' : '#ffffff';
+  const contrast = contrastRatio(accentRgb, [0, 0, 0]) >= contrastRatio(accentRgb, [255, 255, 255]) ? '#15171a' : '#ffffff';
   return { accent: rgbToHex(accentRgb), accent2: rgbToHex(accent2Rgb), accentContrast: contrast };
 }

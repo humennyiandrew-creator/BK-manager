@@ -40,10 +40,8 @@
 }
 
 .kicker {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
   color: #e3a32e;
 }
 
@@ -108,10 +106,8 @@
 }
 
 .patienceLabel {
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
   color: var(--text-muted);
   align-self: flex-start;
 }
@@ -246,9 +242,8 @@
   border: none;
   border-radius: var(--radius);
   padding: 0.45rem 1.1rem;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  text-transform: uppercase;
   cursor: pointer;
 }
 
@@ -278,8 +273,7 @@
   border: none;
   border-radius: var(--radius);
   padding: 0.45rem 1rem;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  text-transform: uppercase;
   cursor: pointer;
 }

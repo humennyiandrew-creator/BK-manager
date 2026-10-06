@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, type CSSProperties } from 'react';
 import { useUI, type TabId } from './store/useUI';
 import { useGame, useGameState } from './store/useGame';
-import NavRail from './components/NavRail';
-import TeamHeader from './components/TeamHeader';
+import Band from './components/shell/Band';
+import { uniform } from './components/shell/teamColors';
 import ContinueWidget from './components/ContinueWidget';
 import EventModal from './components/EventModal';
 import PlayerPage from './components/PlayerPage';
@@ -68,8 +68,6 @@ function Shell() {
   const closeEvent = useUI((s) => s.closeEvent);
   const playerId = useUI((s) => s.playerId);
   const closePlayer = useUI((s) => s.closePlayer);
-  const navCollapsed = useUI((s) => s.navCollapsed);
-  const toggleNav = useUI((s) => s.toggleNav);
   const Screen = SCREENS[tab];
   const pending = s ? pendingUserEvent(s) : undefined;
   const seenPendingId = useRef<string | null>(null);
@@ -108,22 +106,23 @@ function Shell() {
     board: s.press?.pending ? 1 : 0,
   };
 
-  const accentStyle = {
+  const u = uniform(team!.colors.primary, team!.colors.secondary);
+  const shellStyle = {
     '--accent': accent.accent,
     '--accent-2': accent.accent2,
-    '--accent-contrast': accent.accentContrast
+    '--accent-contrast': accent.accentContrast,
+    '--team': u.team,
+    '--team-2': u.trim,
+    '--team-ink': u.ink
   } as CSSProperties;
 
   return (
-    <div className={styles.shell} style={accentStyle}>
-      <NavRail active={tab} onSelect={setTab} badges={badges} collapsed={navCollapsed} onToggle={toggleNav} />
-      <div className={styles.main}>
-        <TeamHeader s={s} continueSlot={<ContinueWidget s={s} busy={busy} onContinue={doContinue} />} />
-        <div className={styles.content}>
-          <ScreenTransition tabKey={tab}>
-            {s.manager.unemployed && UNEMPLOYED_LOCKED.has(tab) ? <BetweenJobsScreen tab={tab} /> : <Screen />}
-          </ScreenTransition>
-        </div>
+    <div className={styles.shell} style={shellStyle}>
+      <Band s={s} tab={tab} onSelect={setTab} badges={badges} continueSlot={<ContinueWidget s={s} busy={busy} onContinue={doContinue} />} />
+      <div className={styles.content}>
+        <ScreenTransition tabKey={tab}>
+          {s.manager.unemployed && UNEMPLOYED_LOCKED.has(tab) ? <BetweenJobsScreen tab={tab} /> : <Screen />}
+        </ScreenTransition>
       </div>
       {activeEventId && <EventModal s={s} eventId={activeEventId} onClose={closeEvent} />}
       {playerId && <PlayerPage s={s} playerId={playerId} onClose={closePlayer} />}

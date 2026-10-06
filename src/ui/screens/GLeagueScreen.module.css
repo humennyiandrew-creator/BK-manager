@@ -1,0 +1,78 @@
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  height: 100%;
+  min-height: 0;
+  padding: 1rem 1.25rem;
+  overflow-y: auto;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--gap);
+  align-items: start;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  min-width: 0;
+}
+
+.name {
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--chalk);
+  font-weight: 600;
+  text-align: left;
+}
+
+.name:hover {
+  text-decoration: underline;
+}
+
+.actions {
+  display: inline-flex;
+  gap: 0.3rem;
+}
+
+.btn,
+.btnQuiet {
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius);
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.btn {
+  background: var(--rail);
+  border: 1px solid var(--seam);
+  color: var(--chalk);
+}
+
+.btn:hover {
+  border-color: var(--chalk-3);
+}
+
+.btnQuiet {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--chalk-3);
+}
+
+.btnQuiet:hover {
+  color: var(--chalk);
+}
+
+.note {
+  margin: 0;
+  padding: 0.7rem 0.9rem;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--chalk-3);
+}

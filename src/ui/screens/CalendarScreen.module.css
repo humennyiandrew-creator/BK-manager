@@ -22,8 +22,6 @@
   font-size: var(--fs-label);
   font-weight: 700;
   color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
   margin-right: 0.2rem;
   white-space: nowrap;
 }
@@ -50,10 +48,8 @@
 
 .dow {
   padding: 0.4rem 0.5rem;
-  font-size: 0.62rem;
-  text-transform: uppercase;
+  font-size: 0.75rem;
   color: var(--text-dim);
-  letter-spacing: 0.05em;
 }
 
 .grid {
@@ -112,9 +108,8 @@
 }
 
 .gameComp {
-  font-size: 0.55rem;
+  font-size: 0.75rem;
   color: var(--text-dim);
-  text-transform: uppercase;
   letter-spacing: 0.03em;
   border: 1px solid var(--panel-border);
   border-radius: 3px;
@@ -194,8 +189,6 @@
   font-size: 0.75rem;
   font-weight: 700;
   color: var(--cyan);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
   margin-bottom: 0.4rem;
 }
 
@@ -208,8 +201,7 @@
 .boxTable th {
   text-align: right;
   color: var(--text-dim);
-  text-transform: uppercase;
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   padding: 0.25rem 0.4rem;
   border-bottom: 1px solid var(--panel-border);
 }

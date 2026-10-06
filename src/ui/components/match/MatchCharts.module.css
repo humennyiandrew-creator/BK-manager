@@ -76,10 +76,8 @@
 
 .flowStats span,
 .zoneCell span {
-  font-size: 0.56rem;
+  font-size: 0.75rem;
   font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
   color: var(--text-dim);
 }
 

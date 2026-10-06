@@ -63,7 +63,6 @@
 
 .gaugeLabel {
   font-size: 0.55rem;
-  letter-spacing: 0.1em;
   fill: var(--text-dim);
 }
 
@@ -144,9 +143,7 @@
   color: var(--text);
   border-radius: var(--radius);
   padding: 0.35rem 0.8rem;
-  font-size: 0.68rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -214,9 +211,7 @@
 }
 
 .toneTag {
-  font-size: 0.6rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-size: 0.75rem;
   color: var(--text-dim);
   border: 1px solid var(--panel-border);
   border-radius: 3px;

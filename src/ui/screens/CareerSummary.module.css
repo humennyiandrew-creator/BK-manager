@@ -31,8 +31,7 @@
 .title {
   position: relative;
   font-size: var(--fs-h1);
-  font-weight: 900;
-  font-style: italic;
+  font-weight: 800;
 }
 
 .slash {
@@ -68,10 +67,8 @@
 }
 
 .statLabel {
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   color: var(--text-dim);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
 }
 
 .tablePanel {
@@ -88,7 +85,6 @@
   padding: 0.7rem 2rem;
   font-size: 0.85rem;
   font-weight: 700;
-  text-transform: uppercase;
   letter-spacing: 0.03em;
 }
 

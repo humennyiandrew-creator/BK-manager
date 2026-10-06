@@ -91,11 +91,8 @@
 }
 
 .nmKicker {
-  font-size: 0.68rem;
-  font-weight: 900;
-  font-style: italic;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
+  font-size: 0.75rem;
+  font-weight: 800;
   background: var(--accent);
   color: var(--accent-contrast);
   padding: 0.15rem 0.6rem;
@@ -103,11 +100,9 @@
 }
 
 .nmComp {
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
 }
 
 .nmDate {
@@ -152,18 +147,14 @@
 }
 
 .nmCity {
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
   color: rgba(255, 255, 255, 0.75);
 }
 
 .nmName {
   font-size: 1.7rem;
-  font-weight: 900;
-  font-style: italic;
-  text-transform: uppercase;
+  font-weight: 800;
   line-height: 1;
   white-space: nowrap;
   overflow: hidden;
@@ -209,7 +200,7 @@
 
 .nmStarOvr {
   font-size: 0.8rem;
-  font-weight: 900;
+  font-weight: 800;
   color: var(--accent);
 }
 
@@ -223,25 +214,20 @@
 
 .nmCount {
   font-size: 2.6rem;
-  font-weight: 900;
-  font-style: italic;
+  font-weight: 800;
   line-height: 0.9;
 }
 
 .nmCountLabel {
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
   color: var(--text-muted);
 }
 
 .nmVs {
   margin: 0.3rem 0;
   font-size: 0.75rem;
-  font-weight: 900;
-  font-style: italic;
-  letter-spacing: 0.2em;
+  font-weight: 800;
   color: var(--text-dim);
 }
 
@@ -254,10 +240,8 @@
 }
 
 .nmOddsLabel {
-  font-size: 0.58rem;
+  font-size: 0.75rem;
   font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
   color: var(--text-dim);
 }
 
@@ -296,10 +280,8 @@
 }
 
 .nmSubhead {
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
   color: #e3a32e;
 }
 
@@ -319,11 +301,8 @@
 .nmBtnGhost {
   border-radius: var(--radius-sm);
   padding: 0.5rem 1rem;
-  font-size: 0.72rem;
-  font-weight: 900;
-  font-style: italic;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  font-size: 0.75rem;
+  font-weight: 800;
 }
 
 .nmBtn {
@@ -360,9 +339,7 @@
 
 .offStage {
   font-size: 2.4rem;
-  font-weight: 900;
-  font-style: italic;
-  text-transform: uppercase;
+  font-weight: 800;
   line-height: 1;
   margin-top: 0.6rem;
 }
@@ -396,10 +373,8 @@
 .tlNow .tlBar { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
 
 .tlLabel {
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
   color: var(--text-dim);
 }
 
@@ -434,15 +409,13 @@
 
 .stHash {
   font-size: 1.6rem;
-  font-weight: 900;
-  font-style: italic;
+  font-weight: 800;
   color: var(--accent);
 }
 
 .stPosNum {
   font-size: 4.4rem;
-  font-weight: 900;
-  font-style: italic;
+  font-weight: 800;
   letter-spacing: -0.02em;
 }
 
@@ -453,16 +426,14 @@
 }
 
 .stLabel {
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
   color: var(--text-dim);
 }
 
 .stRecord {
   font-size: 1.7rem;
-  font-weight: 900;
+  font-weight: 800;
   line-height: 1;
 }
 
@@ -493,10 +464,8 @@
 .onTrack,
 .offTrack {
   margin-left: auto;
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
   padding: 0.1rem 0.4rem;
   border-radius: 2px;
 }
@@ -614,8 +583,7 @@
   width: 2rem;
   text-align: right;
   font-size: 1rem;
-  font-weight: 900;
-  font-style: italic;
+  font-weight: 800;
 }
 
 /* ================= last result / season review ================= */
@@ -634,13 +602,12 @@
 
 .lastWL {
   font-size: 1.6rem;
-  font-weight: 900;
-  font-style: italic;
+  font-weight: 800;
 }
 
 .lastScore {
   font-size: 1.6rem;
-  font-weight: 900;
+  font-weight: 800;
 }
 
 .lastOpp {
@@ -713,7 +680,6 @@
   font-size: 0.6rem;
   font-weight: 800;
   color: var(--text-dim);
-  letter-spacing: 0.08em;
 }
 
 .awardName {

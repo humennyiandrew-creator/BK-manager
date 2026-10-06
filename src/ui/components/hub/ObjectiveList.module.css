@@ -46,10 +46,8 @@
 }
 
 .sponsor {
-  font-size: 0.64rem;
+  font-size: 0.75rem;
   color: var(--text-dim);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
   font-weight: 700;
 }
 
@@ -66,10 +64,8 @@
 }
 
 .pill {
-  font-size: 0.56rem;
+  font-size: 0.75rem;
   font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
   padding: 0.1rem 0.35rem;
   border-radius: 2px;
   background: rgba(255, 255, 255, 0.06);

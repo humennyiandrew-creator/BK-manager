@@ -1,8 +1,6 @@
 .subhead {
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
   color: #e3a32e;
 }
 
@@ -44,18 +42,14 @@
 }
 
 .preCity {
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
   color: var(--text-muted);
 }
 
 .preName {
   font-size: 1.8rem;
-  font-weight: 900;
-  font-style: italic;
-  text-transform: uppercase;
+  font-weight: 800;
   line-height: 1;
 }
 
@@ -109,7 +103,7 @@
 
 .preOvr {
   font-size: 0.78rem;
-  font-weight: 900;
+  font-weight: 800;
   color: var(--accent);
 }
 
@@ -123,24 +117,21 @@
 
 .preVs {
   font-size: 2.4rem;
-  font-weight: 900;
-  font-style: italic;
+  font-weight: 800;
   color: var(--text-dim);
   line-height: 1;
 }
 
 .preOddsLabel {
   margin-top: 0.6rem;
-  font-size: 0.56rem;
+  font-size: 0.75rem;
   font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
   color: var(--text-dim);
 }
 
 .preOdds {
   font-size: 1.8rem;
-  font-weight: 900;
+  font-weight: 800;
 }
 
 .preOdds small {
@@ -181,9 +172,7 @@
 
 .result {
   font-size: 1.6rem;
-  font-weight: 900;
-  font-style: italic;
-  text-transform: uppercase;
+  font-weight: 800;
 }
 
 .win { color: var(--positive); }
@@ -194,7 +183,7 @@
   align-items: center;
   gap: 0.5rem;
   font-size: 1.5rem;
-  font-weight: 900;
+  font-weight: 800;
 }
 
 .final i {
@@ -249,9 +238,7 @@
 
 .potgName {
   font-size: 1.05rem;
-  font-weight: 900;
-  font-style: italic;
-  text-transform: uppercase;
+  font-weight: 800;
   color: var(--text);
 }
 
@@ -294,7 +281,7 @@
 
 .better {
   color: var(--text);
-  font-weight: 900;
+  font-weight: 800;
 }
 
 .cmpMid {
@@ -306,10 +293,8 @@
 
 .cmpLabel {
   text-align: center;
-  font-size: 0.58rem;
+  font-size: 0.75rem;
   font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
   color: var(--text-dim);
 }
 
@@ -368,7 +353,7 @@
 .gradeBadge {
   text-align: center;
   font-size: 0.78rem;
-  font-weight: 900;
+  font-weight: 800;
   border-radius: 2px;
   padding: 0.12rem 0;
 }

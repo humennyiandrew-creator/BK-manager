@@ -10,9 +10,9 @@ interface Props {
   children: ReactNode;
 }
 
-export default function Panel({ title, headerRight, flush, reveal, className, children }: Props) {
+export default function Panel({ title, headerRight, flush, className, children }: Props) {
   return (
-    <section className={`${styles.panel} ${reveal ? 'fade-in slide-up' : ''} ${className ?? ''}`}>
+    <section className={`${styles.panel} ${className ?? ''}`}>
       <div className={styles.head}>
         <span className={styles.title}>{title}</span>
         {headerRight}

@@ -60,9 +60,8 @@
   color: var(--text);
   border-radius: var(--radius);
   padding: 0.25rem 0.6rem;
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  text-transform: uppercase;
 }
 
 .bulkBtn:hover {
@@ -91,7 +90,6 @@
 }
 
 .digestRow {
-  font-style: italic;
 }
 
 .pinnedWrap {
@@ -117,9 +115,8 @@
   border: none;
   border-radius: var(--radius);
   padding: 0.25rem 0.6rem;
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  text-transform: uppercase;
 }
 
 .miniAccept {
@@ -265,9 +262,8 @@
   border: none;
   border-radius: var(--radius);
   padding: 0.45rem 0.9rem;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  text-transform: uppercase;
 }
 
 .acceptBtn {

@@ -25,20 +25,20 @@ function derive(s: GameState): Derived {
   const pendingEvent = pendingUserEvent(s);
   if (pendingEvent) {
     const d = daysUntil(s, pendingEvent.expires);
-    return { label: 'Decision Needed', main: pendingEvent.title, sub: d <= 0 ? 'Expires today' : `Expires in ${d}d`, days: d };
+    return { label: 'Decision needed', main: pendingEvent.title, sub: d <= 0 ? 'Expires today' : `Expires in ${d}d`, days: d };
   }
 
   if (s.press?.pending) {
     const q = s.press.pending;
     const left = q.questions.length - q.answered.length;
-    return { label: 'Press Conference', main: 'Answer the media', sub: `${left} question${left === 1 ? '' : 's'} pending` };
+    return { label: 'Press conference', main: 'Answer the media', sub: `${left} question${left === 1 ? '' : 's'} pending` };
   }
 
   const today = userGameToday(s);
   if (today) {
     const opp = opponentOf(s, today);
     const side = today.home === s.userTeamId ? 'vs' : '@';
-    return { label: 'Continue', main: `${side} ${opp.abbr}`, sub: 'Today — play match', days: 0 };
+    return { label: 'Continue', main: `${side} ${opp.abbr}`, sub: 'Tip-off today', days: 0 };
   }
 
   if (s.phase === 'offseason') {
@@ -46,7 +46,7 @@ function derive(s: GameState): Derived {
     const idx = stage ? OFFSEASON_STAGE_ORDER.indexOf(stage) : -1;
     const progress = (idx + 1) / (OFFSEASON_STAGE_ORDER.length + 1);
     const hint = !stage
-      ? 'Finalize the season'
+      ? 'Wrap up the season'
       : stage === 'draft'
       ? (nextPick(s)?.owner === s.userTeamId ? 'On the clock' : 'Auto-advancing draft')
       : stage === 'resign'
@@ -78,7 +78,7 @@ interface Props {
   onContinue: () => void;
 }
 
-/** Top-right widget naming the next thing that will happen, with a chevron-stripe motif (F1 Manager "Continue"). */
+/** The chalk Continue patch on the band: names what happens next, then makes it happen. */
 export default function ContinueWidget({ s, busy, onContinue }: Props) {
   const d = derive(s);
   return (
@@ -89,11 +89,9 @@ export default function ContinueWidget({ s, busy, onContinue }: Props) {
       disabled={busy}
       data-sound="confirm"
     >
-      <span className={`${styles.stripe} chevron-stripe`} />
       <div className={styles.body}>
         <div className={styles.topRow}>
           <span className={styles.label}>{d.label}</span>
-          {d.days != null && <span className={styles.days}>{d.days <= 0 ? 'Today' : `${d.days}d`}</span>}
         </div>
         <div className={styles.main}>{busy ? 'Simulating…' : d.main}</div>
         {d.sub && !busy && <div className={styles.sub}>{d.sub}</div>}
@@ -103,7 +101,7 @@ export default function ContinueWidget({ s, busy, onContinue }: Props) {
           </div>
         )}
       </div>
-      {busy ? <span className={styles.spinner} /> : <span className={styles.chevron}>&#10148;</span>}
+      <span className={styles.go}>{busy ? <span className={styles.spinner} /> : <svg viewBox="0 0 10 12" className={styles.play} aria-hidden="true"><path d="M0 0L10 6L0 12Z" /></svg>}</span>
     </button>
   );
 }

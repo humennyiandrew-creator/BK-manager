@@ -9,8 +9,7 @@
 
 .title {
   font-size: var(--fs-h1);
-  font-weight: 900;
-  font-style: italic;
+  font-weight: 800;
 }
 
 .titleRow {
@@ -35,7 +34,6 @@
   color: var(--text-muted);
   font-size: 0.75rem;
   font-weight: 700;
-  text-transform: uppercase;
   letter-spacing: 0.03em;
   padding: 0.4rem 0.9rem;
   border-radius: var(--radius-sm);
@@ -204,7 +202,6 @@
 
 .stars {
   font-size: 0.68rem;
-  letter-spacing: 0.1em;
 }
 
 .starOn {
@@ -271,16 +268,12 @@
 .heroCity {
   font-size: 0.75rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
   color: rgba(255, 255, 255, 0.8);
 }
 
 .heroName {
   font-size: 2.1rem;
-  font-weight: 900;
-  font-style: italic;
-  text-transform: uppercase;
+  font-weight: 800;
   line-height: 1;
   text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
 }
@@ -290,10 +283,8 @@
   align-items: center;
   gap: 0.5rem;
   margin-top: 0.3rem;
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
 }
 
 .facts {
@@ -315,10 +306,8 @@
 
 .facts span,
 .keyHead {
-  font-size: 0.58rem;
+  font-size: 0.75rem;
   font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
   color: var(--text-dim);
 }
 
@@ -380,8 +369,7 @@
 
 .detailOvr {
   color: var(--accent);
-  font-weight: 900;
-  font-style: italic;
+  font-weight: 800;
   font-size: 1rem;
   text-align: right;
 }
@@ -395,8 +383,6 @@
   padding: 0.8rem;
   font-size: 0.9rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
   overflow: hidden;
 }
 

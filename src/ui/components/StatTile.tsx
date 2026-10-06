@@ -10,7 +10,7 @@ interface Props {
   className?: string;
 }
 
-/** Label + big animated value + optional delta chip (F1-Manager stat card). */
+/** Label, a jersey-numeral value and an optional change against last time. */
 export default function StatTile({ label, value, formatter, delta, deltaFormatter, className }: Props) {
   const hasDelta = delta != null && delta !== 0;
   const positive = (delta ?? 0) > 0;
@@ -23,7 +23,7 @@ export default function StatTile({ label, value, formatter, delta, deltaFormatte
         <CountUp value={value} formatter={formatter} className={`${styles.value} mono-num`} />
         {hasDelta && (
           <span className={positive ? `${styles.delta} ${styles.up}` : `${styles.delta} ${styles.down}`}>
-            {positive ? '▲' : '▼'} {deltaText}
+            {deltaText}
           </span>
         )}
       </div>

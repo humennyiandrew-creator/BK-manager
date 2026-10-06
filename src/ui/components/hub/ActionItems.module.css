@@ -58,10 +58,8 @@
   border: 1px solid var(--panel-border);
   border-radius: 2px;
   color: var(--text);
-  font-size: 0.64rem;
+  font-size: 0.75rem;
   font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
   padding: 0.3rem 0.55rem;
 }
 

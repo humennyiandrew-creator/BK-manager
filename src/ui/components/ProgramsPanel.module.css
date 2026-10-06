@@ -47,9 +47,8 @@
   border: none;
   border-radius: var(--radius);
   padding: 0.5rem;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 800;
-  text-transform: uppercase;
 }
 
 .startBtn:disabled {
@@ -88,9 +87,7 @@
 }
 
 .modalLabel {
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-size: 0.75rem;
   color: var(--text-dim);
   font-weight: 700;
 }
@@ -153,7 +150,6 @@
   padding: 0.5rem 1rem;
   font-size: 0.78rem;
   font-weight: 700;
-  text-transform: uppercase;
 }
 
 .cancelBtn {

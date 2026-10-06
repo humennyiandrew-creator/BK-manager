@@ -36,7 +36,7 @@ function ToastRow({ item }: { item: ToastItem }) {
   }, [item.id, dismiss]);
   return (
     <div
-      className={`${styles.toast} ${styles[item.type]} slide-in-right`}
+      className={`${styles.toast} ${styles[item.type]} fade-in`}
       onClick={() => dismiss(item.id)}
     >
       {item.text}

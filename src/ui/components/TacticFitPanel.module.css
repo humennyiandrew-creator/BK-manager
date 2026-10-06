@@ -42,10 +42,8 @@
 }
 
 .sectionLabel {
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   color: var(--text-dim);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -100,10 +98,8 @@
 }
 
 .draftField label {
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
 }
 
 .draftField select {

@@ -1,48 +1,84 @@
-@import '@fontsource/titillium-web/300.css';
-@import '@fontsource/titillium-web/400.css';
-@import '@fontsource/titillium-web/600.css';
-@import '@fontsource/titillium-web/700.css';
-@import '@fontsource/titillium-web/900.css';
+@import '@fontsource-variable/archivo/wdth';
+@import '@fontsource-variable/big-shoulders-display';
+@import '@fontsource-variable/doto';
 
+/*
+  "Home Uniform" — the interface wears your club's uniform; everything else is quiet arena concrete.
+  Team colours (--team, --team-2, --team-ink) are set on the shell from the user's club.
+*/
 :root {
-  --bg: #0b0f1a;
-  --bg-alt: #0e1422;
-  --panel: #151b2b;
-  --panel-alt: #101627;
-  --panel-border: #232b40;
-  --radius: 4px;
-  --cyan: #19c3d6;
-  --cyan-dim: #0f7c8a;
-  --red: #c8102e;
-  --accent: var(--cyan);
-  --accent-2: var(--cyan-dim);
-  --accent-contrast: #052226;
-  --text: #ffffff;
-  --text-muted: #8a93a8;
-  --text-dim: #5b6478;
-  --positive: #3ddc97;
-  --negative: #ff4d5e;
-  --gap: 0.75rem;
+  /* ---- surfaces: arena concrete, not navy ---- */
+  --concrete: #1e2024;
+  --slab: #282b30;
+  --slab-2: #24272c;
+  --rail: #33373d;
+  --seam: #3b4047;
+  --seam-soft: #30343a;
 
-  /* ---- Typography scale ---- */
-  --fs-display: 2.5rem;
-  --fs-h1: 1.65rem;
-  --fs-h2: 1.02rem;
-  --fs-label: 0.68rem;
-  --fs-body: 0.85rem;
-  --fs-small: 0.72rem;
+  /* ---- ink ---- */
+  --chalk: #eceae4;
+  --chalk-2: #b3b1ab;
+  --chalk-3: #82817c;
 
-  /* ---- Spacing scale (4/8px base) ---- */
+  /* ---- basketball materials ---- */
+  --maple: #d9a86c;
+  --maple-deep: #b5844b;
+  --ball: #e0662c;
+
+  /* ---- results ---- */
+  --win: #63b783;
+  --loss: #e2584f;
+  --warn: #e7a93b;
+
+  /* ---- team uniform (overridden per club on the shell) ---- */
+  --team: #3a3f47;
+  --team-2: #e0662c;
+  --team-ink: #ffffff;
+  --accent: #e0662c;
+  --accent-2: #b5501f;
+  --accent-contrast: #1e2024;
+
+  /* ---- type ---- */
+  --font-ui: 'Archivo Variable', 'Archivo', system-ui, sans-serif;
+  --font-display: 'Big Shoulders Display Variable', 'Archivo Variable', sans-serif;
+  --font-led: 'Doto Variable', ui-monospace, monospace;
+
+  --fs-display: 2.75rem;
+  --fs-h1: 2rem;
+  --fs-h2: 1.25rem;
+  --fs-body: 0.875rem;
+  --fs-small: 0.8125rem;
+  --fs-label: 0.75rem;
+
+  /* ---- spacing (4px base) ---- */
   --sp-1: 0.25rem;
   --sp-2: 0.5rem;
   --sp-3: 0.75rem;
   --sp-4: 1rem;
   --sp-6: 1.5rem;
   --sp-8: 2rem;
+  --gap: 0.75rem;
 
-  /* ---- Panel radius/border ---- */
-  --radius-sm: 3px;
-  --radius-lg: 8px;
+  /* ---- shape: bands are square, controls barely rounded ---- */
+  --radius: 2px;
+  --radius-sm: 2px;
+  --radius-lg: 3px;
+
+  /* ---- legacy names used across screen stylesheets ---- */
+  --bg: var(--concrete);
+  --bg-alt: var(--slab-2);
+  --panel: var(--slab);
+  --panel-alt: var(--slab-2);
+  --panel-border: var(--seam-soft);
+  --text: var(--chalk);
+  --text-muted: var(--chalk-2);
+  --text-dim: var(--chalk-3);
+  --positive: var(--win);
+  --negative: var(--loss);
+  --cyan: var(--accent);
+  --cyan-dim: var(--accent-2);
+  --red: var(--accent);
+  --yellow: var(--warn);
 }
 
 * {
@@ -73,29 +109,16 @@ body,
 }
 
 body {
-  background: radial-gradient(120% 120% at 20% 0%, #101a2e 0%, var(--bg) 45%, #060811 100%);
-  color: var(--text);
-  font-family: 'Titillium Web', system-ui, sans-serif;
-  font-weight: 400;
+  background: var(--concrete);
+  color: var(--chalk);
+  font-family: var(--font-ui);
+  font-stretch: 96%;
+  font-size: var(--fs-body);
+  font-weight: 420;
+  line-height: 1.4;
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
-  position: relative;
-}
-
-/* Subtle grain overlay so dark slabs don't look flat. */
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 9999;
-  opacity: 0.025;
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-}
-
-html.reduce-motion body::after {
-  display: none;
+  font-variant-numeric: tabular-nums;
 }
 
 #root {
@@ -103,111 +126,146 @@ html.reduce-motion body::after {
   flex-direction: column;
 }
 
-button {
+button,
+input,
+select,
+textarea {
   font-family: inherit;
+  font-stretch: inherit;
+}
+
+button {
   cursor: pointer;
 }
 
+::selection {
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--chalk);
   outline-offset: 1px;
 }
 
-.label-caps {
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  font-weight: 600;
+/* ---- form controls ---- */
+
+select {
+  appearance: none;
+  background: var(--rail) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23b3b1ab' stroke-width='1.5' fill='none'/%3E%3C/svg%3E") no-repeat right 0.55rem center;
+  border: 1px solid var(--seam);
+  border-radius: var(--radius);
+  color: var(--chalk);
+  font-size: var(--fs-small);
+  padding: 0.3rem 1.6rem 0.3rem 0.55rem;
 }
 
-.value-positive {
-  color: var(--positive);
+select:hover {
+  border-color: var(--chalk-3);
 }
 
-.value-negative {
-  color: var(--negative);
+input[type='range'] {
+  accent-color: var(--accent);
 }
 
-.value-neutral {
-  color: var(--text);
+input[type='checkbox'] {
+  accent-color: var(--accent);
+  width: 1rem;
+  height: 1rem;
+}
+
+input[type='text'],
+input[type='number'],
+input[type='search'] {
+  background: var(--rail);
+  border: 1px solid var(--seam);
+  border-radius: var(--radius);
+  color: var(--chalk);
+  padding: 0.35rem 0.55rem;
 }
 
 ::-webkit-scrollbar {
-  width: 0.5rem;
-  height: 0.5rem;
+  width: 0.55rem;
+  height: 0.55rem;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--panel-border);
-  border-radius: var(--radius);
+  background: var(--seam);
+  border-radius: 1px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--chalk-3);
 }
 
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 
-/* ---- Shared gradient / motif utilities (F1-Manager style) ---- */
+/* ---- typography utilities ---- */
+
+/* Jersey lettering: team and player wordmarks only. */
+.wordmark {
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  line-height: 0.92;
+}
+
+/* Big numbers set like tackle-twill jersey numerals. */
+.numeral {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-variant-numeric: lining-nums tabular-nums;
+  line-height: 0.9;
+}
+
+/* Arena scoreboard digits: clocks, scores, dates, countdowns. Nowhere else. */
+.led {
+  font-family: var(--font-led);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--warn);
+  text-shadow: 0 0 0.5em color-mix(in srgb, var(--warn) 45%, transparent);
+}
 
 .mono-num {
   font-variant-numeric: tabular-nums;
-  font-feature-settings: 'tnum' 1;
-}
-
-/* Repeating diagonal chevron stripe, used on hero headers / continue widgets / accent bars. */
-.chevron-stripe {
-  background-image: repeating-linear-gradient(
-    115deg,
-    rgba(255, 255, 255, 0.1) 0 0.4rem,
-    transparent 0.4rem 1.1rem
-  );
-}
-
-/* Diagonal accent wash for hero/detail panels. */
-.diagonal-accent {
-  background:
-    linear-gradient(115deg, color-mix(in srgb, var(--accent) 16%, transparent) 0%, transparent 42%),
-    linear-gradient(295deg, color-mix(in srgb, var(--accent-2) 12%, transparent) 0%, transparent 38%);
 }
 
 .text-display {
+  font-family: var(--font-display);
   font-size: var(--fs-display);
-  font-weight: 900;
-  font-style: italic;
-  letter-spacing: 0.01em;
-  line-height: 1.05;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .text-h1 {
+  font-family: var(--font-display);
   font-size: var(--fs-h1);
   font-weight: 800;
-  letter-spacing: 0.01em;
 }
 
 .text-h2 {
   font-size: var(--fs-h2);
-  font-weight: 700;
+  font-weight: 650;
 }
 
-.text-label {
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+.text-label,
+.label-caps {
   font-size: var(--fs-label);
-  font-weight: 700;
-  color: var(--text-muted);
+  font-weight: 600;
+  color: var(--chalk-3);
 }
 
-/* Thin accent underline, reused under panel/section headers. */
+.value-positive { color: var(--win); }
+.value-negative { color: var(--loss); }
+.value-neutral { color: var(--chalk); }
+
+/* Retired decorative helpers from the previous look: kept as no-ops so older markup stays valid. */
+.chevron-stripe,
+.diagonal-accent,
 .accent-edge {
-  position: relative;
-}
-
-.accent-edge::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: -1px;
-  width: 2.4rem;
-  height: 2px;
-  background: var(--accent);
+  background-image: none;
 }

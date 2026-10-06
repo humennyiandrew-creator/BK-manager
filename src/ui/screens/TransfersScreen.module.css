@@ -33,9 +33,7 @@
   color: var(--text-muted);
   border-radius: var(--radius);
   padding: 0.4rem 0.9rem;
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -142,9 +140,7 @@
 }
 
 .meterLabel {
-  font-size: 0.68rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-size: 0.75rem;
   color: var(--text-dim);
   font-weight: 700;
 }
@@ -174,7 +170,6 @@
   padding: 0.6rem;
   font-size: 0.8rem;
   font-weight: 800;
-  text-transform: uppercase;
   letter-spacing: 0.03em;
 }
 
@@ -251,9 +246,7 @@
 
 .offerLabel {
   color: var(--text-dim);
-  text-transform: uppercase;
-  font-size: 0.62rem;
-  letter-spacing: 0.04em;
+  font-size: 0.75rem;
   margin-right: 0.3rem;
 }
 
@@ -279,9 +272,8 @@
   border: none;
   border-radius: var(--radius);
   padding: 0.4rem 0.9rem;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  text-transform: uppercase;
 }
 
 .acceptBtn {
@@ -351,9 +343,7 @@
   color: var(--text-muted);
   border-radius: var(--radius);
   padding: 0.25rem 0.7rem;
-  font-size: 0.68rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
@@ -495,7 +485,6 @@
   padding: 0.5rem 1rem;
   font-size: 0.75rem;
   font-weight: 700;
-  text-transform: uppercase;
 }
 
 /* ---------- transactions ---------- */
@@ -534,8 +523,7 @@
 
 .txKind {
   color: var(--cyan);
-  text-transform: uppercase;
-  font-size: 0.65rem;
+  font-size: 0.75rem;
   width: 4rem;
   flex-shrink: 0;
   font-weight: 700;

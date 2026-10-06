@@ -25,6 +25,7 @@ import NegotiationModal from './NegotiationModal';
 import TeamBadge from './TeamBadge';
 import ArcBadge from './hub/ArcBadge';
 import { ARC_LABEL } from '../../engine/arcs';
+import { affiliateName, assign, canAssign, recall } from '../../engine/gleague';
 import { toast } from './Toasts';
 import { play } from '../sound';
 import styles from './PlayerPage.module.css';
@@ -146,7 +147,9 @@ export default function PlayerPage({ s, playerId, onClose }: Props) {
               {team && (
                 <TeamBadge logoPath={team.logo} name={`${team.city} ${team.name}`} className={styles.teamBadge} />
               )}
-              {p.prospect && <div className={styles.metaLine}>{p.college ?? 'International'} · Draft prospect</div>}
+              {p.prospect && <div className={styles.metaLine}>{p.college ?? 'International'}, draft prospect</div>}
+              {p.assigned && p.teamId && <div className={styles.metaLine}>On assignment with the {affiliateName(s, p.teamId)}</div>}
+              {!p.teamId && p.affiliate && !p.prospect && <div className={styles.metaLine}>Playing for the {affiliateName(s, p.affiliate)}</div>}
             </div>
 
             <div className={styles.ringsRow}>
@@ -194,6 +197,9 @@ export default function PlayerPage({ s, playerId, onClose }: Props) {
                 <button type="button" className={styles.actionBtn} disabled={!meetOk} title={meetOk ? '1-on-1 meeting' : 'Met with him recently'} onClick={() => setMeetOpen(true)}>1-on-1</button>
                 <button type="button" className={styles.actionBtn} onClick={onProgram}>{p.program ? 'View Programme' : 'Start Programme'}</button>
                 <button type="button" className={styles.actionBtn} onClick={onNegotiate}>{negotiateEnabled ? negotiateLabel : 'Contract'}</button>
+                {p.assigned
+                  ? <button type="button" className={styles.actionBtn} onClick={() => mutate((st) => { const e = recall(st, p.id); toast(e ?? `${p.lastName} recalled`, e ? 'error' : 'success'); })}>Recall</button>
+                  : canAssign(s, p) && <button type="button" className={styles.actionBtn} onClick={() => mutate((st) => { const e = assign(st, p.id); toast(e ?? `${p.lastName} sent to the ${affiliateName(st, st.userTeamId)}`, e ? 'error' : 'success'); })}>Send down</button>}
                 <button type="button" className={`${styles.actionBtn} ${styles.danger}`} onClick={() => setReleaseOpen(true)}>Release</button>
               </div>
             )}

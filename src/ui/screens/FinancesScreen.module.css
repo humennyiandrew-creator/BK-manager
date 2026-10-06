@@ -182,9 +182,7 @@
 
 .sponsorDivider {
   padding: 0.3rem 0.9rem;
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-size: 0.75rem;
   color: var(--text-dim);
   border-top: 1px solid var(--panel-border);
   border-bottom: 1px solid var(--panel-border);
@@ -231,9 +229,7 @@
   color: var(--text);
   border-radius: var(--radius);
   padding: 0.3rem 0.7rem;
-  font-size: 0.68rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 

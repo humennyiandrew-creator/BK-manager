@@ -131,6 +131,7 @@ export default function RosterScreen() {
     {
       key: 'status', header: 'Status', render: (p) => {
         if (p.injury) return <span className={styles.chipNegative}>{p.injury.name}</span>;
+        if (p.assigned) return <span className={styles.chipMuted}>G League</span>;
         const m = moraleLabel(p.morale);
         return <span className={styles[`chip${m.variant === 'positive' ? 'Positive' : m.variant === 'negative' ? 'Negative' : 'Muted'}`]}>{m.text}</span>;
       }
@@ -139,7 +140,7 @@ export default function RosterScreen() {
       key: 'salary', header: th('salary', 'Contract'), align: 'right', render: (p) => {
         if (!p.contract) return '-';
         const amt = p.contract.salaries[0]?.amount ?? 0;
-        return `${formatMoney(amt)} · ${p.contract.salaries.length}yr`;
+        return `${formatMoney(amt)}, ${p.contract.salaries.length}yr`;
       }
     }
   ];

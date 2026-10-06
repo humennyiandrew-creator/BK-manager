@@ -10,10 +10,8 @@
   border: 1px solid var(--panel-border);
   border-radius: 2px;
   color: var(--text-muted);
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
   padding: 0.25rem 0;
 }
 
@@ -52,8 +50,7 @@
 
 .rank {
   width: 1rem;
-  font-weight: 900;
-  font-style: italic;
+  font-weight: 800;
   color: var(--text-dim);
 }
 
@@ -89,7 +86,6 @@
   font-size: 0.6rem;
   font-weight: 800;
   color: var(--text-dim);
-  letter-spacing: 0.06em;
 }
 
 .line {
@@ -106,10 +102,8 @@
 }
 
 .blockTitle {
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
   color: var(--accent);
   margin-bottom: 0.3rem;
 }

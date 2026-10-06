@@ -28,10 +28,8 @@
 }
 
 .momLabel {
-  font-size: 0.56rem;
+  font-size: 0.75rem;
   font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
   color: var(--text-dim);
 }
 
@@ -64,9 +62,7 @@
   gap: 0.45rem;
   padding: 0.3rem 1rem;
   color: #fff;
-  font-style: italic;
-  font-weight: 900;
-  text-transform: uppercase;
+  font-weight: 800;
   clip-path: polygon(4% 0, 100% 0, 96% 100%, 0 100%);
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
@@ -78,7 +74,7 @@
 
 .runAbbr { font-size: 1rem; }
 .runScore { font-size: 1.4rem; }
-.runWord { font-size: 0.8rem; letter-spacing: 0.1em; }
+.runWord {}
 
 @keyframes runIn {
   from { opacity: 0; transform: translateX(-50%) translateY(-8px) scale(0.95); }
@@ -92,10 +88,8 @@
 }
 
 .modesLabel {
-  font-size: 0.58rem;
+  font-size: 0.75rem;
   font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
   color: var(--text-dim);
   margin-right: 0.35rem;
 }
@@ -104,11 +98,8 @@
   background: transparent;
   border: 1px solid var(--panel-border);
   color: var(--text-muted);
-  font-size: 0.66rem;
-  font-weight: 900;
-  font-style: italic;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-size: 0.75rem;
+  font-weight: 800;
   padding: 0.35rem 0.7rem;
   transform: skewX(-10deg);
 }
@@ -129,10 +120,8 @@
 }
 
 .talkHead {
-  font-size: 0.62rem;
+  font-size: 0.75rem;
   font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
   color: var(--accent);
 }
 
@@ -173,9 +162,7 @@
 
 .talkLabel {
   font-size: 0.85rem;
-  font-weight: 900;
-  font-style: italic;
-  text-transform: uppercase;
+  font-weight: 800;
 }
 
 .talkHint {
