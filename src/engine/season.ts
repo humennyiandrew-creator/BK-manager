@@ -12,6 +12,7 @@ import { fatigueInjuryMul, trainingEffects } from './progression';
 import { clamp } from './mgmt/market';
 import { hasNode } from './mgmt/facilities';
 import { hasSpec } from './mgmt/staff';
+import { injuryRatePerMinute, rollInjuryType } from './injuries';
 import { offseasonStep } from './offseason';
 import { eventsDaily } from './events';
 import { settleMatchObjectives } from './objectives';
@@ -79,18 +80,10 @@ function addLine(to: StatLine, b: BoxLine) {
   for (const k of Object.keys(to) as (keyof StatLine)[]) to[k] += b[k];
 }
 
-const INJURIES: [string, number, number, number][] = [
-  // name, weight, minDays, maxDays
-  ['Ankle sprain', 30, 2, 12], ['Knee soreness', 20, 1, 6], ['Hamstring strain', 14, 5, 20], ['Back spasms', 10, 2, 8],
-  ['Concussion', 5, 7, 14], ['Calf strain', 8, 8, 25], ['Broken finger', 5, 14, 35], ['Torn meniscus', 4, 30, 70],
-  ['Fractured foot', 2, 45, 100], ['Torn ACL', 1, 220, 320], ['Illness', 12, 1, 4],
-];
-
 function rollInjury(p: Player, minutes: number, rng: () => number, mul = 1): boolean {
-  if (minutes <= 0 || rng() >= 0.0045 * mul * (minutes / 36) * (0.4 + p.ratings.injuryProne)) return false;
-  let r = rng() * INJURIES.reduce((s, x) => s + x[1], 0);
-  const inj = INJURIES.find((x) => (r -= x[1]) <= 0) ?? INJURIES[0];
-  p.injury = { name: inj[0], daysLeft: Math.round(inj[2] + rng() * (inj[3] - inj[2])) };
+  if (minutes <= 0 || rng() >= injuryRatePerMinute(p) * minutes * mul) return false;
+  const inj = rollInjuryType(rng);
+  p.injury = { name: inj.name, daysLeft: inj.days };
   return true;
 }
 
@@ -107,7 +100,12 @@ export function applyResult(s: GameState, g: Game, res: GameResult) {
     addLine(g.type === 'regular' || g.type === 'cup' ? p.season : p.playoffs, b);
     const loadMgmt = p.teamId && hasNode(s, p.teamId, 'analytics_loadMgmt');
     p.fatigue = clamp((p.fatigue ?? 0) + b.min * 0.35 * (loadMgmt ? 0.85 : 1) * (p.teamId && hasSpec(s, p.teamId, 'loadMgmt') ? 0.9 : 1), 0, 100);
-    if (rollInjury(p, b.min, rng, (injMul[p.teamId!] ?? 1) * fatigueInjuryMul(p))) {
+    // A live game already decided who got hurt on the floor; the quick sim rolls afterwards.
+    const live = res.liveInjuries?.find((x) => x.id === p.id);
+    const hurt = res.liveInjuries
+      ? !!live && ((p.injury = { name: live.name, daysLeft: live.days }), true)
+      : rollInjury(p, b.min, rng, (injMul[p.teamId!] ?? 1) * fatigueInjuryMul(p));
+    if (hurt) {
       if (p.injury && hasSpec(s, p.teamId!, 'rehab')) p.injury.daysLeft = Math.max(1, Math.round(p.injury.daysLeft * 0.8));
       refreshRotation(s.teams[p.teamId!], s.players);
       newsInjury(s, p);

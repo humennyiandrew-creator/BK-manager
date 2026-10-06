@@ -86,6 +86,16 @@ export interface Tactics {
   playWeights: Record<string, number>; // user overrides of system play frequencies (0 = off)
   focusPlayer: string | null;
   clutchPlay: string | null;           // play run in last 2 min of close games
+  late?: LateGame;                     // clock management at the end of periods
+}
+
+/** Late-game clock management. Defaults mirror what AI benches do. */
+export interface LateGame {
+  foul: boolean;        // foul to stop the clock when trailing late
+  foulUp3: boolean;     // foul before the shot when up three in the final seconds
+  hold: boolean;        // hold for the last shot when the shot clock is off
+  twoForOne: boolean;   // shoot early with ~35s left to get the ball back
+  hack: string | null;  // player to foul on purpose once in the bonus (hack-a-player)
 }
 
 export interface TeamState extends Team {
@@ -108,6 +118,8 @@ export interface GameResult {
   home: number; away: number;
   periods: [number, number][];      // per period [home, away]
   box?: { home: BoxLine[]; away: BoxLine[] };
+  /** Live games: injuries that happened on the floor (replaces the post-game injury roll). */
+  liveInjuries?: { id: string; name: string; days: number }[];
 }
 
 export interface Game {

@@ -761,3 +761,26 @@
 .obj_failed { opacity: 0.55; text-decoration: line-through; }
 .obj_failed .objMark { border-color: var(--loss); }
 .obj_on .objMark { border-color: var(--win); }
+
+.lateBox {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.6rem 0.7rem;
+  background: var(--slab-2);
+  border: 1px solid var(--seam-soft);
+  border-radius: var(--radius);
+}
+
+.lateHead {
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+
+.lateRow {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.82rem;
+  color: var(--chalk-2);
+}

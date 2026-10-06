@@ -1,6 +1,6 @@
 // Possession core. decide() rolls a possession into events (pure w.r.t. stats), commit() books them.
 // Fast sim = decide+commit in a loop. Live sim = decide, animate, commit each event on its beat.
-import type { BoxLine, GameResult, Player, TeamState } from '../model';
+import type { BoxLine, GameResult, LateGame, Player, TeamState } from '../model';
 import { emptyLine } from '../model';
 import { gauss, type Rng } from '../rng';
 import { available } from '../rotation';
@@ -48,6 +48,7 @@ export interface SP {
   energy: number;       // 0–1
   target: number;       // target minutes
   sec: number;          // seconds played
+  hurt?: boolean;       // injured during a live game: out for the night
 }
 
 export interface Side {
@@ -107,7 +108,7 @@ export interface SubCtx { period: number; clock: number; margin: number }
 export function doSubs(s: Side, elapsed: number, total: number, ctx: SubCtx, rules: Rules) {
   const frac = Math.min(1, elapsed / total);
   const need = (sp: SP) => sp.target * frac - sp.sec / 60;
-  const eligible = (sp: SP) => sp.line.pf < rules.foulOut;
+  const eligible = (sp: SP) => sp.line.pf < rules.foulOut && !sp.hurt;
   const late = ctx.period >= rules.periods && ctx.clock <= 300;
   const garbage = ctx.period >= rules.periods && ctx.clock <= 420 && Math.abs(ctx.margin) >= 22;
   const bench = () => s.roster.filter((sp) => !s.court.includes(sp) && eligible(sp));
@@ -197,7 +198,28 @@ export interface Outcome {
   event: string;
 }
 
-export interface DecideCtx { transition: boolean; calledPlay?: string | null; clutch?: boolean }
+export interface DecideCtx {
+  transition: boolean; calledPlay?: string | null; clutch?: boolean;
+  /** Clock context for late-game decisions; foulNow is the user's "foul now" call. */
+  late?: { period: number; periods: number; clock: number; foulNow?: boolean };
+}
+
+export const DEFAULT_LATE: LateGame = { foul: true, foulUp3: true, hold: true, twoForOne: true, hack: null };
+
+/** How long the offence takes, given the clock: hold for the last shot, two-for-one, milk a lead, hurry when well behind. */
+export function lateDuration(off: Side, def: Side, dur: number, period: number, periods: number, clock: number, rng: Rng): number {
+  const ol = off.team.tactics.late ?? DEFAULT_LATE;
+  const final = period >= periods;
+  const lead = off.pts - def.pts;
+  if (clock <= 24) {
+    if (!final || lead >= -3) return ol.hold ? Math.max(0.6, clock - 0.4 - rng() * 1.2) : dur;
+    return Math.min(dur, 4 + rng() * 3);
+  }
+  if (ol.twoForOne && clock > 28 && clock <= 40 && !(final && lead > 0)) return Math.min(dur, 4 + rng() * 3.5);
+  if (final && clock <= 150 && lead > 0) return Math.max(dur, Math.min(clock - 1, 17 + rng() * 5));
+  if (final && clock <= 150 && lead <= -7) return Math.min(dur, 6 + rng() * 3);
+  return dur;
+}
 
 export function choosePlay(off: Side, rng: Rng, ctx: DecideCtx): Play {
   const t = off.team.tactics;
@@ -246,6 +268,32 @@ export function decide(off: Side, def: Side, rng: Rng, rules: Rules, ctx: Decide
   const usage = (sp: SP) => sp.p.ratings.tend.usage ** K.usgExp * fatigue(sp);
   const handler = pick(off.court, (x) => usage(x) * (a(x).ballHandle + a(x).passing) * (roleOf(off, x) === 1 ? 1.5 : 1), rng);
   const out = (events: Ev[], keep: boolean, transition: boolean, event: string): Outcome => ({ play, handler, events, keep, transition, event });
+
+  // Fouling on purpose: trailing late, up three at the death, or hacking a poor free-throw shooter in the bonus.
+  const lc = ctx.late;
+  if (lc) {
+    const dl = def.team.tactics.late ?? DEFAULT_LATE;
+    const final = lc.period >= lc.periods;
+    const offLead = off.pts - def.pts;
+    const hackSp = dl.hack ? off.court.find((x) => x.p.id === dl.hack) : undefined;
+    const lateFoul = !!lc.foulNow
+      || (dl.foul && final && lc.clock <= 45 && offLead >= 1 && offLead <= 10 && !(offLead === 3 && lc.clock <= 24))
+      || (dl.foulUp3 && final && offLead === -3 && lc.clock <= 8);
+    const hack = !!hackSp && def.fouls + 1 >= rules.bonusAt && !(final && lc.clock <= 120) && rng() < 0.7;
+    if (lateFoul || hack) {
+      const target = hack ? hackSp! : pick(off.court, (x) => (101 - a(x).freeThrow) ** 2 + (x === handler ? 600 : 0), rng);
+      const by = pick(def.court, (x) => Math.max(0.2, rules.foulOut - 1 - x.line.pf) * (110 - a(x).perimeterD), rng);
+      const ev: Ev[] = [{ k: 'foul', by, on: target, shooting: false }];
+      const fts = freeThrowEvents(target, 2, rng);
+      ev.push(...fts);
+      if (!(fts[1] as { made: boolean }).made) {
+        const reb = reboundEvent(off, def, rng);
+        ev.push(reb);
+        return out(ev, reb.off, false, 'intentional-foul');
+      }
+      return out(ev, false, false, 'intentional-foul');
+    }
+  }
 
   // Turnover
   const of = sideFit(off).fit, df = schemeFit(def, off);
@@ -417,11 +465,13 @@ export function simGame(home: TeamState, away: TeamState, players: Record<string
         doSubs(H, elapsed, total, ctx, rules);
         doSubs(A, elapsed, total, { ...ctx, margin: -ctx.margin }, rules);
       }
-      const dur = Math.min(clock, possessionLength(off, def, prev, rng, rules));
+      let dur = Math.min(clock, possessionLength(off, def, prev, rng, rules));
+      dur = Math.min(clock, lateDuration(off, def, dur, period, rules.periods, clock, rng));
+      const clutch = period >= rules.periods && clock < 120 && Math.abs(H.pts - A.pts) <= 5;
+      prev = decide(off, def, rng, rules, { transition: !!prev?.transition, clutch, late: { period, periods: rules.periods, clock } });
+      if (prev.event === 'intentional-foul') dur = Math.min(clock, 1 + rng() * 2.5);
       tickEnergy(H, dur, drain); tickEnergy(A, dur, drain);
       clock -= dur; elapsed += dur;
-      const clutch = period >= rules.periods && clock < 120 && Math.abs(H.pts - A.pts) <= 5;
-      prev = decide(off, def, rng, rules, { transition: !!prev?.transition, clutch });
       for (const ev of prev.events) commitEvent(off, def, ev);
       if (!prev.keep) off = def;
     }

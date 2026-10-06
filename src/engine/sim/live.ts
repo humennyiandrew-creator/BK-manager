@@ -9,7 +9,9 @@ import { S } from '../playbook/plays';
 import {
   NBA_RULES, commitEvent, decide, doSubs, drainFor, makeSide, possessionLength, sortCourt, tickEnergy,
   type Ev, type Outcome, type Rules, type ShotType, type SP, type Side, type TalkBoost,
+  lateDuration,
 } from './fast';
+import { injuryRatePerMinute, rollInjuryType } from '../injuries';
 
 export const COURT = { w: 94, h: 50, hoop: 5.25 };
 
@@ -97,6 +99,9 @@ export class LiveMatch {
   private streaks = new Map<string, number>();   // consecutive FG makes (+) / misses (−)
   private talkOn: [TeamTalk | null, TeamTalk | null] = [null, null];
   private prior: number;                          // pre-game expected home margin
+  private foulCall: [boolean, boolean] = [false, false]; // "foul now" for the next defensive possession
+  private injuries: { id: string; name: string; days: number }[] = [];
+  private injuryStop = false;
 
   constructor(home: TeamState, away: TeamState, players: Record<string, Player>, seed: number, userSide: 0 | 1 | null, rules = NBA_RULES) {
     this.rules = rules;
@@ -133,6 +138,11 @@ export class LiveMatch {
     return true;
   }
   requestTimeout(side: 0 | 1) { if (this.timeouts[side] > 0) this.pendingTimeout[side] = true; }
+  /** Foul on purpose on the next defensive possession. */
+  foulNow(side: 0 | 1) { this.foulCall[side] = true; }
+  foulPending(side: 0 | 1) { return this.foulCall[side]; }
+  /** Players hurt during this game (they take no further part). */
+  hurt() { return this.injuries; }
   callPlay(side: 0 | 1, playId: string | null) { this.calledPlay[side] = playId; }
   sub(side: 0 | 1, outId: string, inId: string) { this.pendingSubs.push({ side, out: outId, in: inId }); }
   resume() { if (this.state === 'timeout' || this.state === 'break') { this.forceDead = true; this.startPossession(); } }
@@ -258,7 +268,7 @@ export class LiveMatch {
 
   result(): GameResult {
     const box = (s: Side) => s.roster.map((sp) => ({ ...sp.line, min: Math.round(sp.sec / 6) / 10, gp: sp.sec > 0 ? 1 : 0 }));
-    return { home: this.H.pts, away: this.A.pts, periods: this.periodScores, box: { home: box(this.H), away: box(this.A) } };
+    return { home: this.H.pts, away: this.A.pts, periods: this.periodScores, box: { home: box(this.H), away: box(this.A) }, liveInjuries: [...this.injuries] };
   }
 
   /** Finish the rest of the game instantly (user pressed "Sim to end"). */
@@ -390,12 +400,12 @@ export class LiveMatch {
       for (const r of this.pendingSubs.filter((x) => x.side === i)) {
         const outIdx = s.court.findIndex((sp) => sp.p.id === r.out);
         const inn = s.roster.find((sp) => sp.p.id === r.in);
-        if (outIdx >= 0 && inn && !s.court.includes(inn) && inn.line.pf < this.rules.foulOut) s.court[outIdx] = inn;
+        if (outIdx >= 0 && inn && !s.court.includes(inn) && inn.line.pf < this.rules.foulOut && !inn.hurt) s.court[outIdx] = inn;
       }
       if (this.autoSubs[i]) doSubs(s, this.elapsed, total, { period: this.period, clock: this.clock, margin: s === this.H ? this.H.pts - this.A.pts : this.A.pts - this.H.pts }, this.rules);
-      else s.court.forEach((sp, k) => { // fouled-out players must leave even with manual subs
-        if (sp.line.pf >= this.rules.foulOut) {
-          const rep = s.roster.find((x) => !s.court.includes(x) && x.line.pf < this.rules.foulOut);
+      else s.court.forEach((sp, k) => { // fouled-out or injured players must leave even with manual subs
+        if (sp.line.pf >= this.rules.foulOut || sp.hurt) {
+          const rep = s.roster.find((x) => !s.court.includes(x) && x.line.pf < this.rules.foulOut && !x.hurt);
           if (rep) s.court[k] = rep;
         }
       });
@@ -408,6 +418,18 @@ export class LiveMatch {
       for (const sp of before) if (!s.court.includes(sp)) this.ents.delete(sp.p.id);
     }
     this.pendingSubs = [];
+  }
+
+  /** Knocks and tweaks on the floor: same per-minute rate as the post-game roll, now it happens mid-game. */
+  private rollInjuries(dur: number) {
+    for (const s of [this.H, this.A]) for (const sp of s.court) {
+      if (sp.hurt || this.rng() >= injuryRatePerMinute(sp.p) * (dur / 60) * (1.6 - sp.energy * 0.6)) continue;
+      const inj = rollInjuryType(this.rng);
+      sp.hurt = true;
+      this.injuries.push({ id: sp.p.id, name: inj.name, days: inj.days });
+      this.injuryStop = true;
+      this.log(this.sideOf(s), 'info', `${name(sp)} is hurt (${inj.name.toLowerCase()}) and will not return`);
+    }
   }
 
   private nextPossession() {
@@ -423,7 +445,8 @@ export class LiveMatch {
     const off = this.off, def = this.other(off);
     const resumed = this.forceDead;
     this.forceDead = false;
-    const dead = resumed || (!this.prevTransition && this.prevEvent !== 'drb' && this.prevEvent !== 'orb');
+    const dead = resumed || this.injuryStop || (!this.prevTransition && this.prevEvent !== 'drb' && this.prevEvent !== 'orb');
+    this.injuryStop = false;
 
     // AI timeout when opponent is on a run.
     for (const i of [0, 1] as const) {
@@ -451,11 +474,16 @@ export class LiveMatch {
     this.flow.push({ t: this.elapsed, margin: this.H.pts - this.A.pts, wp: this.winProb() });
 
     const prev = this.o;
-    const dur = Math.min(this.clock, possessionLength(off, def, prev ? { ...prev, keep: this.prevKeep, transition: this.prevTransition, event: this.prevEvent } : null, this.rng, this.rules));
+    let dur = Math.min(this.clock, possessionLength(off, def, prev ? { ...prev, keep: this.prevKeep, transition: this.prevTransition, event: this.prevEvent } : null, this.rng, this.rules));
+    dur = Math.min(this.clock, lateDuration(off, def, dur, this.period, this.rules.periods, this.clock, this.rng));
     const clutch = this.period >= this.rules.periods && this.clock < 120 && Math.abs(this.H.pts - this.A.pts) <= 5;
-    const side = this.sideOf(off);
-    this.o = decide(off, def, this.rng, this.rules, { transition: this.prevTransition, calledPlay: this.calledPlay[side], clutch });
+    const side = this.sideOf(off), defSide = this.sideOf(def);
+    const foulNow = this.foulCall[defSide];
+    this.foulCall[defSide] = false;
+    this.o = decide(off, def, this.rng, this.rules, { transition: this.prevTransition, calledPlay: this.calledPlay[side], clutch, late: { period: this.period, periods: this.rules.periods, clock: this.clock, foulNow } });
+    if (this.o.event === 'intentional-foul') dur = Math.min(this.clock, 1 + this.rng() * 2.5);
     this.calledPlay[side] = null;
+    this.rollInjuries(dur);
     this.shotClock = this.prevKeep && this.prevEvent !== 'foul' ? 14 : 24;
     this.tPoss = 0;
     this.shotReleased = false;

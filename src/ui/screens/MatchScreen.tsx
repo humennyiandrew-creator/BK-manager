@@ -6,7 +6,8 @@ import { applyResult, advanceDay, continueGame } from '../../engine/season';
 import { SYSTEMS, SCHEMES } from '../../engine/playbook/systems';
 import { PLAYS } from '../../engine/playbook/plays';
 import type { OffSystem, DefScheme } from '../../engine/playbook/types';
-import type { Side, SP } from '../../engine/sim/fast';
+import { DEFAULT_LATE, type Side, type SP } from '../../engine/sim/fast';
+import type { LateGame } from '../../engine/model';
 import type { PbpLine, Snapshot } from '../../engine/sim/live';
 import { lineupProfile, offenseFit, defenseFit } from '../../engine/playbook/fit';
 import BkImage from '../components/BkImage';
@@ -16,7 +17,8 @@ import { FlowChart, ShotChart } from '../components/match/MatchCharts';
 import { IntensityControl, MomentumMeter, RunBanner, TeamTalkPicker, WinBar } from '../components/match/MatchHud';
 import { PostgameReport, PregamePreview, objectiveStatusFn } from '../components/match/MatchReport';
 import { formatMoneyShort } from '../format';
-import { onConcrete, teamInk } from '../components/shell/teamColors';
+import { onConcrete, teamInk, uniform } from '../components/shell/teamColors';
+import { computeAccent } from '../accent';
 import { play, startCrowd, stopCrowd, crowdIntensity } from '../sound';
 import styles from './MatchScreen.module.css';
 
@@ -264,8 +266,12 @@ export default function MatchScreen() {
     mutate((st) => fn(st.teams[st.userTeamId].tactics));
   }
 
+  const kit = uniform(userTeamState.colors.primary, userTeamState.colors.secondary);
+  const accent = computeAccent(userTeamState.colors.primary, userTeamState.colors.secondary);
+  const clubVars = { '--accent': accent.accent, '--accent-2': accent.accent2, '--accent-contrast': accent.accentContrast, '--team': kit.team, '--team-2': kit.trim, '--team-ink': kit.ink } as CSSProperties;
+
   return (
-    <div className={styles.wrap}>
+    <div className={styles.wrap} style={clubVars}>
       <Scoreboard s={s} game={game} snap={snap} home={home} away={away} maxTo={maxTo} />
       <div className={styles.hud}>
         <div className={styles.hudObjectives}>
@@ -355,6 +361,8 @@ export default function MatchScreen() {
                 onSlider={(k: string, v: number) => handleTactic((t) => ((t as any)[k] = v))}
                 onFocus={(v: string) => handleTactic((t) => (t.focusPlayer = v || null))}
                 onClutch={(v: string) => handleTactic((t) => (t.clutchPlay = v || null))}
+                onLate={(k: keyof LateGame, v: boolean | string | null) => handleTactic((t) => { t.late = { ...(t.late ?? DEFAULT_LATE), [k]: v }; })}
+                opponents={(userSide === 0 ? match.A : match.H).roster}
                 calledPlay={calledPlay}
                 onCalledPlayChange={setCalledPlay}
                 onCallPlay={() => { match!.callPlay(userSide, calledPlay || null); }}
@@ -376,7 +384,7 @@ export default function MatchScreen() {
 
       <div className={styles.controls}>
         <button className={styles.controlBtn} onClick={() => setPaused(!paused)} disabled={snap.state !== 'live'}>
-          {paused ? '▶ Play' : '⏸ Pause'}
+          {paused ? 'Play' : 'Pause'}
         </button>
         <div className={styles.speedGroup}>
           {[1, 2, 5, 10, 20].map((n) => (
@@ -394,8 +402,13 @@ export default function MatchScreen() {
         <button className={styles.controlBtn} onClick={() => match!.requestTimeout(userSide)} disabled={snap.timeouts[userSide] <= 0 || snap.state !== 'live'}>
           Timeout ({snap.timeouts[userSide]})
         </button>
+        {snap.period >= match.rules.periods && snap.clock <= 180 && snap.state !== 'final' && (
+          <button className={styles.controlBtn} onClick={() => { match!.foulNow(userSide); setTick((t) => t + 1); }} disabled={match.foulPending(userSide)} title="Foul on purpose on the next defensive possession">
+            {match.foulPending(userSide) ? 'Fouling next trip' : 'Foul now'}
+          </button>
+        )}
         <button className={styles.controlBtn} onClick={() => { match!.simToEnd(); setTick((t) => t + 1); }} disabled={snap.state === 'final'}>
-          Sim to End
+          Sim to end
         </button>
       </div>
     </div>
@@ -540,7 +553,8 @@ function BoxTable({ side, label }: { side: Side; label: string }) {
   );
 }
 
-function TacticsTab({ tactics, roster, court, onOffense, onDefense, onSlider, onFocus, onClutch, calledPlay, onCalledPlayChange, onCallPlay }: any) {
+function TacticsTab({ tactics, roster, court, onOffense, onDefense, onSlider, onFocus, onClutch, onLate, opponents, calledPlay, onCalledPlayChange, onCallPlay }: any) {
+  const late: LateGame = tactics.late ?? DEFAULT_LATE;
   const five = (court as SP[]).map((sp) => sp.p);
   const fit = five.length === 5
     ? (() => { const prof = lineupProfile(five); return { off: offenseFit(prof, tactics), def: defenseFit(prof, tactics.defense) }; })()
@@ -588,6 +602,23 @@ function TacticsTab({ tactics, roster, court, onOffense, onDefense, onSlider, on
           {PLAYS.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
         </select>
       </div>
+      <div className={styles.lateBox}>
+        <span className={styles.lateHead}>Late game</span>
+        {([['foul', 'Foul when trailing late'], ['foulUp3', 'Foul when up three at the death'], ['hold', 'Hold for the last shot'], ['twoForOne', 'Go two-for-one']] as const).map(([k, label]) => (
+          <label key={k} className={styles.lateRow}>
+            <input type="checkbox" checked={late[k]} onChange={(e) => onLate(k, e.target.checked)} /> {label}
+          </label>
+        ))}
+        <div className={styles.tField}>
+          <label>Hack-a-player once in the bonus</label>
+          <select value={late.hack ?? ''} onChange={(e) => onLate('hack', e.target.value || null)}>
+            <option value="">Nobody</option>
+            {[...opponents].sort((x: SP, y: SP) => x.p.ratings.attrs.freeThrow - y.p.ratings.attrs.freeThrow).slice(0, 6).map((sp: SP) => (
+              <option key={sp.p.id} value={sp.p.id}>{sp.p.lastName} (FT {Math.round(sp.p.ratings.attrs.freeThrow)})</option>
+            ))}
+          </select>
+        </div>
+      </div>
       <div className={styles.tField}>
         <label>Call next possession</label>
         <div className={styles.callRow}>
@@ -623,10 +654,10 @@ function LineupTab({ side, subOut, onPickCourt, onPickBench, autoSubs, onAutoSub
       ))}
       <div className={styles.lineupLabel}>Bench</div>
       {bench.map((sp) => (
-        <button key={sp.p.id} className={styles.lineupRow} disabled={sp.p.injury != null} onClick={() => onPickBench(sp.p.id)}>
+        <button key={sp.p.id} className={styles.lineupRow} disabled={sp.p.injury != null || !!sp.hurt} onClick={() => onPickBench(sp.p.id)}>
           <span>{sp.p.lastName}</span>
           <span className={styles.lineupEnergy}><span style={{ width: `${sp.energy * 100}%` }} /></span>
-          <span className={styles.lineupPf}>{sp.p.injury ? 'INJ' : ''}</span>
+          <span className={styles.lineupPf}>{sp.p.injury || sp.hurt ? 'Injured' : ''}</span>
         </button>
       ))}
     </div>
